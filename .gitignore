@@ -2,6 +2,8 @@ Thumbs.db
 /package.json
 /package-lock.json
 
+.env
+
 # Logs
 logs
 *.log
