@@ -40,3 +40,47 @@
 .read-the-docs {
   color: #888;
 }
+
+/* Drag & drop styles */
+.dd-root {
+  max-width: 900px;
+  margin: 1.5rem auto;
+  text-align: left;
+  font-family: system-ui, Arial, sans-serif;
+}
+.dd-container {
+  display: grid;
+  gap: 1rem;
+}
+.dd-container.columns-5 {
+  grid-template-columns: repeat(5, 1fr);
+}
+.dd-column {
+  min-height: 160px;
+  border: 2px dashed #ddd;
+  border-radius: 8px;
+  padding: 0.75rem;
+  background: #fafafa;
+}
+.dd-column h3 {
+  margin: 0 0 0.5rem 0;
+}
+.dd-item {
+  padding: 0.5rem 0.75rem;
+  background: white;
+  border: 1px solid #eee;
+  border-radius: 6px;
+  margin-bottom: 0.5rem;
+  cursor: grab;
+}
+.dd-item:active { cursor: grabbing }
+.dd-empty {
+  color: #888;
+  font-style: italic;
+}
+
+@media (max-width: 900px) {
+  .dd-container.columns-5 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
