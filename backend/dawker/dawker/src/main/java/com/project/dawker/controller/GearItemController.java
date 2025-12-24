@@ -1,5 +1,6 @@
 package com.project.dawker.controller;
 
+import com.project.dawker.controller.dto.GearItem.GearItemAllRespDTO;
 import com.project.dawker.controller.dto.GearItem.GearItemRespDTO;
 import com.project.dawker.service.GearItemService;
 import org.springframework.http.HttpStatus;
@@ -32,5 +33,17 @@ public class GearItemController {
     @ResponseStatus(HttpStatus.OK)
     public boolean existsByModelName(@RequestParam String modelName){
         return serv.existsByModelName(modelName);
+    }
+
+    @GetMapping(path = "/all", params = {"type", "!modelName"})
+    @ResponseStatus(HttpStatus.OK)
+    public List<GearItemAllRespDTO> findByGearTypeAll(@RequestParam String type){
+        return serv.findByGearTypeAll(type);
+    }
+
+    @GetMapping(path = "/all", params = {"modelName", "!type"})
+    @ResponseStatus(HttpStatus.OK)
+    public GearItemAllRespDTO findByModelNameAll(@RequestParam String modelName){
+        return serv.findByModelNameAll(modelName);
     }
 }

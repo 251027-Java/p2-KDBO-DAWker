@@ -1,5 +1,6 @@
 package com.project.dawker.controller;
 
+import com.project.dawker.controller.dto.Category.CategoryAllRespDTO;
 import com.project.dawker.controller.dto.Category.CategoryRespDTO;
 import com.project.dawker.service.CategoryService;
 import org.springframework.http.HttpStatus;
@@ -18,6 +19,12 @@ public class CategoryController {
     @ResponseStatus(HttpStatus.OK)
     public CategoryRespDTO findByCategoryType(@RequestParam String type) {
         return serv.findByCategoryType(type);
+    }
+
+    @GetMapping("/all")
+    @ResponseStatus(HttpStatus.OK)
+    public CategoryAllRespDTO findByCategoryTypeAll(@RequestParam String type) {
+        return serv.findByCategoryTypeAll(type);
     }
 
     @GetMapping("/exists")
