@@ -1,6 +1,7 @@
 package com.project.dawker.repository;
 
 import com.project.dawker.entity.Category;
+import com.project.dawker.entity.CategoryType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -18,18 +19,18 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
      * Find a category by its name.
      * Used for lookup and validation when tagging presets.
      *
-     * @param categoryName the name of the category (e.g., "Jazz", "Metal", "Studio")
+     * @param categoryType the name of the category (e.g., "Jazz", "Metal", "Studio")
      * @return Optional containing the category if found
      */
-    Optional<Category> findByCategoryName(String categoryName);
+    Optional<Category> findByCategoryType(CategoryType categoryType);
 
     /**
      * Check if a category exists with the given name.
      * Used to avoid duplicate categories.
      *
-     * @param categoryName the category name to check
+     * @param categoryType the category name to check
      * @return true if a category with this name exists
      */
-    boolean existsByCategoryName(String categoryName);
+    boolean existsByCategoryType(String categoryType);
 }
 

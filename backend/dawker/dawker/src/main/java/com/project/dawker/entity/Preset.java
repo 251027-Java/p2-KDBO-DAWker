@@ -10,7 +10,9 @@ import java.util.List;
 
 // acts like a container for the gear items, doesn't store the actual settings just name and created time
 @Entity
-@Table(name = "presets")
+@Table(name = "presets", uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"user_id", "presetName"})
+})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -37,6 +39,14 @@ public class Preset {
     // m:m with categories through preset category
     @OneToMany(mappedBy = "preset", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<PresetCategory> presetCategories;
+
+    public Preset(Long newId, User newUser, String name, List<PresetGear> newPresetGears, List<PresetCategory> newPresetCategories){
+        id = newId;
+        user = newUser;
+        presetName = name;
+        presetGears = newPresetGears;
+        presetCategories = newPresetCategories;
+    }
 
     @PrePersist
     protected void onCreate() {
