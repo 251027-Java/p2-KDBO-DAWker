@@ -1,10 +1,10 @@
-import tonejsDemo from './components/tonejsDemo'
+import TonejsDemo from './components/tonejsDemo'
 import './App.css'
 
 function App() {
   return (
     <div className="app">
-      <tonejsDemo />
+      <TonejsDemo />
     </div>
   )
 }
