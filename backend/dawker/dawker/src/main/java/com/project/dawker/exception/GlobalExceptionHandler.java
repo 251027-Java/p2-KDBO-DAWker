@@ -22,18 +22,38 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(CategoryNotFoundException.class)
+    @ExceptionHandler(CategoryTypeNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleCategoryTypeNotFound(CategoryTypeNotFoundException ex) {
         return buildErrorResponse(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(CategoryNotFoundException.class)
+    @ExceptionHandler(GearTypeNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleGearTypeNotFound(GearTypeNotFoundException ex) {
         return buildErrorResponse(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(CategoryNotFoundException.class)
+    @ExceptionHandler(GearItemModelNameNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleGearItemModelNameNotFound(GearItemModelNameNotFoundException ex) {
+        return buildErrorResponse(ex.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleUserNotFound(UserNotFoundException ex) {
+        return buildErrorResponse(ex.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(PresetNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handlePresetNotFound(PresetNotFoundException ex) {
+        return buildErrorResponse(ex.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(PresetCategoryNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handlePresetCategoryNotFound(PresetCategoryNotFoundException ex) {
+        return buildErrorResponse(ex.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(PresetGearNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handlePresetGearNotFound(PresetGearNotFoundException ex) {
         return buildErrorResponse(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 

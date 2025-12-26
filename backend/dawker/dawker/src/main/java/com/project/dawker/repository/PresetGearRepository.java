@@ -15,14 +15,12 @@ import java.util.List;
 @Repository
 public interface PresetGearRepository extends JpaRepository<PresetGear, Long> {
 
-    List<PresetGear> findByPreset(Preset preset);
-
     // find all preset gear entries for specific preset, order it by the order index.
     List<PresetGear> findByPresetIdOrderByOrderIndexAsc(Long presetId);
 
     // find all preset gear entries for specific gear item
     // in the service you could use it to find all presets using a specific gear model
-    List<PresetGear> findByGearItem(GearItem gearItem);
+    List<PresetGear> findByGearItemId(Long gearItemId);
 
     /**
      * Count how many times a specific gear item is used across all presets.

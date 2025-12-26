@@ -1,6 +1,5 @@
 package com.project.dawker.service;
 
-import com.project.dawker.controller.dto.GearItem.GearItemAllRespDTO;
 import com.project.dawker.controller.dto.GearItem.GearItemRespDTO;
 import com.project.dawker.entity.GearItem;
 import com.project.dawker.entity.GearType;
@@ -41,36 +40,12 @@ public class GearItemService {
             String.format("Gear Item Model Name = %s not found.", modelName))));
     }
 
-    public List<GearItemAllRespDTO> findByGearTypeAll(String gearType){
-        GearType type;
-
-        try {
-            type = GearType.valueOf(gearType);
-        } catch (IllegalArgumentException | NullPointerException e) {
-            throw new CategoryTypeNotFoundException(
-                String.format("Gear Type = %s not found.", gearType));
-        }
-
-        return findByGearTypeAll(type);
-    }
-    public List<GearItemAllRespDTO> findByGearTypeAll(GearType gearType){
-        return repo.findByGearType(gearType).stream().map(this::gearItemToAllRespDTO).toList();
-    }
-
-    public GearItemAllRespDTO findByModelNameAll(String modelName){
-        return gearItemToAllRespDTO(repo.findByModelName(modelName).orElseThrow(() -> new GearItemModelNameNotFoundException(
-            String.format("Gear Item Model Name = %s not found.", modelName))));
-    }
-
     public boolean existsByModelName(String modelName){
         return repo.existsByModelName(modelName);
     }
 
     private GearItemRespDTO gearItemToRespDTO(GearItem item){
-        return new GearItemRespDTO(item.getId(), item.getModelName(), item.getGearType().toString());
-    }
-    private GearItemAllRespDTO gearItemToAllRespDTO(GearItem item){
-        return new GearItemAllRespDTO(item.getId(), item.getModelName(), item.getGearType().toString(),
+        return new GearItemRespDTO(item.getId(), item.getModelName(), item.getGearType().toString(),
             item.getPresetGears().stream().map(PresetGear::getId).toList());
     }
 }
