@@ -10,44 +10,7 @@ const GuitarRig = () => {
     const [time, setTime] = useState(0.5);
 
     const setupAudio = async () => {
-        // try {
-        //     const AudioContext = window.AudioContext || window.webkitAudioContext;
-        //     const context = new AudioContext();
-        //     audioContextRef.current = context;
 
-        //     // 1. Load RNBO Patcher
-        //     const response = await fetch('/export/patch.export.json');
-        //     const patcher = await response.json();
-
-        //     // 2. Create RNBO Device
-        //     const device = await createDevice({ context, patcher });
-        //     deviceRef.current = device;
-
-        //     // 3. Load Audio Sample (practiceSetup.wav)
-        //     const audioResponse = await fetch('/audio/practiceSetup.wav');
-        //     const arrayBuffer = await audioResponse.arrayBuffer(); 
-        //     const audioBuffer = await context.decodeAudioData(arrayBuffer);
-
-        //     // 4. Create and Configure Source Node
-        //     const source = context.createBufferSource();
-        //     source.buffer = audioBuffer;
-        //     source.loop = true;
-
-        //     // 5. Routing: Source -> RNBO -> Speakers
-        //     source.connect(device.node);
-        //     device.node.connect(context.destination);
-
-        //     // 6. Start Playback
-        //     source.start();
-        //     sourceNodeRef.current = source;
-            
-        //     setIsLoaded(true);
-        //     await context.resume(); // Browser safety unlock
-        //     console.log("Audio Engine Started Successfully");
-        // } catch (err) {
-        //     console.error("Audio Setup Failed:", err);
-        //     alert("Could not load audio. Check console for details.");
-        // }
 
         try {
                 const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -81,68 +44,59 @@ const GuitarRig = () => {
 
                 deviceRef.current = device
 
-                // Maybe have to have a set of parameters to set when changing a preset?
-                // let presets = patcher.presets || [];
-                // device.setPreset(presets[4].data)
+
+                // ---- Some ways to work without setting pre-sets-----
 
                 // 1. Turn the Input ON (index 0)
-                const inputParam = device.parametersById.get('input');
-                if (inputParam) inputParam.value = 1;
+                // const inputParam = device.parametersById.get('input');
+                // if (inputParam) inputParam.value = 1;
 
                 // 2. Turn the Mix up to 50% so we hear the delay
-                const mixParam = device.parametersById.get('mix');
-                if (mixParam) mixParam.value = 50; // Note: Your JSON says max is 100
+                // const mixParam = device.parametersById.get('mix');
+                // if (mixParam) mixParam.value = 50; // Note: Your JSON says max is 100
 
                 // 3. Turn Regen (Feedback) up so the echoes last
-                const regenParam = device.parametersById.get('regen');
-                if (regenParam) regenParam.value = 60;
+                // const regenParam = device.parametersById.get('regen');
+                // if (regenParam) regenParam.value = 60;
 
                 // 4. Ensure Volume is audible (it defaults to 0, which is fine, but let's be safe)
-                const volParam = device.parametersById.get('volume');
-                if (volParam) volParam.value = 50;
+                // const volParam = device.parametersById.get('volume');
+                // if (volParam) volParam.value = 50;
 
+                // 5. Load your device and source
+                // source.connect(device.node)
+                // device.node.connect(gainNode)
+                // gainNode.connect(context.destination);
+
+                // source.start();
+                // sourceNodeRef.current = source;
+                
+                // await context.resume();
+                // setIsLoaded(true);
+
+                // -------------------------------------------------
+
+                // --------------Working with presets in RNBO----------------
+
+                // Load a preset from the patcher presets list
                 let presets = patcher.presets || [];
-                device.setPreset(presets[4].preset)
+                device.setPreset(presets[6].preset)
 
                 // 2. Create the Source
                 const source = context.createBufferSource();
                 source.buffer = audioBuffer;
                 source.loop = true;
 
-                // 3. Connect directly to speakers (Bypassing RNBO)
-                // source.connect(context.destination);
-
-                // Add a preset
-                // let presets = patcher.presets || [];
-
-                // 2. Pass the DATA property, not the name string
-                // console.log(`loading the preset ${presets[4].name}`)
-                // deviceRef.current.setPreset(presets[4]);
-
-                // Connect audio to RNBO input (the node)
-                // const gainNode = context.createGain();
-                // gainNode.connect(context.destination)
-                // source.connect(device.node);
-
-                // Connect the processed AUdio from the node to the Speakers (your audio context destination)
-                // device.node.connect(context.destination);
-                // device.node.connect(gainNode)
-
-                // ---------gain node test------------------
-
-                // Add presets
-                // device.setPreset(presets[4].data)
-
+                // Connect to the sequence [audio source -> RNBO node -> Gain node -> Speakers]
                 source.connect(device.node)
                 device.node.connect(gainNode)
                 gainNode.connect(context.destination);
 
-                console.log("--- Current RNBO State ---");
-                device.parameters.forEach(p => {
-                    console.log(`${p.id}: ${p.value}`);
-                });
-
-                // ----------------------------------------------------------
+                // [[DEBUGGING: see if the preset has actually loaded]]
+                // console.log("--- Current RNBO State ---");
+                // device.parameters.forEach(p => {
+                //     console.log(`${p.id}: ${p.value}`);
+                // });
 
                 // 4. Start Playback
                 source.start();
@@ -152,7 +106,8 @@ const GuitarRig = () => {
                 setIsLoaded(true);
                 console.log("Direct Audio Playing (RNBO Bypassed)");
 
-                console.log("Available parameters", device.parameters.map(p => p.id))
+                // [[DEBUGGING: Check available parameters from your exported RNBO file]]
+                // console.log("Available parameters", device.parameters.map(p => p.id))
             } catch (err) {
                 console.error("Direct Audio Setup Failed:", err);
             }
