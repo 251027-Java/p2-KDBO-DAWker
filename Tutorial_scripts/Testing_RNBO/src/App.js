@@ -8,6 +8,15 @@ const GuitarRig = () => {
 
     const [isLoaded, setIsLoaded] = useState(false);
     const [time, setTime] = useState(0.5);
+    const [scale, setScale] = useState(0.5);
+    const [color, setColor] = useState(0.5);
+    const [volume, setVolume] = useState(0.5);
+    const [mix, setMix] = useState(0.5);
+    const [spread, setSpread] = useState(0.5);
+    const [filter, setfilter] = useState(0.5);
+    const [regen, setRegen] = useState(0.5);
+    const [fb, setFb] = useState(0.5);
+
 
     const setupAudio = async () => {
 
@@ -107,7 +116,7 @@ const GuitarRig = () => {
                 console.log("Direct Audio Playing (RNBO Bypassed)");
 
                 // [[DEBUGGING: Check available parameters from your exported RNBO file]]
-                // console.log("Available parameters", device.parameters.map(p => p.id))
+                console.log("Available parameters", device.parameters.map(p => p.id))
             } catch (err) {
                 console.error("Direct Audio Setup Failed:", err);
             }
@@ -125,6 +134,102 @@ const GuitarRig = () => {
               console.warn("Parameter 'time' not found in this device!")
             }
     };
+    const handleScaleChange = (e) => {
+        const val = parseFloat(e.target.value);
+        setScale(val);
+        if (deviceRef.current) {
+            // Ensure 'gain' matches your param ID in the RNBO patch
+            const param = deviceRef.current.parametersById.get('scale');
+            if (param) param.value = val;
+              console.log(`RNBO param ${param.id} is now: ${param.value}`)
+            } else {
+              console.warn("Parameter 'scale' not found in this device!")
+            }
+    };
+    const handleColorChange = (e) => {
+        const val = parseFloat(e.target.value);
+        setColor(val);
+        if (deviceRef.current) {
+            // Ensure 'gain' matches your param ID in the RNBO patch
+            const param = deviceRef.current.parametersById.get('color');
+            if (param) param.value = val;
+              console.log(`RNBO param ${param.id} is now: ${param.value}`)
+            } else {
+              console.warn("Parameter 'color' not found in this device!")
+            }
+    };
+    const handleVolumeChange = (e) => {
+        const val = parseFloat(e.target.value);
+        setVolume(val);
+        if (deviceRef.current) {
+            // Ensure 'gain' matches your param ID in the RNBO patch
+            const param = deviceRef.current.parametersById.get('volume');
+            if (param) param.value = val;
+              console.log(`RNBO param ${param.id} is now: ${param.value}`)
+            } else {
+              console.warn("Parameter 'volume' not found in this device!")
+            }
+    };
+    const handleMixChange = (e) => {
+        const val = parseFloat(e.target.value);
+        setMix(val);
+        if (deviceRef.current) {
+            // Ensure 'gain' matches your param ID in the RNBO patch
+            const param = deviceRef.current.parametersById.get('mix');
+            if (param) param.value = val;
+              console.log(`RNBO param ${param.id} is now: ${param.value}`)
+            } else {
+              console.warn("Parameter 'mix' not found in this device!")
+            }
+    };
+    const handleSpreadChange = (e) => {
+        const val = parseFloat(e.target.value);
+        setSpread(val);
+        if (deviceRef.current) {
+            // Ensure 'gain' matches your param ID in the RNBO patch
+            const param = deviceRef.current.parametersById.get('spread');
+            if (param) param.value = val;
+              console.log(`RNBO param ${param.id} is now: ${param.value}`)
+            } else {
+              console.warn("Parameter 'spread' not found in this device!")
+            }
+    };
+    const handleFilterChange = (e) => {
+        const val = parseFloat(e.target.value);
+        setfilter(val);
+        if (deviceRef.current) {
+            // Ensure 'gain' matches your param ID in the RNBO patch
+            const param = deviceRef.current.parametersById.get('filter');
+            if (param) param.value = val;
+              console.log(`RNBO param ${param.id} is now: ${param.value}`)
+            } else {
+              console.warn("Parameter 'filter' not found in this device!")
+            }
+    }
+    const handleRegenChange = (e) => {
+        const val = parseFloat(e.target.value);
+        setRegen(val);
+        if (deviceRef.current) {
+            // Ensure 'gain' matches your param ID in the RNBO patch
+            const param = deviceRef.current.parametersById.get('regen');
+            if (param) param.value = val;
+              console.log(`RNBO param ${param.id} is now: ${param.value}`)
+            } else {
+              console.warn("Parameter 'regen' not found in this device!")
+            }
+    };
+    const handleFBChange = (e) => {
+        const val = parseFloat(e.target.value);
+        setFb(val);
+        if (deviceRef.current) {
+            // Ensure 'gain' matches your param ID in the RNBO patch
+            const param = deviceRef.current.parametersById.get('fb');
+            if (param) param.value = val;
+              console.log(`RNBO param ${param.id} is now: ${param.value}`)
+            } else {
+              console.warn("Parameter 'fb' not found in this device!")
+            }
+    }
 
     return (
         <div style={{ padding: '20px', background: '#222', color: 'white', borderRadius: '8px', textAlign: 'center' }}>
@@ -139,14 +244,94 @@ const GuitarRig = () => {
                 <div>
                     <h3>🎸 Blues/Jazz Amp Active</h3>
                     <div style={{ margin: '20px 0' }}>
-                        <label>Amp Drive: </label>
+                        <label>Time: </label>
                         <input 
                             type="range" 
-                            min="-100" max="100" step="1" 
+                            min="0" max="100" step="0.01" 
                             value={time} 
                             onChange={handleTimeChange} 
                         />
-                        <span> {Math.round(time * 100)}%</span>
+                        <span> {Math.round(time)}%</span>
+                    </div>
+                    <div style={{ margin: '20px 0' }}>
+                        <label>Scale: </label>
+                        <input 
+                            type="range" 
+                            min="0" max="6" step="0.01" 
+                            value={scale} 
+                            onChange={handleScaleChange} 
+                        />
+                        <span> {Math.round(scale)}%</span>
+                    </div>
+                    <div style={{ margin: '20px 0' }}>
+                        <label>Color: </label>
+                        <input 
+                            type="range" 
+                            min="0" max="100" step="0.01" 
+                            value={color} 
+                            onChange={handleColorChange} 
+                        />
+                        <span> {Math.round(color)}%</span>
+                    </div>
+                    <div style={{ margin: '20px 0' }}>
+                        <label>Volume: </label>
+                        <input 
+                            type="range" 
+                            min="-100" max="100" step="0.01" 
+                            value={volume} 
+                            onChange={handleVolumeChange} 
+                        />
+                        <span> {Math.round(volume)}%</span>
+                    </div>
+                    <div style={{ margin: '20px 0' }}>
+                        <label>Mix: </label>
+                        <input 
+                            type="range" 
+                            min="0" max="100" step="0.01" 
+                            value={mix} 
+                            onChange={handleMixChange} 
+                        />
+                        <span> {Math.round(mix)}%</span>
+                    </div>
+                    <div style={{ margin: '20px 0' }}>
+                        <label>Spread: </label>
+                        <input 
+                            type="range" 
+                            min="-100" max="100" step="0.01" 
+                            value={spread} 
+                            onChange={handleSpreadChange} 
+                        />
+                        <span> {Math.round(spread)}%</span>
+                    </div>
+                    <div style={{ margin: '20px 0' }}>
+                        <label>Filter: </label>
+                        <input 
+                            type="range" 
+                            min="0" max="4" step="0.01" 
+                            value={filter} 
+                            onChange={handleFilterChange} 
+                        />
+                        <span> {Math.round(filter)}%</span>
+                    </div>
+                    <div style={{ margin: '20px 0' }}>
+                        <label>Regen: </label>
+                        <input 
+                            type="range" 
+                            min="0" max="100" step="0.01" 
+                            value={regen} 
+                            onChange={handleRegenChange} 
+                        />
+                        <span> {Math.round(regen)}%</span>
+                    </div>
+                    <div style={{ margin: '20px 0' }}>
+                        <label>FB: </label>
+                        <input 
+                            type="range" 
+                            min="0" max="1" step="0.1" 
+                            value={fb} 
+                            onChange={handleFBChange} 
+                        />
+                        <span> {Math.round(fb)}%</span>
                     </div>
                     <p style={{ color: '#888' }}>Sample is looping through RNBO math...</p>
                 </div>
