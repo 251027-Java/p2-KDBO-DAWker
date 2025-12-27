@@ -4,8 +4,8 @@ import com.project.dawker.controller.dto.GearItem.GearItemRespDTO;
 import com.project.dawker.entity.GearItem;
 import com.project.dawker.entity.GearType;
 import com.project.dawker.entity.PresetGear;
-import com.project.dawker.exception.CategoryTypeNotFoundException;
-import com.project.dawker.exception.GearItemModelNameNotFoundException;
+import com.project.dawker.exception.GearItemNotFoundException;
+import com.project.dawker.exception.GearTypeNotFoundException;
 import com.project.dawker.repository.GearItemRepository;
 import org.springframework.stereotype.Service;
 
@@ -19,13 +19,18 @@ public class GearItemService {
         repo = gearItemRepository;
     }
 
+    public GearItemRespDTO findById(Long id){
+        return gearItemToRespDTO(repo.findById(id).orElseThrow(() -> new GearItemNotFoundException(
+            String.format("Gear Item ID = %d not found.", id))));
+    }
+
     public List<GearItemRespDTO> findByGearType(String gearType){
         GearType type;
 
         try {
             type = GearType.valueOf(gearType);
         } catch (IllegalArgumentException | NullPointerException e) {
-            throw new CategoryTypeNotFoundException(
+            throw new GearTypeNotFoundException(
                 String.format("Gear Type = %s not found.", gearType));
         }
 
@@ -36,7 +41,7 @@ public class GearItemService {
     }
 
     public GearItemRespDTO findByModelName(String modelName){
-        return gearItemToRespDTO(repo.findByModelName(modelName).orElseThrow(() -> new GearItemModelNameNotFoundException(
+        return gearItemToRespDTO(repo.findByModelName(modelName).orElseThrow(() -> new GearItemNotFoundException(
             String.format("Gear Item Model Name = %s not found.", modelName))));
     }
 

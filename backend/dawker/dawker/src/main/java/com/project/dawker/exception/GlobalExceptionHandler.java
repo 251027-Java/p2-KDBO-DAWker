@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -14,6 +15,11 @@ import java.util.Map;
 public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleValidationErrors(MethodArgumentNotValidException ex) {
+        return buildErrorResponse(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<Map<String, Object>> handleValidationErrors(MethodArgumentTypeMismatchException ex) {
         return buildErrorResponse(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
@@ -32,8 +38,8 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(GearItemModelNameNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleGearItemModelNameNotFound(GearItemModelNameNotFoundException ex) {
+    @ExceptionHandler(GearItemNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleGearItemModelNameNotFound(GearItemNotFoundException ex) {
         return buildErrorResponse(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 
@@ -54,6 +60,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(PresetGearNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handlePresetGearNotFound(PresetGearNotFoundException ex) {
+        return buildErrorResponse(ex.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(NonPositiveNumberException.class)
+    public ResponseEntity<Map<String, Object>> handleNonPositiveNumber(NonPositiveNumberException ex) {
         return buildErrorResponse(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 

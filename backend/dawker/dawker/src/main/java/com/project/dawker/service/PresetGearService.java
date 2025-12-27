@@ -4,6 +4,7 @@ import com.project.dawker.controller.dto.PresetGear.PresetGearRespDTO;
 import com.project.dawker.entity.GearType;
 import com.project.dawker.entity.PresetGear;
 import com.project.dawker.exception.CategoryTypeNotFoundException;
+import com.project.dawker.exception.NonPositiveNumberException;
 import com.project.dawker.repository.PresetGearRepository;
 import com.project.dawker.repository.dto.GearItemUsageDTO;
 import org.springframework.data.domain.Pageable;
@@ -40,6 +41,9 @@ public class PresetGearService {
         return findMostPopularGearItems(DEFAULT_NUM_MOST_POPULAR_GEAR_ITEMS);
     }
     public Map<Long, Long> findMostPopularGearItems(int numMostPopular){
+        if (numMostPopular <= 0) throw new NonPositiveNumberException(
+            String.format("Nonpositive number = %d given. Enter an integer greater than 0.", numMostPopular));
+
         return repo.findMostPopularGearItems(Pageable.ofSize(numMostPopular)).stream()
             .collect(Collectors.toMap(
                 GearItemUsageDTO::gearItemId,

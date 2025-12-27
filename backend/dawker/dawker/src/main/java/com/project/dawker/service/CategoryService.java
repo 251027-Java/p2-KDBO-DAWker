@@ -17,6 +17,11 @@ public class CategoryService {
         repo = categoryRepository;
     }
 
+    public CategoryRespDTO findById(Long id){
+        return categoryToRespDTO(repo.findById(id).orElseThrow(() -> new CategoryNotFoundException(
+            String.format("Category ID = %d not found.", id))));
+    }
+
     public CategoryRespDTO findByCategoryType(String categoryType){
         CategoryType type;
 

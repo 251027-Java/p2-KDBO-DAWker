@@ -15,12 +15,17 @@ public class GearItemController {
         serv = gearItemService;
     }
 
-    @GetMapping(params = {"type", "!modelName"})
+    @GetMapping(params = {"id", "!type", "!modelName"})
+    public GearItemRespDTO findById(@RequestParam Long id){
+        return serv.findById(id);
+    }
+
+    @GetMapping(params = {"!id", "type", "!modelName"})
     public List<GearItemRespDTO> findByGearType(@RequestParam String type){
         return serv.findByGearType(type);
     }
 
-    @GetMapping(params = {"modelName", "!type"})
+    @GetMapping(params = {"!id", "modelName", "!type"})
     public GearItemRespDTO findByModelName(@RequestParam String modelName){
         return serv.findByModelName(modelName);
     }

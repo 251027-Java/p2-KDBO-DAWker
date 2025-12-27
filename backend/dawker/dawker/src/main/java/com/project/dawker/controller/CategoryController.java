@@ -13,7 +13,12 @@ public class CategoryController {
         serv = categoryService;
     }
 
-    @GetMapping
+    @GetMapping(params = {"id", "!type"})
+    public CategoryRespDTO findById(@RequestParam Long id) {
+        return serv.findById(id);
+    }
+
+    @GetMapping(params = {"!id", "type"})
     public CategoryRespDTO findByCategoryType(@RequestParam String type) {
         return serv.findByCategoryType(type);
     }
