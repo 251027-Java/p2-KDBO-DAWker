@@ -1,6 +1,7 @@
 package com.project.dawker.controller.dto.PresetCategory;
 
-public record PresetCategoryReqDTO(
+public record PresetCategoryDTO(
+    Long id,
     Long presetId,
     Long categoryId
 ) {

@@ -1,6 +1,6 @@
 package com.project.dawker.controller;
 
-import com.project.dawker.controller.dto.User.UserRespDTO;
+import com.project.dawker.controller.dto.User.UserDTO;
 import com.project.dawker.service.UserService;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,7 +16,7 @@ public class UserController {
     }
 
     @GetMapping(params = {"username", "!search"})
-    public UserRespDTO findByUsername(@RequestParam String username){
+    public UserDTO findByUsername(@RequestParam String username){
         return serv.findByUsername(username);
     }
 
@@ -26,7 +26,7 @@ public class UserController {
     }
 
     @GetMapping(params = {"!username", "search"})
-    public List<UserRespDTO> findByUsernameContainingIgnoreCase(@RequestParam String search){
+    public List<UserDTO> findByUsernameContainingIgnoreCase(@RequestParam String search){
         return serv.findByUsernameContainingIgnoreCase(search);
     }
 }

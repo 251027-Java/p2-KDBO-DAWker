@@ -1,9 +1,7 @@
 package com.project.dawker.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 // represents the join table for the m:m relationship between presets and categories
 // allows us to perform join queries to fetch all tags associated with a preset
@@ -11,7 +9,8 @@ import lombok.NoArgsConstructor;
 @Table(name = "preset_categories", uniqueConstraints = {
     @UniqueConstraint(columnNames = {"preset_id", "category_id"})
 })
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class PresetCategory {

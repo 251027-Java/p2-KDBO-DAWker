@@ -1,7 +1,7 @@
 package com.project.dawker.controller;
 
 import com.project.dawker.controller.dto.User.Nested.UserRespNestedUserDTO;
-import com.project.dawker.controller.dto.User.UserRespAllDTO;
+import com.project.dawker.controller.dto.User.UserAllDTO;
 import com.project.dawker.service.UserAllService;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,7 +23,7 @@ public class UserAllController {
     }
 
     @GetMapping
-    public UserRespAllDTO findByUsername(@RequestParam String username) {
+    public UserAllDTO findByUsername(@RequestParam String username) {
         return serv.findByUsername(username);
     }
 }

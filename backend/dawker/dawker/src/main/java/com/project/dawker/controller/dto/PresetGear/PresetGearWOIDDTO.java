@@ -1,7 +1,6 @@
 package com.project.dawker.controller.dto.PresetGear;
 
-public record PresetGearRespDTO(
-    Long id,
+public record PresetGearWOIDDTO(
     Long presetId,
     Long gearItemId,
     Double gainValue,

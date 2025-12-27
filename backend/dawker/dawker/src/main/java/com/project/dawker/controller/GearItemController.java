@@ -1,6 +1,6 @@
 package com.project.dawker.controller;
 
-import com.project.dawker.controller.dto.GearItem.GearItemRespDTO;
+import com.project.dawker.controller.dto.GearItem.GearItemDTO;
 import com.project.dawker.service.GearItemService;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,17 +16,17 @@ public class GearItemController {
     }
 
     @GetMapping(params = {"id", "!type", "!modelName"})
-    public GearItemRespDTO findById(@RequestParam Long id){
+    public GearItemDTO findById(@RequestParam Long id){
         return serv.findById(id);
     }
 
     @GetMapping(params = {"!id", "type", "!modelName"})
-    public List<GearItemRespDTO> findByGearType(@RequestParam String type){
+    public List<GearItemDTO> findByGearType(@RequestParam String type){
         return serv.findByGearType(type);
     }
 
     @GetMapping(params = {"!id", "modelName", "!type"})
-    public GearItemRespDTO findByModelName(@RequestParam String modelName){
+    public GearItemDTO findByModelName(@RequestParam String modelName){
         return serv.findByModelName(modelName);
     }
 

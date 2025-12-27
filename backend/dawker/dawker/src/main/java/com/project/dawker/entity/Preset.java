@@ -1,9 +1,7 @@
 package com.project.dawker.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -13,7 +11,8 @@ import java.util.List;
 @Table(name = "presets", uniqueConstraints = {
     @UniqueConstraint(columnNames = {"user_id", "presetName"})
 })
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Preset {
@@ -33,11 +32,11 @@ public class Preset {
     private LocalDateTime createdAt;
 
     // m:m with gear items through preset gear
-    @OneToMany(mappedBy = "preset", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "preset", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<PresetGear> presetGears;
 
     // m:m with categories through preset category
-    @OneToMany(mappedBy = "preset", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "preset", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<PresetCategory> presetCategories;
 
     public Preset(Long newId, User newUser, String name, List<PresetGear> newPresetGears, List<PresetCategory> newPresetCategories){

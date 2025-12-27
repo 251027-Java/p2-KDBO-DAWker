@@ -1,6 +1,6 @@
 package com.project.dawker.controller;
 
-import com.project.dawker.controller.dto.PresetGear.PresetGearRespDTO;
+import com.project.dawker.controller.dto.PresetGear.PresetGearDTO;
 import com.project.dawker.service.PresetGearService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,12 +20,12 @@ public class PresetGearController {
     }
 
     @GetMapping(params = {"presetId", "!gearItemId", "!type"})
-    public List<PresetGearRespDTO> findByPresetId(@RequestParam Long presetId){
+    public List<PresetGearDTO> findByPresetId(@RequestParam Long presetId){
         return serv.findByPresetIdOrderByOrderIndexAsc(presetId);
     }
 
     @GetMapping(params = {"!presetId", "gearItemId", "!type"})
-    public List<PresetGearRespDTO> findByGearItemId(@RequestParam Long gearItemId){
+    public List<PresetGearDTO> findByGearItemId(@RequestParam Long gearItemId){
         return serv.findByGearItemId(gearItemId);
     }
 
@@ -45,7 +45,7 @@ public class PresetGearController {
     }
 
     @GetMapping(params = {"!presetId", "!gearItemId", "type"})
-    public List<PresetGearRespDTO> findByGearType(@RequestParam String type){
+    public List<PresetGearDTO> findByGearType(@RequestParam String type){
         return serv.findByGearType(type);
     }
 }

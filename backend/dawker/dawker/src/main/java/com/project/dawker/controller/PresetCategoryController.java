@@ -1,6 +1,6 @@
 package com.project.dawker.controller;
 
-import com.project.dawker.controller.dto.PresetCategory.PresetCategoryRespDTO;
+import com.project.dawker.controller.dto.PresetCategory.PresetCategoryDTO;
 import com.project.dawker.service.PresetCategoryService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -17,11 +17,11 @@ public class PresetCategoryController {
     }
 
     @GetMapping(params = {"presetId", "!categoryId"})
-    public List<PresetCategoryRespDTO> findByPresetId(@RequestParam Long presetId){
+    public List<PresetCategoryDTO> findByPresetId(@RequestParam Long presetId){
         return serv.findByPresetId(presetId);
     }
     @GetMapping(params = {"!presetId", "categoryId"})
-    public List<PresetCategoryRespDTO> findByCategoryId(@RequestParam Long categoryId){
+    public List<PresetCategoryDTO> findByCategoryId(@RequestParam Long categoryId){
         return serv.findByCategoryId(categoryId);
     }
 

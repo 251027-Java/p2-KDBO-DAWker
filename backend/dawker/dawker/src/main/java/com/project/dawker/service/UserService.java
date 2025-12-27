@@ -1,6 +1,6 @@
 package com.project.dawker.service;
 
-import com.project.dawker.controller.dto.User.UserRespDTO;
+import com.project.dawker.controller.dto.User.UserDTO;
 import com.project.dawker.entity.Preset;
 import com.project.dawker.entity.User;
 import com.project.dawker.exception.UserNotFoundException;
@@ -17,7 +17,7 @@ public class UserService {
         repo = userRepository;
     }
 
-    public UserRespDTO findByUsername(String username){
+    public UserDTO findByUsername(String username){
         return userToRespDTO(repo.findByUsername(username).orElseThrow(() -> new UserNotFoundException(
             String.format("Username = %s not found.", username))));
     }
@@ -26,12 +26,12 @@ public class UserService {
         return repo.existsByUsername(username);
     }
 
-    public List<UserRespDTO> findByUsernameContainingIgnoreCase(String search){
+    public List<UserDTO> findByUsernameContainingIgnoreCase(String search){
         return repo.findByUsernameContainingIgnoreCase(search).stream().map(this::userToRespDTO).toList();
     }
 
-    private UserRespDTO userToRespDTO(User user){
-        return new UserRespDTO(user.getId(), user.getUsername(), user.getRole(),
+    private UserDTO userToRespDTO(User user){
+        return new UserDTO(user.getId(), user.getUsername(), user.getRole(),
             user.getPresets().stream().map(Preset::getId).toList());
     }
 }

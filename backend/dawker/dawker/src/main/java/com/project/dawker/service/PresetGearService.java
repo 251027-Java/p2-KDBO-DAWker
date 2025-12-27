@@ -1,6 +1,6 @@
 package com.project.dawker.service;
 
-import com.project.dawker.controller.dto.PresetGear.PresetGearRespDTO;
+import com.project.dawker.controller.dto.PresetGear.PresetGearDTO;
 import com.project.dawker.entity.GearType;
 import com.project.dawker.entity.PresetGear;
 import com.project.dawker.exception.CategoryTypeNotFoundException;
@@ -25,11 +25,11 @@ public class PresetGearService {
         repo = presetGearRepository;
     }
 
-    public List<PresetGearRespDTO> findByPresetIdOrderByOrderIndexAsc(Long presetId){
+    public List<PresetGearDTO> findByPresetIdOrderByOrderIndexAsc(Long presetId){
         return repo.findByPresetIdOrderByOrderIndexAsc(presetId).stream().map(this::presetGearToRespDTO).toList();
     }
 
-    public List<PresetGearRespDTO> findByGearItemId(Long gearItemId){
+    public List<PresetGearDTO> findByGearItemId(Long gearItemId){
         return repo.findByGearItemId(gearItemId).stream().map(this::presetGearToRespDTO).toList();
     }
 
@@ -53,7 +53,7 @@ public class PresetGearService {
             ));
     }
 
-    public List<PresetGearRespDTO> findByGearType(String gearType){
+    public List<PresetGearDTO> findByGearType(String gearType){
         GearType type;
 
         try {
@@ -65,12 +65,12 @@ public class PresetGearService {
 
         return findByGearType(type);
     }
-    public List<PresetGearRespDTO> findByGearType(GearType gearType){
+    public List<PresetGearDTO> findByGearType(GearType gearType){
         return repo.findByGearType(gearType).stream().map(this::presetGearToRespDTO).toList();
     }
 
-    private PresetGearRespDTO presetGearToRespDTO(PresetGear presetGear){
-        return new PresetGearRespDTO(presetGear.getId(), presetGear.getPreset().getId(), presetGear.getGearItem().getId(),
+    private PresetGearDTO presetGearToRespDTO(PresetGear presetGear){
+        return new PresetGearDTO(presetGear.getId(), presetGear.getPreset().getId(), presetGear.getGearItem().getId(),
             presetGear.getGainValue(), presetGear.getToneValue(), presetGear.getOrderIndex());
     }
 }

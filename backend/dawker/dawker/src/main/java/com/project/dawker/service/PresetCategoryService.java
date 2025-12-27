@@ -1,6 +1,6 @@
 package com.project.dawker.service;
 
-import com.project.dawker.controller.dto.PresetCategory.PresetCategoryRespDTO;
+import com.project.dawker.controller.dto.PresetCategory.PresetCategoryDTO;
 import com.project.dawker.entity.PresetCategory;
 import com.project.dawker.repository.PresetCategoryRepository;
 import org.springframework.stereotype.Service;
@@ -15,10 +15,10 @@ public class PresetCategoryService {
         repo = presetCategoryRepository;
     }
 
-    public List<PresetCategoryRespDTO> findByPresetId(Long presetId){
+    public List<PresetCategoryDTO> findByPresetId(Long presetId){
         return repo.findByPresetId(presetId).stream().map(this::presetCategoryToRespDTO).toList();
     }
-    public List<PresetCategoryRespDTO> findByCategoryId(Long categoryId){
+    public List<PresetCategoryDTO> findByCategoryId(Long categoryId){
         return repo.findByCategoryId(categoryId).stream().map(this::presetCategoryToRespDTO).toList();
     }
 
@@ -30,8 +30,8 @@ public class PresetCategoryService {
         repo.deleteByPresetId(presetId);
     }
 
-    private PresetCategoryRespDTO presetCategoryToRespDTO(PresetCategory presetCategory){
-        return new PresetCategoryRespDTO(presetCategory.getId(), presetCategory.getPreset().getId(),
+    private PresetCategoryDTO presetCategoryToRespDTO(PresetCategory presetCategory){
+        return new PresetCategoryDTO(presetCategory.getId(), presetCategory.getPreset().getId(),
             presetCategory.getCategory().getId());
     }
 }

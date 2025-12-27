@@ -1,6 +1,6 @@
 package com.project.dawker.service;
 
-import com.project.dawker.controller.dto.GearItem.GearItemRespDTO;
+import com.project.dawker.controller.dto.GearItem.GearItemDTO;
 import com.project.dawker.entity.GearItem;
 import com.project.dawker.entity.GearType;
 import com.project.dawker.entity.PresetGear;
@@ -19,12 +19,12 @@ public class GearItemService {
         repo = gearItemRepository;
     }
 
-    public GearItemRespDTO findById(Long id){
+    public GearItemDTO findById(Long id){
         return gearItemToRespDTO(repo.findById(id).orElseThrow(() -> new GearItemNotFoundException(
             String.format("Gear Item ID = %d not found.", id))));
     }
 
-    public List<GearItemRespDTO> findByGearType(String gearType){
+    public List<GearItemDTO> findByGearType(String gearType){
         GearType type;
 
         try {
@@ -36,11 +36,11 @@ public class GearItemService {
 
         return findByGearType(type);
     }
-    public List<GearItemRespDTO> findByGearType(GearType gearType){
+    public List<GearItemDTO> findByGearType(GearType gearType){
         return repo.findByGearType(gearType).stream().map(this::gearItemToRespDTO).toList();
     }
 
-    public GearItemRespDTO findByModelName(String modelName){
+    public GearItemDTO findByModelName(String modelName){
         return gearItemToRespDTO(repo.findByModelName(modelName).orElseThrow(() -> new GearItemNotFoundException(
             String.format("Gear Item Model Name = %s not found.", modelName))));
     }
@@ -49,8 +49,8 @@ public class GearItemService {
         return repo.existsByModelName(modelName);
     }
 
-    private GearItemRespDTO gearItemToRespDTO(GearItem item){
-        return new GearItemRespDTO(item.getId(), item.getModelName(), item.getGearType().toString(),
+    private GearItemDTO gearItemToRespDTO(GearItem item){
+        return new GearItemDTO(item.getId(), item.getModelName(), item.getGearType().toString(),
             item.getPresetGears().stream().map(PresetGear::getId).toList());
     }
 }

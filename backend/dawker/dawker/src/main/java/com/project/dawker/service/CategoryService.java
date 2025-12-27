@@ -1,6 +1,6 @@
 package com.project.dawker.service;
 
-import com.project.dawker.controller.dto.Category.CategoryRespDTO;
+import com.project.dawker.controller.dto.Category.CategoryDTO;
 import com.project.dawker.entity.Category;
 import com.project.dawker.entity.CategoryType;
 import com.project.dawker.entity.PresetCategory;
@@ -17,12 +17,12 @@ public class CategoryService {
         repo = categoryRepository;
     }
 
-    public CategoryRespDTO findById(Long id){
+    public CategoryDTO findById(Long id){
         return categoryToRespDTO(repo.findById(id).orElseThrow(() -> new CategoryNotFoundException(
             String.format("Category ID = %d not found.", id))));
     }
 
-    public CategoryRespDTO findByCategoryType(String categoryType){
+    public CategoryDTO findByCategoryType(String categoryType){
         CategoryType type;
 
         try {
@@ -34,7 +34,7 @@ public class CategoryService {
 
         return findByCategoryType(type);
     }
-    public CategoryRespDTO findByCategoryType(CategoryType categoryType){
+    public CategoryDTO findByCategoryType(CategoryType categoryType){
         return categoryToRespDTO(repo.findByCategoryType(categoryType).orElseThrow(() -> new CategoryNotFoundException(
             String.format("Category = %s not found.", categoryType))));
     }
@@ -43,8 +43,8 @@ public class CategoryService {
         return repo.existsByCategoryType(categoryType);
     }
 
-    private CategoryRespDTO categoryToRespDTO(Category category){
-        return new CategoryRespDTO(category.getId(), category.getCategoryType().toString(),
+    private CategoryDTO categoryToRespDTO(Category category){
+        return new CategoryDTO(category.getId(), category.getCategoryType().toString(),
             category.getPresetCategories().stream().map(PresetCategory::getId).toList());
     }
 }
