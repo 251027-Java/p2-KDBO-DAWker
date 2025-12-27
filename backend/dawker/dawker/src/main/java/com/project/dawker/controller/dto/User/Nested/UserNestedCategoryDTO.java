@@ -1,6 +1,6 @@
 package com.project.dawker.controller.dto.User.Nested;
 
-public record UserRespNestedCategoryDTO (
+public record UserNestedCategoryDTO(
     Long id,
     String categoryType
 ) {

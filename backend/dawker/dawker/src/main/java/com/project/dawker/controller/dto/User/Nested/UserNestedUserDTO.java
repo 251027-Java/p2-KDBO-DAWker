@@ -2,10 +2,10 @@ package com.project.dawker.controller.dto.User.Nested;
 
 import java.util.List;
 
-public record UserRespNestedUserDTO(
+public record UserNestedUserDTO(
     Long id,
     String username,
     String role,
-    List<UserRespNestedPresetDTO> presets
+    List<UserNestedPresetDTO> presets
 ) {
 }

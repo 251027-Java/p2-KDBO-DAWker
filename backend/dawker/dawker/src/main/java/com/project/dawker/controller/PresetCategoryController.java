@@ -16,11 +16,15 @@ public class PresetCategoryController {
         serv = presetCategoryService;
     }
 
-    @GetMapping(params = {"presetId", "!categoryId"})
+    @GetMapping(params = {"id", "!presetId", "!categoryId"})
+    public PresetCategoryDTO findById(@RequestParam Long id){
+        return serv.findById(id);
+    }
+    @GetMapping(params = {"!id", "presetId", "!categoryId"})
     public List<PresetCategoryDTO> findByPresetId(@RequestParam Long presetId){
         return serv.findByPresetId(presetId);
     }
-    @GetMapping(params = {"!presetId", "categoryId"})
+    @GetMapping(params = {"!id", "!presetId", "categoryId"})
     public List<PresetCategoryDTO> findByCategoryId(@RequestParam Long categoryId){
         return serv.findByCategoryId(categoryId);
     }

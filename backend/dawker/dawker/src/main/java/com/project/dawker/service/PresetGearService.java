@@ -5,8 +5,10 @@ import com.project.dawker.entity.GearType;
 import com.project.dawker.entity.PresetGear;
 import com.project.dawker.exception.CategoryTypeNotFoundException;
 import com.project.dawker.exception.NonPositiveNumberException;
+import com.project.dawker.exception.PresetGearNotFoundException;
 import com.project.dawker.repository.PresetGearRepository;
 import com.project.dawker.repository.dto.GearItemUsageDTO;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +18,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class PresetGearService {
     private final static int DEFAULT_NUM_MOST_POPULAR_GEAR_ITEMS = 10;
 
@@ -23,6 +26,11 @@ public class PresetGearService {
 
     public PresetGearService(PresetGearRepository presetGearRepository){
         repo = presetGearRepository;
+    }
+
+    public PresetGearDTO findById(Long id){
+        return presetGearToRespDTO(repo.findById(id).orElseThrow(() -> new PresetGearNotFoundException(
+            String.format("Preset Gear ID = %d not found.", id))));
     }
 
     public List<PresetGearDTO> findByPresetIdOrderByOrderIndexAsc(Long presetId){

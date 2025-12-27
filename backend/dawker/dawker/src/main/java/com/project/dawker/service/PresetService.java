@@ -6,16 +6,23 @@ import com.project.dawker.entity.PresetCategory;
 import com.project.dawker.entity.PresetGear;
 import com.project.dawker.exception.PresetNotFoundException;
 import com.project.dawker.repository.PresetRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@Transactional
 public class PresetService {
     private final PresetRepository repo;
 
     public PresetService(PresetRepository presetRepository){
         repo = presetRepository;
+    }
+
+    public PresetDTO findById(Long id){
+        return presetToRespDTO(repo.findById(id).orElseThrow(() -> new PresetNotFoundException(
+            String.format("Preset ID = %d not found.", id))));
     }
 
     public List<PresetDTO> findByUserId(Long userId){

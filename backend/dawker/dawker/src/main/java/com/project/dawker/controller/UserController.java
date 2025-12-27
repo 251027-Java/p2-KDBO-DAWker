@@ -15,7 +15,12 @@ public class UserController {
         serv = userService;
     }
 
-    @GetMapping(params = {"username", "!search"})
+    @GetMapping(params = {"id", "!username", "!search"})
+    public UserDTO findById(@RequestParam Long id){
+        return serv.findById(id);
+    }
+
+    @GetMapping(params = {"!id", "username", "!search"})
     public UserDTO findByUsername(@RequestParam String username){
         return serv.findByUsername(username);
     }
@@ -25,7 +30,7 @@ public class UserController {
         return serv.existsByUsername(modelName);
     }
 
-    @GetMapping(params = {"!username", "search"})
+    @GetMapping(params = {"!id", "!username", "search"})
     public List<UserDTO> findByUsernameContainingIgnoreCase(@RequestParam String search){
         return serv.findByUsernameContainingIgnoreCase(search);
     }

@@ -19,12 +19,17 @@ public class PresetGearController {
         serv = presetGearService;
     }
 
-    @GetMapping(params = {"presetId", "!gearItemId", "!type"})
+    @GetMapping(params = {"id", "!presetId", "!gearItemId", "!type"})
+    public PresetGearDTO findById(@RequestParam Long id){
+        return serv.findById(id);
+    }
+
+    @GetMapping(params = {"!id", "presetId", "!gearItemId", "!type"})
     public List<PresetGearDTO> findByPresetId(@RequestParam Long presetId){
         return serv.findByPresetIdOrderByOrderIndexAsc(presetId);
     }
 
-    @GetMapping(params = {"!presetId", "gearItemId", "!type"})
+    @GetMapping(params = {"!id", "!presetId", "gearItemId", "!type"})
     public List<PresetGearDTO> findByGearItemId(@RequestParam Long gearItemId){
         return serv.findByGearItemId(gearItemId);
     }
@@ -44,7 +49,7 @@ public class PresetGearController {
         return serv.findMostPopularGearItems(numMostPopular);
     }
 
-    @GetMapping(params = {"!presetId", "!gearItemId", "type"})
+    @GetMapping(params = {"!id", "!presetId", "!gearItemId", "type"})
     public List<PresetGearDTO> findByGearType(@RequestParam String type){
         return serv.findByGearType(type);
     }

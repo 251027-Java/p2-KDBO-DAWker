@@ -1,6 +1,6 @@
 package com.project.dawker.controller;
 
-import com.project.dawker.controller.dto.User.Nested.UserRespNestedUserDTO;
+import com.project.dawker.controller.dto.User.Nested.UserNestedUserDTO;
 import com.project.dawker.controller.dto.User.UserAllDTO;
 import com.project.dawker.service.UserAllService;
 import org.springframework.web.bind.annotation.*;
@@ -17,12 +17,22 @@ public class UserAllController {
         serv = userAllService;
     }
 
-    @GetMapping("/nested")
-    public UserRespNestedUserDTO findByUsernameNested(@RequestParam String username) {
+    @GetMapping(path = "/nested", params = {"id", "!username"})
+    public UserNestedUserDTO findByIdNested(@RequestParam Long id) {
+        return serv.findByIdNested(id);
+    }
+
+    @GetMapping(params = {"id", "!username"})
+    public UserAllDTO findById(@RequestParam Long id) {
+        return serv.findById(id);
+    }
+
+    @GetMapping(path = "/nested", params = {"!id", "username"})
+    public UserNestedUserDTO findByUsernameNested(@RequestParam String username) {
         return serv.findByUsernameNested(username);
     }
 
-    @GetMapping
+    @GetMapping(params = {"!id", "username"})
     public UserAllDTO findByUsername(@RequestParam String username) {
         return serv.findByUsername(username);
     }

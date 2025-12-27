@@ -31,7 +31,15 @@ public class UserAllService {
         gServ = gearItemService;
     }
 
-    public UserRespNestedUserDTO findByUsernameNested(String username){
+    public UserNestedUserDTO findByIdNested(Long id){
+        return userRespToUserRespAllNestedDTO(uServ.findById(id));
+    }
+
+    public UserAllDTO findById(Long id){
+        return userRespToUserRespAllDTO(uServ.findById(id));
+    }
+
+    public UserNestedUserDTO findByUsernameNested(String username){
         return userRespToUserRespAllNestedDTO(uServ.findByUsername(username)); // user info
     }
 
@@ -41,39 +49,39 @@ public class UserAllService {
 
     // basically converted normal response DTOs into one single long nested response DTO for a single user
     // contains all their presets, and each category and gear item for each preset
-    public UserRespNestedUserDTO userRespToUserRespAllNestedDTO(UserDTO user){
+    public UserNestedUserDTO userRespToUserRespAllNestedDTO(UserDTO user){
         long userId = user.id();
 
         // get all the presets for a user
-        List<UserRespNestedPresetDTO> presets = new ArrayList<>();
+        List<UserNestedPresetDTO> presets = new ArrayList<>();
         for (PresetDTO preset : pServ.findByUserId(userId)){
             long presetId = preset.id();
 
             // get all the preset categories for a preset
-            List<UserRespNestedPresetCategoryDTO> presetCategories = new ArrayList<>();
+            List<UserNestedPresetCategoryDTO> presetCategories = new ArrayList<>();
             for (PresetCategoryDTO presetCategory : pcServ.findByPresetId(presetId)){
                 CategoryDTO category = cServ.findById(presetCategory.categoryId()); // get category corresponding to the preset category
-                UserRespNestedCategoryDTO nestedCategory = new UserRespNestedCategoryDTO(category.id(), category.categoryType()); // create nested category dto
+                UserNestedCategoryDTO nestedCategory = new UserNestedCategoryDTO(category.id(), category.categoryType()); // create nested category dto
 
-                presetCategories.add(new UserRespNestedPresetCategoryDTO(presetCategory.id(), nestedCategory)); // create nested preset category dto
+                presetCategories.add(new UserNestedPresetCategoryDTO(presetCategory.id(), nestedCategory)); // create nested preset category dto
             }
 
             // get all the preset gear items for a preset
-            List<UserRespNestedPresetGearDTO> presetGearItems = new ArrayList<>();
+            List<UserNestedPresetGearDTO> presetGearItems = new ArrayList<>();
             for (PresetGearDTO presetGearItem : pgServ.findByPresetIdOrderByOrderIndexAsc(presetId)){
                 GearItemDTO gearItem = gServ.findById(presetGearItem.gearItemId()); // get gear item corresponding to the preset gear item
-                UserRespNestedGearItemDTO nestedGearItem = new UserRespNestedGearItemDTO(gearItem.id(), gearItem.modelName(), gearItem.gearType()); // create nested gear item dto
+                UserNestedGearItemDTO nestedGearItem = new UserNestedGearItemDTO(gearItem.id(), gearItem.modelName(), gearItem.gearType()); // create nested gear item dto
 
-                presetGearItems.add(new UserRespNestedPresetGearDTO(presetGearItem.id(), presetGearItem.gainValue(),
+                presetGearItems.add(new UserNestedPresetGearDTO(presetGearItem.id(), presetGearItem.gainValue(),
                     presetGearItem.toneValue(), presetGearItem.orderIndex(), nestedGearItem)); // create nested preset gear item dto
             }
 
             // create nested preset dto
-            presets.add(new UserRespNestedPresetDTO(presetId, preset.presetName(), presetCategories, presetGearItems));
+            presets.add(new UserNestedPresetDTO(presetId, preset.presetName(), presetCategories, presetGearItems));
         }
 
         // create nested user dto
-        return new UserRespNestedUserDTO(userId, user.username(), user.role(), presets);
+        return new UserNestedUserDTO(userId, user.username(), user.role(), presets);
     }
 
     // taking all the DTOs of presets, and each category and gear item for each preset, and putting them all into 1 big DTO,
