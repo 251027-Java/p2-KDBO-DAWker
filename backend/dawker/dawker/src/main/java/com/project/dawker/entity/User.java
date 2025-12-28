@@ -28,7 +28,16 @@ public class User {
     private String role;
 
     // one to many with presets
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<Preset> presets;
+
+    public void addPreset(Preset preset) {
+        presets.add(preset);
+        preset.setUser(this);
+    }
+
+    public void removePreset(Preset preset) {
+        presets.remove(preset);
+    }
 }
 

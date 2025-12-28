@@ -18,7 +18,7 @@ public class CategoryService {
     }
 
     public CategoryDTO findById(Long id){
-        return categoryToRespDTO(repo.findById(id).orElseThrow(() -> new CategoryNotFoundException(
+        return categoryToDTO(repo.findById(id).orElseThrow(() -> new CategoryNotFoundException(
             String.format("Category ID = %d not found.", id))));
     }
 
@@ -35,7 +35,7 @@ public class CategoryService {
         return findByCategoryType(type);
     }
     public CategoryDTO findByCategoryType(CategoryType categoryType){
-        return categoryToRespDTO(repo.findByCategoryType(categoryType).orElseThrow(() -> new CategoryNotFoundException(
+        return categoryToDTO(repo.findByCategoryType(categoryType).orElseThrow(() -> new CategoryNotFoundException(
             String.format("Category = %s not found.", categoryType))));
     }
 
@@ -43,7 +43,7 @@ public class CategoryService {
         return repo.existsByCategoryType(categoryType);
     }
 
-    private CategoryDTO categoryToRespDTO(Category category){
+    private CategoryDTO categoryToDTO(Category category){
         return new CategoryDTO(category.getId(), category.getCategoryType().toString(),
             category.getPresetCategories().stream().map(PresetCategory::getId).toList());
     }

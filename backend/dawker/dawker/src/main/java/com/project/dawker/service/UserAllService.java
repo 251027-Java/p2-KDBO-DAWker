@@ -32,24 +32,24 @@ public class UserAllService {
     }
 
     public UserNestedUserDTO findByIdNested(Long id){
-        return userRespToUserRespAllNestedDTO(uServ.findById(id));
+        return userToAllNestedDTO(uServ.findById(id));
     }
 
     public UserAllDTO findById(Long id){
-        return userRespToUserRespAllDTO(uServ.findById(id));
+        return userToAllDTO(uServ.findById(id));
     }
 
     public UserNestedUserDTO findByUsernameNested(String username){
-        return userRespToUserRespAllNestedDTO(uServ.findByUsername(username)); // user info
+        return userToAllNestedDTO(uServ.findByUsername(username)); // user info
     }
 
     public UserAllDTO findByUsername(String username){
-        return userRespToUserRespAllDTO(uServ.findByUsername(username)); // user info
+        return userToAllDTO(uServ.findByUsername(username)); // user info
     }
 
     // basically converted normal response DTOs into one single long nested response DTO for a single user
     // contains all their presets, and each category and gear item for each preset
-    public UserNestedUserDTO userRespToUserRespAllNestedDTO(UserDTO user){
+    public UserNestedUserDTO userToAllNestedDTO(UserDTO user){
         long userId = user.id();
 
         // get all the presets for a user
@@ -86,7 +86,7 @@ public class UserAllService {
 
     // taking all the DTOs of presets, and each category and gear item for each preset, and putting them all into 1 big DTO,
     // which is the main userDTO and a few maps from ID -> corresponding DTOs
-    public UserAllDTO userRespToUserRespAllDTO(UserDTO user){
+    public UserAllDTO userToAllDTO(UserDTO user){
         Map<Long, PresetDTO> presets = new HashMap<>();
         Map<Long, PresetGearDTO> presetGears = new LinkedHashMap<>(); // LinkedHashMap to keep elements in ascending order of order index
         Map<Long, GearItemDTO> gearItems = new HashMap<>();

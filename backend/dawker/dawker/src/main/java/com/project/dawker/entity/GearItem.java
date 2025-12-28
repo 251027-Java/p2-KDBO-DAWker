@@ -29,5 +29,15 @@ public class GearItem {
     // m:m with presets through preset gear
     @OneToMany(mappedBy = "gearItem", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<PresetGear> presetGears;
+
+    public void addPresetGear(PresetGear pg) {
+        presetGears.add(pg);
+        pg.setGearItem(this);
+    }
+
+    public void removePresetGear(PresetGear pg) {
+        presetGears.remove(pg);
+    }
+
 }
 

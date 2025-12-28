@@ -20,7 +20,7 @@ public class GearItemService {
     }
 
     public GearItemDTO findById(Long id){
-        return gearItemToRespDTO(repo.findById(id).orElseThrow(() -> new GearItemNotFoundException(
+        return gearItemToDTO(repo.findById(id).orElseThrow(() -> new GearItemNotFoundException(
             String.format("Gear Item ID = %d not found.", id))));
     }
 
@@ -37,11 +37,11 @@ public class GearItemService {
         return findByGearType(type);
     }
     public List<GearItemDTO> findByGearType(GearType gearType){
-        return repo.findByGearType(gearType).stream().map(this::gearItemToRespDTO).toList();
+        return repo.findByGearType(gearType).stream().map(this::gearItemToDTO).toList();
     }
 
     public GearItemDTO findByModelName(String modelName){
-        return gearItemToRespDTO(repo.findByModelName(modelName).orElseThrow(() -> new GearItemNotFoundException(
+        return gearItemToDTO(repo.findByModelName(modelName).orElseThrow(() -> new GearItemNotFoundException(
             String.format("Gear Item Model Name = %s not found.", modelName))));
     }
 
@@ -49,7 +49,7 @@ public class GearItemService {
         return repo.existsByModelName(modelName);
     }
 
-    private GearItemDTO gearItemToRespDTO(GearItem item){
+    private GearItemDTO gearItemToDTO(GearItem item){
         return new GearItemDTO(item.getId(), item.getModelName(), item.getGearType().toString(),
             item.getPresetGears().stream().map(PresetGear::getId).toList());
     }

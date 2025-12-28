@@ -1,11 +1,10 @@
 package com.project.dawker.controller;
 
 import com.project.dawker.controller.dto.PresetGear.PresetGearDTO;
+import com.project.dawker.controller.dto.PresetGear.PresetGearWOIDDTO;
 import com.project.dawker.service.PresetGearService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
@@ -52,5 +51,22 @@ public class PresetGearController {
     @GetMapping(params = {"!id", "!presetId", "!gearItemId", "type"})
     public List<PresetGearDTO> findByGearType(@RequestParam String type){
         return serv.findByGearType(type);
+    }
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public PresetGearDTO createPresetGear(@RequestBody PresetGearWOIDDTO dto){
+        return serv.createPresetGear(dto);
+    }
+
+    @PutMapping
+    public PresetGearDTO updatePresetGear(@RequestParam Long id, @RequestBody PresetGearWOIDDTO dto){
+        return serv.updatePresetGear(id, dto);
+    }
+
+    @DeleteMapping
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deletePresetGear(@RequestParam Long id){
+        serv.deletePresetGear(id);
     }
 }

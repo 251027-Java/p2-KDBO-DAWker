@@ -47,6 +47,24 @@ public class Preset {
         presetCategories = newPresetCategories;
     }
 
+    public void addPresetGear(PresetGear pg) {
+        presetGears.add(pg);
+        pg.setPreset(this);
+    }
+
+    public void removePresetGear(PresetGear pg) {
+        presetGears.remove(pg);
+    }
+
+    public void addPresetCategory(PresetCategory pc) {
+        presetCategories.add(pc);
+        pc.setPreset(this);
+    }
+
+    public void removePresetCategory(PresetCategory pc) {
+        presetCategories.remove(pc);
+    }
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

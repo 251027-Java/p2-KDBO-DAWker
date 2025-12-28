@@ -25,4 +25,14 @@ public class Category {
     // m:m with presets through preset category
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<PresetCategory> presetCategories;
+
+    public void addPresetCategory(PresetCategory pc) {
+        presetCategories.add(pc);
+        pc.setCategory(this);
+    }
+
+    public void removePresetCategory(PresetCategory pc) {
+        presetCategories.remove(pc);
+    }
+
 }
