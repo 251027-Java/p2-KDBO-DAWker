@@ -14,16 +14,27 @@ export const usePedal = (enabled, reverbMix, reverbRoomSize) => {
     }
 
     // large roomSize and high wet mix for lots of reverb
-    if (!reverb.current) {
+    // roomSize can only be set during initialization, so we need to recreate
+    // the reverb when roomSize changes
+    const createReverb = async () => {
+      if (reverb.current) {
+        reverb.current.dispose();
+      }
+      
       reverb.current = new Tone.Reverb({
         roomSize: reverbRoomSize,
         wet: reverbMix
       });
+      
       // generate the reverb impulse response
-      reverb.current.generate().catch(err => {
+      try {
+        await reverb.current.generate();
+      } catch (err) {
         console.error('Error generating reverb:', err);
-      });
-    }
+      }
+    };
+
+    createReverb();
 
     return () => {
       if (reverb.current) {
@@ -31,19 +42,13 @@ export const usePedal = (enabled, reverbMix, reverbRoomSize) => {
         reverb.current = null;
       }
     };
-  }, [enabled]);
+  }, [enabled, reverbRoomSize]); // regenerate when roomSize changes
 
   useEffect(() => {
     if (reverb.current && enabled) {
       reverb.current.wet.value = reverbMix;
     }
   }, [reverbMix, enabled]);
-
-  useEffect(() => {
-    if (reverb.current && enabled) {
-      reverb.current.roomSize.value = reverbRoomSize;
-    }
-  }, [reverbRoomSize, enabled]);
 
   const getPedalNode = useCallback(() => {
     if (!enabled || !reverb.current) {
