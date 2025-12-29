@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import * as Tone from 'tone';
 import { useCabinet } from './useCabinet';
+import { usePedal } from './usePedal';
 
 const TonejsDemo = () => {
   const [isEngineStarted, setIsEngineStarted] = useState(false);
@@ -14,7 +15,12 @@ const TonejsDemo = () => {
   const [volumeValue, setVolumeValue] = useState(-6); // dB value
   const [reverbValue, setReverbValue] = useState(0.3); // controls the wet/dry mix of the reverb effect
   
-  // Cabinet state variables - separate entity from amp
+  // pedal
+  const [pedalEnabled, setPedalEnabled] = useState(true);
+  const [pedalReverbMix, setPedalReverbMix] = useState(0.8); 
+  const [pedalReverbRoomSize, setPedalReverbRoomSize] = useState(0.9);
+  
+  // cabinet
   const [cabinetEnabled, setCabinetEnabled] = useState(true);
   const [cabinetLowCut, setCabinetLowCut] = useState(80); // Hz - removes sub-bass
   const [cabinetHighCut, setCabinetHighCut] = useState(8000); // Hz - speaker roll-off
@@ -26,6 +32,10 @@ const TonejsDemo = () => {
   const eq = useRef(null); // references the EQ3 node for bass mid treble (AMP)
   const volume = useRef(null);
   const reverb = useRef(null); // spatial ambience/reverberation
+
+  // pedal hook - comes before amp in signal chain
+  const pedal = usePedal(pedalEnabled, pedalReverbMix, pedalReverbRoomSize);
+  const getPedalNode = pedal.getPedalNode;
 
   // Cabinet hook - separate entity from amp
   const cabinet = useCabinet(cabinetEnabled, cabinetLowCut, cabinetHighCut, cabinetPresence);
@@ -88,6 +98,15 @@ const TonejsDemo = () => {
     reverb.current?.disconnect();
     volume.current?.disconnect();
     
+    const pedalNode = getPedalNode();
+    if (pedalNode) {
+      try {
+        pedalNode.disconnect();
+      } catch (e) {
+        // ignore errors if already disconnected
+      }
+    }
+    
     const cabinetChain = getCabinetChain();
     if (cabinetChain && cabinetEnabled) {
       cabinetChain.forEach(node => {
@@ -101,34 +120,44 @@ const TonejsDemo = () => {
       });
     }
     
-    // cabinet logic
     if (useDirectMode) {
       mic.current.connect(Tone.Destination);
     } else {
-      // get cabinet chain - check if it's ready
+      // get pedal and cabinet nodes
+      const currentPedalNode = getPedalNode();
       const currentCabinetChain = getCabinetChain();
       
-      if (currentCabinetChain && cabinetEnabled && currentCabinetChain[0] && currentCabinetChain[3]) {
-        // chain with cabinet: mic -> distortion -> amp EQ -> cabinet -> reverb -> volume -> output
-        mic.current.connect(distortion.current);
-        distortion.current.connect(eq.current);
-        eq.current.connect(currentCabinetChain[0]); // connect to cabinet's highPass (first node)
-        currentCabinetChain[3].connect(reverb.current); // connect from cabinet's presence filter (last node)
-        reverb.current.connect(volume.current);
-        volume.current.connect(Tone.Destination);
-        console.log("Chain connected with cabinet");
-      } else {
-        mic.current.chain(
-          distortion.current, 
-          eq.current, 
-          reverb.current, 
-          volume.current, 
-          Tone.Destination
-        );
-        console.log("Chain connected without cabinet");
+      // mic -> pedal -> distortion -> amp EQ -> cabinet -> reverb -> volume -> output
+      let currentOutput = mic.current;
+      
+      // connect pedal 
+      if (currentPedalNode && pedalEnabled) {
+        currentOutput.connect(currentPedalNode);
+        currentOutput = currentPedalNode;
       }
+      
+      // connect amp
+      currentOutput.connect(distortion.current);
+      distortion.current.connect(eq.current);
+      currentOutput = eq.current;
+      
+      // connect cabinet
+      if (currentCabinetChain && cabinetEnabled && currentCabinetChain[0] && currentCabinetChain[3]) {
+        currentOutput.connect(currentCabinetChain[0]);
+        currentOutput = currentCabinetChain[3]; // output from cabinet's presence filter
+      }
+      
+      // connect reverb -> volume -> output
+      currentOutput.connect(reverb.current);
+      reverb.current.connect(volume.current);
+      volume.current.connect(Tone.Destination);
+      
+      console.log("Chain connected:", {
+        pedal: pedalEnabled && currentPedalNode ? 'enabled' : 'disabled',
+        cabinet: cabinetEnabled && currentCabinetChain ? 'enabled' : 'disabled'
+      });
     }
-  }, [useDirectMode, isEngineStarted, cabinetEnabled, getCabinetChain]);
+  }, [useDirectMode, isEngineStarted, pedalEnabled, cabinetEnabled, getPedalNode, getCabinetChain]);
 
   // effect hook: updates distortion in real time whenever user adjusts it
   useEffect(() => {
@@ -230,7 +259,45 @@ const TonejsDemo = () => {
           {/* only show the amp controls when not in direct/low-latency mode */}
           {/* in direct mode, the signal bypasses all effects for minimal latency */}
           {!useDirectMode && (
-            <div className="amp-cabinet-container">
+            <>
+              {/* pedal section: comes before amp in signal chain */}
+              <div className="sliders-section">
+                <h2 className="section-title">Pedal</h2>
+                <div className="control-group" style={{ marginBottom: '20px' }}>
+                  <label className="toggle-label">
+                    <input 
+                      type="checkbox"
+                      checked={pedalEnabled}
+                      onChange={(e) => setPedalEnabled(e.target.checked)}
+                      style={{ marginRight: '8px' }}
+                    />
+                    Enable Pedal
+                  </label>
+                </div>
+                {pedalEnabled && (
+                  <div className="sliders-column">
+                    <Slider
+                      label="Reverb Mix"
+                      value={pedalReverbMix}
+                      min={0}
+                      max={1}
+                      step={0.01}
+                      onChange={setPedalReverbMix}
+                    />
+                    
+                    <Slider
+                      label="Room Size"
+                      value={pedalReverbRoomSize}
+                      min={0.1}
+                      max={1}
+                      step={0.01}
+                      onChange={setPedalReverbRoomSize}
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div className="amp-cabinet-container">
               {/* Amp section: contains EQ, gain, reverb, and volume controls */}
               <div className="sliders-section">
                 <h2 className="section-title">Amp</h2>
@@ -358,6 +425,7 @@ const TonejsDemo = () => {
                 )}
               </div>
             </div>
+            </>
           )}
         </div>
       )}
