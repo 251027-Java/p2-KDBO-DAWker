@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+import com.project.dawker.entity.daw_specific.DawEntity;
+
 // user entity : account info
 @Entity
 @Table(name = "users")
@@ -28,8 +30,10 @@ public class User {
     @Column(nullable = false)
     private String role;
 
-    // one to many with presets
+    // one to many with presets (May cut)
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Preset> presets;
-}
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<DawEntity> daws;
+}
