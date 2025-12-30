@@ -12,8 +12,10 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderColumn;
+import lombok.Data;
 
 @Entity
+@Data
 public class ConfigEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
