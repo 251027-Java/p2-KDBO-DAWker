@@ -8,7 +8,8 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.List;
 
-// acts like a container for the gear items, doesn't store the actual settings just name and created time
+// preset entity : container for a complete guitar rig configuration
+// this may change in the future for a different m:m connection
 @Entity
 @Table(name = "presets")
 @Data
@@ -30,11 +31,17 @@ public class Preset {
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
-    // m:m with gear items through preset gear
-    @OneToMany(mappedBy = "preset", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<PresetGear> presetGears;
+    // One-to-One relationships with gear components (matches frontend structure)
+    @OneToOne(mappedBy = "preset", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private PresetPedal presetPedal;
 
-    // m:m with categories through preset category
+    @OneToOne(mappedBy = "preset", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private PresetAmp presetAmp;
+
+    @OneToOne(mappedBy = "preset", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private PresetCabinet presetCabinet;
+
+    // m:m with categories through preset category (fulfills M:M requirement)
     @OneToMany(mappedBy = "preset", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<PresetCategory> presetCategories;
 
