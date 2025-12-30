@@ -5,6 +5,8 @@ import lombok.*;
 
 import java.util.List;
 
+import com.project.dawker.entity.daw_specific.DawEntity;
+
 // user entity : account info
 @Entity
 @Table(name = "users")
@@ -19,6 +21,9 @@ public class User {
     private Long id;
 
     @Column(nullable = false, unique = true)
+    private String email;
+
+    @Column(nullable = false, unique = true)
     private String username;
 
     @Column(nullable = false)
@@ -27,9 +32,12 @@ public class User {
     @Column(nullable = false)
     private String role;
 
-    // one to many with presets
+    // one to many with presets (May cut)
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<Preset> presets;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<DawEntity> daws;
 
     public void addPreset(Preset preset) {
         presets.add(preset);
@@ -40,4 +48,3 @@ public class User {
         presets.remove(preset);
     }
 }
-

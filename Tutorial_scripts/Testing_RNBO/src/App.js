@@ -1,12 +1,19 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { createDevice, ParameterNotificationSetting } from '@rnbo/js';
 
 const GuitarRig = () => {
     const audioContextRef = useRef(null);
     const deviceRef = useRef(null);
     const sourceNodeRef = useRef(null);
+    // ken: added these for input stream (mic and audio interface)
+    const mediaStreamRef = useRef(null);
+    const mediaStreamSourceRef = useRef(null);
 
     const [isLoaded, setIsLoaded] = useState(false);
+    // ken: this tracks whether its audio input or the wav input
+    const [useMicInput, setUseMicInput] = useState(false);
+    const [isMicActive, setIsMicActive] = useState(false);
+
     const [time, setTime] = useState(0.5);
     const [scale, setScale] = useState(0.5);
     const [color, setColor] = useState(0.5);
@@ -17,6 +24,47 @@ const GuitarRig = () => {
     const [regen, setRegen] = useState(0.5);
     const [fb, setFb] = useState(0.5);
 
+
+    // ken: sets up audio interface input
+    const setupMicInput = async (context) => {
+        try {
+            // request access
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                audio: {
+                    echoCancellation: false, // should help with latency
+                    noiseSuppression: false,
+                    autoGainControl: false
+                } 
+            });
+            mediaStreamRef.current = stream;
+            
+            // ken: MediaStreamSource from the microphone stream
+            const mediaStreamSource = context.createMediaStreamSource(stream);
+            mediaStreamSourceRef.current = mediaStreamSource;
+            
+            setIsMicActive(true);
+            console.log("audio interface connected");
+            return mediaStreamSource;
+        } catch (err) {
+            console.error("audio interface access error:", err);
+            alert("could not access microphone/audio interface. please check permissions.");
+            throw err;
+        }
+    };
+
+    // ken: stops input
+    const stopMicInput = () => {
+        if (mediaStreamRef.current) {
+            mediaStreamRef.current.getTracks().forEach(track => track.stop());
+            mediaStreamRef.current = null;
+        }
+        if (mediaStreamSourceRef.current) {
+            mediaStreamSourceRef.current.disconnect();
+            mediaStreamSourceRef.current = null;
+        }
+        setIsMicActive(false);
+        console.log("audio interface disconnected");
+    };
 
     const setupAudio = async () => {
 
@@ -31,10 +79,30 @@ const GuitarRig = () => {
 
                 audioContextRef.current = context;
 
-                // 1. Load Audio Sample directly
-                const audioResponse = await fetch('/audio/practiceSetup.wav');
-                const arrayBuffer = await audioResponse.arrayBuffer(); 
-                const audioBuffer = await context.decodeAudioData(arrayBuffer);
+                // ken: check if using mic input or audio file
+                let audioSource = null;
+                
+                if (useMicInput) {
+                    audioSource = await setupMicInput(context);
+                } else {
+                    // 1. Load Audio Sample directly
+                    const audioResponse = await fetch('/audio/practiceSetup.wav');
+                    const arrayBuffer = await audioResponse.arrayBuffer(); 
+                    const audioBuffer = await context.decodeAudioData(arrayBuffer);
+                    
+                    // ORIGINAL CODE: create buffer source (commented out but preserved)
+                    // 2. Create the Source
+                    // const source = context.createBufferSource();
+                    // source.buffer = audioBuffer;
+                    // source.loop = true;
+                    // audioSource = source;
+                    
+                    // ken: for now, we'll still create the buffer source but connect it conditionally
+                    const source = context.createBufferSource();
+                    source.buffer = audioBuffer;
+                    source.loop = true;
+                    audioSource = source;
+                }
 
                 // Creating RNBO object
 
@@ -91,13 +159,15 @@ const GuitarRig = () => {
                 let presets = patcher.presets || [];
                 device.setPreset(presets[6].preset)
 
+                // ORIGINAL CODE: Create the Source
                 // 2. Create the Source
-                const source = context.createBufferSource();
-                source.buffer = audioBuffer;
-                source.loop = true;
+                // const source = context.createBufferSource();
+                // source.buffer = audioBuffer;
+                // source.loop = true;
 
                 // Connect to the sequence [audio source -> RNBO node -> Gain node -> Speakers]
-                source.connect(device.node)
+                // ken: MODIFIED: connect audioSource to RNBO device
+                audioSource.connect(device.node)
                 device.node.connect(gainNode)
                 gainNode.connect(context.destination);
 
@@ -107,19 +177,58 @@ const GuitarRig = () => {
                 //     console.log(`${p.id}: ${p.value}`);
                 // });
 
+                // ken: MODIFIED: only start buffer source if not using mic input
                 // 4. Start Playback
-                source.start();
-                sourceNodeRef.current = source;
+                if (!useMicInput && audioSource.start) {
+                    audioSource.start();
+                }
+                sourceNodeRef.current = audioSource;
                 
                 await context.resume();
                 setIsLoaded(true);
-                console.log("Direct Audio Playing (RNBO Bypassed)");
+                // ken: MODIFIED: console log updates
+                if (useMicInput) {
+                    console.log("Live Audio Input Playing through RNBO");
+                } else {
+                    console.log("Direct Audio Playing (RNBO Bypassed)");
+                }
 
                 // [[DEBUGGING: Check available parameters from your exported RNBO file]]
                 console.log("Available parameters", device.parameters.map(p => p.id))
             } catch (err) {
                 console.error("Direct Audio Setup Failed:", err);
+                // ken: clean up mic input if setup fails
+                if (useMicInput) {
+                    stopMicInput();
+                }
             }
+    };
+
+    // ken: function to toggle between mic input and audio file
+    const toggleInputSource = () => {
+        const newUseMicInput = !useMicInput;
+        setUseMicInput(newUseMicInput);
+        
+        // if currently loaded, we need to restart with new source
+        if (isLoaded) {
+            // stop current audio
+            if (sourceNodeRef.current) {
+                if (sourceNodeRef.current.stop) {
+                    sourceNodeRef.current.stop();
+                }
+                sourceNodeRef.current.disconnect();
+            }
+            if (useMicInput) {
+                stopMicInput();
+            }
+            
+            // reset and restart with new source
+            setIsLoaded(false);
+            // small delay to ensure cleanup completes
+            setTimeout(() => {
+                setupAudio();
+            }, 100);
+        }
     };
 
     const handleTimeChange = (e) => {
@@ -231,18 +340,78 @@ const GuitarRig = () => {
             }
     }
 
+    // ken: cleanup effect to stop microphone when component unmounts
+    useEffect(() => {
+        return () => {
+            // stop microphone stream when component unmounts
+            if (mediaStreamRef.current) {
+                mediaStreamRef.current.getTracks().forEach(track => track.stop());
+                mediaStreamRef.current = null;
+            }
+            if (mediaStreamSourceRef.current) {
+                mediaStreamSourceRef.current.disconnect();
+                mediaStreamSourceRef.current = null;
+            }
+        };
+    }, []);
+
     return (
         <div style={{ padding: '20px', background: '#222', color: 'white', borderRadius: '8px', textAlign: 'center' }}>
             {!isLoaded ? (
-                <button 
-                    onClick={setupAudio} 
-                    style={{ padding: '15px 30px', fontSize: '18px', cursor: 'pointer', backgroundColor: '#4CAF50', border: 'none', color: 'white', borderRadius: '5px' }}
-                >
-                    🔌 Power On Guitar Rig
-                </button>
+                <div>
+                    {/* ADDED: Input source toggle before power on */}
+                    <div style={{ marginBottom: '20px' }}>
+                        <label style={{ marginRight: '10px', fontSize: '16px' }}>
+                            Input Source:
+                        </label>
+                        <select 
+                            value={useMicInput ? 'mic' : 'file'} 
+                            onChange={(e) => setUseMicInput(e.target.value === 'mic')}
+                            style={{ 
+                                padding: '8px 15px', 
+                                fontSize: '16px', 
+                                borderRadius: '5px',
+                                backgroundColor: '#333',
+                                color: 'white',
+                                border: '1px solid #555',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            <option value="file">Audio File (practiceSetup.wav)</option>
+                            <option value="mic">Microphone/Audio Interface</option>
+                        </select>
+                    </div>
+                    <button 
+                        onClick={setupAudio} 
+                        style={{ padding: '15px 30px', fontSize: '18px', cursor: 'pointer', backgroundColor: '#4CAF50', border: 'none', color: 'white', borderRadius: '5px' }}
+                    >
+                        🔌 Power On Guitar Rig
+                    </button>
+                </div>
             ) : (
                 <div>
                     <h3>🎸 Blues/Jazz Amp Active</h3>
+                    <div style={{ margin: '15px 0', padding: '10px', background: '#333', borderRadius: '5px' }}>
+                        <div style={{ marginBottom: '10px' }}>
+                            <strong>Input:</strong> {useMicInput ? 'Audio Interface' : 'Audio File (practiceSetup.wav)'}
+                            {isMicActive && <span style={{ color: '#4CAF50', marginLeft: '10px' }}>● Active</span>}
+                        </div>
+                        <button 
+                            onClick={toggleInputSource}
+                            style={{ 
+                                padding: '8px 20px', 
+                                fontSize: '14px', 
+                                cursor: 'pointer', 
+                                backgroundColor: '#555', 
+                                border: 'none', 
+                                color: 'white', 
+                                borderRadius: '5px',
+                                marginTop: '5px'
+                            }}
+                        >
+                            Switch to {useMicInput ? 'Audio File' : 'Microphone'}
+                        </button>
+                    </div>
                     <div style={{ margin: '20px 0' }}>
                         <label>Time: </label>
                         <input 
