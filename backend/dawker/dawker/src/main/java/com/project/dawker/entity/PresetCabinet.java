@@ -5,10 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * PresetCabinet entity: Stores cabinet configuration for a preset
- * Matches frontend structure: enabled, cabinetLowCut, cabinetHighCut, cabinetPresence
- */
+// preset cabinet entity : stores cabinet configuration for a preset
 @Entity
 @Table(name = "preset_cabinet")
 @Data

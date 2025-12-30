@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import * as Tone from 'tone';
 import { useCabinet } from './useCabinet';
 import { usePedal } from './usePedal';
+import { savePreset } from '../services/presetApi';
+import { buildPresetDTO, extractStateFromComponent } from '../utils/presetBuilder';
 
 const TonejsDemo = () => {
   const [isEngineStarted, setIsEngineStarted] = useState(false);
@@ -25,6 +27,11 @@ const TonejsDemo = () => {
   const [cabinetLowCut, setCabinetLowCut] = useState(80); // Hz - removes sub-bass
   const [cabinetHighCut, setCabinetHighCut] = useState(8000); // Hz - speaker roll-off
   const [cabinetPresence, setCabinetPresence] = useState(0); // dB - mid-high frequency emphasis
+  
+  // preset save state
+  const [presetName, setPresetName] = useState('My Preset');
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveStatus, setSaveStatus] = useState(null); // 'success', 'error', or null
   
   // basic useRef hooks for the audio nodes
   const mic = useRef(null);
@@ -208,6 +215,51 @@ const TonejsDemo = () => {
     }
   };
 
+  // save the current DAW state as a preset
+  const handleSavePreset = async () => {
+    if (!presetName.trim()) {
+      setSaveStatus('error');
+      setTimeout(() => setSaveStatus(null), 3000);
+      return;
+    }
+
+    setIsSaving(true);
+    setSaveStatus(null);
+
+    try {
+      const currentState = extractStateFromComponent({
+        pedalEnabled,
+        pedalReverbMix,
+        pedalReverbRoomSize,
+        distortionValue,
+        bassValue,
+        midValue,
+        trebleValue,
+        reverbValue,
+        volumeValue,
+        cabinetEnabled,
+        cabinetLowCut,
+        cabinetHighCut,
+        cabinetPresence,
+      });
+
+      const presetDTO = buildPresetDTO(currentState, presetName.trim());
+
+      // send to backend
+      const savedPreset = await savePreset(presetDTO);
+      
+      console.log('Preset saved successfully:', savedPreset);
+      setSaveStatus('success');
+      setTimeout(() => setSaveStatus(null), 3000);
+    } catch (error) {
+      console.error('Failed to save preset:', error);
+      setSaveStatus('error');
+      setTimeout(() => setSaveStatus(null), 3000);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   // for now im gonna use sliders for the amp simulation controls, WE SHOULD SWITCH TO KNOBS LATER ON but idk how to make knobs properly
   const Slider = ({ label, value, min, max, step, onChange, unit = '' }) => {
     return (
@@ -235,6 +287,59 @@ const TonejsDemo = () => {
   return (
     <div className="demo">
       <h1>ToneJS Amp Demo</h1>
+      
+      {/* save */}
+      <div className="preset-save-section" style={{ 
+        marginBottom: '20px', 
+        padding: '15px', 
+        backgroundColor: 'rgba(0, 0, 0, 0.3)', 
+        borderRadius: '8px',
+        display: 'flex',
+        gap: '10px',
+        alignItems: 'center',
+        flexWrap: 'wrap'
+      }}>
+        <input
+          type="text"
+          value={presetName}
+          onChange={(e) => setPresetName(e.target.value)}
+          placeholder="Preset name"
+          style={{
+            padding: '8px 12px',
+            borderRadius: '4px',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+            color: '#fff',
+            fontSize: '14px',
+            flex: '1',
+            minWidth: '150px'
+          }}
+        />
+        <button
+          onClick={handleSavePreset}
+          disabled={isSaving || !presetName.trim()}
+          style={{
+            padding: '8px 20px',
+            borderRadius: '4px',
+            border: 'none',
+            backgroundColor: isSaving ? 'rgba(100, 100, 100, 0.5)' : '#4CAF50',
+            color: '#fff',
+            cursor: isSaving ? 'not-allowed' : 'pointer',
+            fontSize: '14px',
+            fontWeight: 'bold',
+            transition: 'background-color 0.3s'
+          }}
+        >
+          {isSaving ? 'Saving...' : 'Save Preset'}
+        </button>
+        {saveStatus === 'success' && (
+          <span style={{ color: '#4CAF50', fontSize: '14px' }}>Saved!</span>
+        )}
+        {saveStatus === 'error' && (
+          <span style={{ color: '#f44336', fontSize: '14px' }}>Error saving</span>
+        )}
+      </div>
+
       <button 
         onClick={togglePower}
         className={`power-button ${isEngineStarted ? 'on' : 'off'}`}

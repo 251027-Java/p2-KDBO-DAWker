@@ -6,8 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * PresetAmp entity: Stores amp configuration for a preset
- * Matches frontend structure: distortionValue, bassValue, midValue, trebleValue, reverbValue, volumeValue
+ * stores amp configuration for a preset
+ * matches frontend structure: distortionValue, bassValue, midValue, trebleValue, reverbValue, volumeValue
  */
 @Entity
 @Table(name = "preset_amp")

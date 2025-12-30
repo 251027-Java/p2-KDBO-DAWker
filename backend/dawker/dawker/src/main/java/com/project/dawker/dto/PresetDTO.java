@@ -4,23 +4,22 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * Simple DTO matching frontend structure for testing connection
- */
+// SAMPLE DTO FOR TESTING CONNECTION
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class PresetDTO {
     private Long id;
     private String presetName;
+    private Long userId; // Optional: for creating presets, can be set from frontend or backend
     
-    // Pedal settings
+    // pedal settings
     private PedalDTO pedal;
     
-    // Amp settings
+    // amp settings
     private AmpDTO amp;
     
-    // Cabinet settings
+    // cabinet settings
     private CabinetDTO cabinet;
     
     @Data
