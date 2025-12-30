@@ -134,7 +134,7 @@ Fields:
 ###### -> Same as with ID except doesn't include the ID field
 ###### &emsp; -> Exception: User without ID also includes a `password` field
 
-### UserDTO
+### UserWOIDDTO
 ```java
 public record UserWOIDDTO (  
     String username,
@@ -149,7 +149,7 @@ Fields:
 - role – Role of the user.
 - presetIds – List of IDs of presets associated with the user.
 
-### PresetDTO
+### PresetWOIDDTO
 ```java
 public record PresetWOIDDTO (  
     Long userId,  
@@ -164,7 +164,7 @@ Fields:
 - presetGearIds – List of IDs of gear items linked to the preset.
 - presetCategoryIds – List of IDs of categories linked to the preset.
 
-### GearItemDTO
+### GearItemWOIDDTO
 ```java
 public record GearItemWOIDDTO (
     String modelName,
@@ -177,7 +177,7 @@ Fields:
 - gearType – Type of gear.
 - presetGearIds – List of presetGear IDs this gear item is linked to.
 
-### CategoryDTO
+### CategoryWOIDDTO
 ```java
 public record CategoryWOIDDTO (
     String categoryType,
@@ -188,7 +188,7 @@ Fields:
 - categoryType – Name/type of the category.
 - presetCategoryIds – List of presetCategory IDs linked to this category.
 
-### PresetGearDTO
+### PresetGearWOIDDTO
 ```java
 public record PresetGearWOIDDTO (
     Long presetId,
@@ -205,7 +205,7 @@ Fields:
 - toneValue – Tone value for the gear in the preset.
 - orderIndex – Display/order index of this gear in the preset.
 
-### PresetCategoryDTO
+### PresetCategoryWOIDDTO
 ```java
 public record PresetCategoryWOIDDTO (
     Long presetId,
