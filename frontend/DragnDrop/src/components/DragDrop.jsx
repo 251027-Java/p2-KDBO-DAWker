@@ -54,6 +54,7 @@ export default function DragDrop() {
   // Should prompt viewer if they wish to save the current state before loading a new page or new DAW
   const [dawState, setDawState] = useState<DawDTO>({
                                             id: 'daw1',
+                                            userId: 1,
                                             name: 'My First DAW',
                                             listOfConfigs: []
                                           });

@@ -1,14 +1,16 @@
 
 // 4. The Top-Level DAW State. What is sent out on search
 export interface DawDTO {
-  id: string;
+  dawId: string;
   userId: number;
+  name: string;
   listOfConfigs: ConfigDTO[];
 }
 
 // 3. The saved list of configurations within a DAW
 export interface ConfigDTO {
-  id?: string;
+  dawId?: string;
+  id: string;
   name: string;
   componentChain: ComponentDTO[];
 }
@@ -17,6 +19,7 @@ export interface ConfigDTO {
 // Order is important here as you decide how the audio signal flows
 export interface ComponentDTO {
   id?: string;
+  configId: number
   instanceId: string; // You can have many of one component, they should have unique ids within the chain
   name: string;
   type: 'filter' | 'reverb' | 'distortion' | 'delay'; // Literal types prevent typos
