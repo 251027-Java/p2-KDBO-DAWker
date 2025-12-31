@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
-import { ConfigDTO } from '../dtos/types';
-import { ComponentDTO } from '../dtos/types';
-import { DawDTO } from '../dtos/types';
+// Type definitions are available but not used in JSX (TypeScript types)
+// import { ConfigDTO } from '../dtos/types';
+// import { ComponentDTO } from '../dtos/types';
+// import { DawDTO } from '../dtos/types';
 
 // This component is focused on defineing a drag-and-drop interface with multiple columns.
 // ----------------PREVIOUS----------------
@@ -46,17 +47,17 @@ export default function DragDrop() {
   ];
 
   // 2. The active signal chain (your row)
-  const [pedalboard, setPedalboard] = useState<ComponentDTO>([]);
+  const [pedalboard, setPedalboard] = useState([]);
 
   // 3. The DAW State
   //  TO-DO: Integrate with Backend DAW state
   // (should be upgraded to get the current state it will be in from the Backend)
   // Should prompt viewer if they wish to save the current state before loading a new page or new DAW
-  const [dawState, setDawState] = useState<DawDTO>({
-                                            id: 'daw1',
-                                            name: 'My First DAW',
-                                            listOfConfigs: []
-                                          });
+  const [dawState, setDawState] = useState({
+    id: 'daw1',
+    name: 'My First DAW',
+    listOfConfigs: []
+  });
 
   // --- End of DAW initialization ---
 
@@ -89,7 +90,21 @@ export default function DragDrop() {
         // --- CASE A: NEW PEDAL ---
         if (prev.length >= 5) return prev;
         const template = effectLibrary.find(item => item.id === id);
-        const newPedal = { ...template, instanceId: Date.now() };
+        if (!template) return prev;
+        
+        // Map library item to ComponentDTO structure
+        const newPedal = {
+          instanceId: Date.now().toString(),
+          name: template.text,
+          type: template.type === 'Modulation' ? 'filter' : 
+                template.type === 'Delay/Reverb' ? 'delay' : 
+                template.type === 'Dynamics' ? 'distortion' : 'filter',
+          settings: {
+            Technology: 'RNBO',
+            export_name: template.export_location,
+            parameters: {}
+          }
+        };
         
         // Insert at the exact spot
         newBoard.splice(targetIdx, 0, newPedal);
@@ -115,59 +130,50 @@ export default function DragDrop() {
   }
 
   // ---- EVENT TRACKING ----
-
+  // TODO: Audio processing will be implemented when RNBO integration is ready
+  // For now, this is commented out to allow the UI to render
+  /*
+  const audioContextRef = useRef(null);
+  const activeNodes = useRef(new Map());
+  
   useEffect(() => {
     const syncAudio = async () => {
+        if (!audioContextRef.current) return;
+        
         // 1. DISCONNECT EVERYTHING (The Re-wire start)
-        source.disconnect();
-        activeNodes.current.forEach(device => device.node.disconnect());
-        gainNode.disconnect();
+        // source.disconnect();
+        // activeNodes.current.forEach(device => device.node.disconnect());
+        // gainNode.disconnect();
 
-        // 2. CLEANUP: Delete devices that are no longer in the componentChain
-        const currentIds = new Set(componentChain.map(p => p.instanceId));
+        // 2. CLEANUP: Delete devices that are no longer in the pedalboard
+        const currentIds = new Set(pedalboard.map(p => p.instanceId));
         activeNodes.current.forEach((device, id) => {
             if (!currentIds.has(id)) {
                 device.node.disconnect(); // Extra safety
-                // If RNBO has a specific cleanup/dispose method, call it here
                 activeNodes.current.delete(id);
             }
         });
 
         // 3. RE-BUILD & SYNC
-        let currentInput = source;
+        // let currentInput = source;
 
-        for (const pedalDTO of componentChain) {
-            let device = activeNodes.current.get(pedalDTO.instanceId);
-
-            // ONLY create if it doesn't exist yet
-            if (!device) {
-                device = await createRNBODevice(pedalDTO.modelId); 
-                activeNodes.current.set(pedalDTO.instanceId, device);
-            }
-
-            // 4. SYNC PARAMETERS (Apply the DTO settings to the existing device)
-            // This is how different "configurations" work on the same model!
-            Object.entries(pedalDTO.settings.parameters).forEach(([key, value]) => {
-                const param = device.parametersById.get(key);
-                if (param) param.value = value;
-            });
-
-            // 5. CONNECT
-            currentInput.connect(device.node);
-            currentInput = device.node;
+        for (const pedalDTO of pedalboard) {
+            // Audio processing logic will go here
+            // let device = activeNodes.current.get(pedalDTO.instanceId);
+            // if (!device) {
+            //     device = await createRNBODevice(pedalDTO.modelId); 
+            //     activeNodes.current.set(pedalDTO.instanceId, device);
+            // }
         }
-
-        // 6. FINISH CHAIN
-        currentInput.connect(gainNode);
-        gainNode.connect(context.destination);
     };
 
     syncAudio();
     
-  }, [componentChain]);
+  }, [pedalboard]);
+  */
 
   return (
-    <div style={{ display: 'flex', gap: '20px', padding: '20px', background: '#1a1a1a', color: 'white', minHeight: '300px' }}>
+    <div style={{ display: 'flex', gap: '20px', padding: '20px', background: '#1a1a1a', color: 'white', minHeight: '100vh', width: '100%' }}>
       
       {/* SIDEBAR: The possible components */}
       <div className="sidebar" style={{ width: '200px', borderRight: '1px solid #444', paddingRight: '20px' }}>
@@ -202,7 +208,7 @@ export default function DragDrop() {
             alignItems: 'center',
           }}
         >
-          {pedalboard.map((pedal) => (
+          {pedalboard.map((pedal, idx) => (
             <div 
               key={pedal.instanceId} 
               draggable
@@ -225,7 +231,7 @@ export default function DragDrop() {
               }}
             >
               {/* Set components here, make it look much better with different config sets */}
-              {pedal.text}
+              {pedal.name}
             </div>
           ))}
           {/* Simple set that says there are some additionals that can be added */}
