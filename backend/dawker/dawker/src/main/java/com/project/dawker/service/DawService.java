@@ -1,4 +1,5 @@
-package com.project.dawker.Service;
+
+package com.project.dawker.service;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -57,27 +58,27 @@ public class DawService {
 
     public List<dawDTO> getAllDaws() {
         return this.dawRepository.findAll().stream()
-                .map(this::mapToDawDto) // cleaner syntax
-                .collect(Collectors.toList());
+            .map(this::mapToDawDto) // cleaner syntax
+            .collect(Collectors.toList());
     }
 
     // Get DAW with full details
     public dawDTO getDawById(String dawId) {
         DawEntity daw = this.dawRepository.findById(dawId)
-                .orElseThrow(() -> new dawNotFoundException("DAW not found with ID: " + dawId));
+            .orElseThrow(() -> new dawNotFoundException("DAW not found with ID: " + dawId));
         return mapToDawDto(daw);
     }
 
     private dawDTO mapToDawDto(DawEntity daw) {
         List<configDTO> configs = daw.getListOfConfigs().stream()
-                .map(config -> new configDTO(
-                        config.getId(),
-                        config.getName(),
-                        daw.getId(),
-                        config.getComponentChain().stream()
-                                .map(this::mapToComponentDto)
-                                .collect(Collectors.toList())))
-                .collect(Collectors.toList());
+            .map(config -> new configDTO(
+                config.getId(),
+                config.getName(),
+                daw.getId(),
+                config.getComponentChain().stream()
+                    .map(this::mapToComponentDto)
+                    .collect(Collectors.toList())))
+            .collect(Collectors.toList());
 
         return new dawDTO(daw.getId(), daw.getUser().getId(), daw.getName(), configs);
     }
@@ -86,29 +87,29 @@ public class DawService {
         // NO STREAM HERE. Just a direct mapping of the single Settings object.
         SettingsEntity settings = component.getSettings();
         settingsDTO settingsDto = new settingsDTO(
-                settings.getId(),
-                settings.getTechnology(),
-                settings.getExportName(),
-                settings.getParameters() // The Map<String, Object> goes right in!
+            settings.getId(),
+            settings.getTechnology(),
+            settings.getExportName(),
+            settings.getParameters() // The Map<String, Object> goes right in!
         );
 
         return new componentDTO(
-                component.getId(),
-                component.getInstanceId(),
-                component.getName(),
-                component.getType(),
-                component.getConfig().getId(),
-                settingsDto // Pass the single object, not a list
+            component.getId(),
+            component.getInstanceId(),
+            component.getName(),
+            component.getType(),
+            component.getConfig().getId(),
+            settingsDto // Pass the single object, not a list
         );
     }
 
     // Get DAW without full details (For searching/listing)
     public List<dawDTO> getDawsByUserId(Long userId) {
         return this.dawRepository.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("No DAWs found for user ID: " + userId))
-                .stream()
-                .map(daw -> new dawDTO(daw.getId(), daw.getUser().getId(), daw.getName(), null))
-                .collect(Collectors.toList());
+            .orElseThrow(() -> new RuntimeException("No DAWs found for user ID: " + userId))
+            .stream()
+            .map(daw -> new dawDTO(daw.getId(), daw.getUser().getId(), daw.getName(), null))
+            .collect(Collectors.toList());
     }
 
     // Get all configurations in daw

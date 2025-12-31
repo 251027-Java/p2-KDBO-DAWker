@@ -12,8 +12,6 @@ import java.util.List;
 @Repository
 public interface PresetCategoryRepository extends JpaRepository<PresetCategory, Long> {
 
-    List<PresetCategory> findByPreset(Preset preset);
-    List<PresetCategory> findByCategory(Category category);
     List<PresetCategory> findByPresetId(Long presetId);
     List<PresetCategory> findByCategoryId(Long categoryId);
 

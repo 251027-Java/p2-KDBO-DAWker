@@ -1,15 +1,14 @@
 package com.project.dawker.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 // preset gear entity : stores specific "knob" settings: gain_value, tone_value, order_index
 // represents the join table for the m:m relationship between presets and gear items
 @Entity
 @Table(name = "preset_gear")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class PresetGear {

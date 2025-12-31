@@ -1,9 +1,7 @@
 package com.project.dawker.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 
@@ -12,7 +10,8 @@ import com.project.dawker.entity.daw_specific.DawEntity;
 // user entity : account info
 @Entity
 @Table(name = "users")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {
@@ -34,10 +33,18 @@ public class User {
     private String role;
 
     // one to many with presets (May cut)
-    // @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch =
-    // FetchType.LAZY)
-    // private List<Preset> presets;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    private List<Preset> presets;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<DawEntity> daws;
+
+    public void addPreset(Preset preset) {
+        presets.add(preset);
+        preset.setUser(this);
+    }
+
+    public void removePreset(Preset preset) {
+        presets.remove(preset);
+    }
 }
