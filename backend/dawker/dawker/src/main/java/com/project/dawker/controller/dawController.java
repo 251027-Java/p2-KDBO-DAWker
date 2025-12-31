@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.project.dawker.Service.DawService;
+import com.project.dawker.service.DawService;
 import com.project.dawker.dto.dawDTO;
 
 import io.swagger.v3.oas.annotations.Operation;

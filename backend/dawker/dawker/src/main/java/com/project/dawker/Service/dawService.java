@@ -1,4 +1,4 @@
-package com.project.dawker.Service;
+package com.project.dawker.service;
 
 import java.util.List;
 import java.util.stream.Collectors;
