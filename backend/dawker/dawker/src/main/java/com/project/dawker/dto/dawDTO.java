@@ -4,27 +4,28 @@ import java.util.List;
 
 public class dawDTO {
 
-    private String id;
+    private String dawId;
     private Long userId;
     private String name;
     private List<configDTO> listOfConfigs;
 
     public dawDTO() {
+
     }
 
-    public dawDTO(String id, Long userId, String name, List<configDTO> listOfConfigs) {
-        this.id = id;
+    public dawDTO(String dawId, Long userId, String name, List<configDTO> listOfConfigs) {
+        this.dawId = dawId;
         this.userId = userId;
         this.name = name;
         this.listOfConfigs = listOfConfigs;
     }
 
-    public String getId() {
-        return id;
+    public String getDawId() {
+        return dawId;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setDawId(String dawId) {
+        this.dawId = dawId;
     }
 
     public Long getUserId() {
@@ -49,6 +50,16 @@ public class dawDTO {
 
     public void setListOfConfigs(List<configDTO> listOfConfigs) {
         this.listOfConfigs = listOfConfigs;
+    }
+
+    @Override
+    public String toString() {
+        return "dawDTO{" +
+                "dawId='" + dawId + '\'' +
+                ", userId=" + userId +
+                ", name='" + name + '\'' +
+                ", listOfConfigs=" + (listOfConfigs != null ? listOfConfigs.toString() : "null") +
+                '}';
     }
 
 }
