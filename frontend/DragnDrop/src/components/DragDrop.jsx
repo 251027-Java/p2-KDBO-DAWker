@@ -1,7 +1,5 @@
 import React, { useState } from 'react'
-import { ConfigDTO } from '../dtos/types';
-import { ComponentDTO } from '../dtos/types';
-import { DawDTO } from '../dtos/types';
+
 
 // This component is focused on defineing a drag-and-drop interface with multiple columns.
 // ----------------PREVIOUS----------------

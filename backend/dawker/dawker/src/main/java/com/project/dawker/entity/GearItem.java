@@ -1,9 +1,7 @@
 package com.project.dawker.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 
@@ -11,7 +9,8 @@ import java.util.List;
 // would be used as like a read only list for the frontend to populate the dropdown menus for the gear items
 @Entity
 @Table(name = "gear_items")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class GearItem {
@@ -20,7 +19,7 @@ public class GearItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String modelName;
 
     @Enumerated(EnumType.STRING)
@@ -30,5 +29,15 @@ public class GearItem {
     // m:m with presets through preset gear
     @OneToMany(mappedBy = "gearItem", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<PresetGear> presetGears;
+
+    public void addPresetGear(PresetGear pg) {
+        presetGears.add(pg);
+        pg.setGearItem(this);
+    }
+
+    public void removePresetGear(PresetGear pg) {
+        presetGears.remove(pg);
+    }
+
 }
 

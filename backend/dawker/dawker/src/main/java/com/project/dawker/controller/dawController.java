@@ -7,11 +7,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.project.dawker.Service.DawService;
-import com.project.dawker.Service.userService;
 import com.project.dawker.dto.dawDTO;
 import com.project.dawker.dto.userDTO;
 import com.project.dawker.entity.User;
+import com.project.dawker.service.DawService;
+import com.project.dawker.service.UserService;
+import com.project.dawker.service.useService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
@@ -25,11 +26,11 @@ import java.util.Map;
 public class dawController {
 
     private final DawService dawService;
-    private final userService userService;
+    private final useService useService;
 
-    public dawController(DawService dawService, userService userService) {
+    public dawController(DawService dawService, useService useService) {
         this.dawService = dawService;
-        this.userService = userService;
+        this.useService = useService;
     }
 
     // ------------------ GET METHODS ------------------
@@ -55,7 +56,7 @@ public class dawController {
 
     @GetMapping("/search/allUsers")
     public List<userDTO> getAllUsers() {
-        return this.userService.getAllUsers();
+        return this.useService.getAllUsers();
     }
 
     // ------------------- POST METHODS ------------------

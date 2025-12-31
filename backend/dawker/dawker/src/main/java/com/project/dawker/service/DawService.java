@@ -1,4 +1,5 @@
-package com.project.dawker.Service;
+
+package com.project.dawker.service;
 
 import java.io.ObjectInputFilter.Config;
 import java.util.List;

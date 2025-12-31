@@ -1,9 +1,7 @@
 package com.project.dawker.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 /**
  * PresetCabinet entity: Stores cabinet configuration for a preset
@@ -11,7 +9,8 @@ import lombok.NoArgsConstructor;
  */
 @Entity
 @Table(name = "preset_cabinet")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class PresetCabinet {

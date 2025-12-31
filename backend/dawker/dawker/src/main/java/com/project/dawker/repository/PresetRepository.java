@@ -13,11 +13,9 @@ import java.util.Optional;
 @Repository
 public interface PresetRepository extends JpaRepository<Preset, Long> {
 
-    List<Preset> findByUser(User user);
-
     List<Preset> findByUserId(Long userId);
 
-    Optional<Preset> findByUserAndPresetName(User user, String presetName);
+    Optional<Preset> findByUserIdAndPresetName(Long userId, String presetName);
 
     // find all presets with a specific category. returns list of presets with that category
     @Query("SELECT p FROM Preset p JOIN p.presetCategories pc WHERE pc.category.id = :categoryId")
