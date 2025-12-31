@@ -1,7 +1,4 @@
-import React, { useState } from 'react'
-import { ConfigDTO } from '../dtos/types';
-import { ComponentDTO } from '../dtos/types';
-import { DawDTO } from '../dtos/types';
+import React, { useState, useEffect, useRef } from 'react'
 
 // This component is focused on defineing a drag-and-drop interface with multiple columns.
 // ----------------PREVIOUS----------------
@@ -46,13 +43,13 @@ export default function DragDrop() {
   ];
 
   // 2. The active signal chain (your row)
-  const [pedalboard, setPedalboard] = useState<ComponentDTO>([]);
+  const [pedalboard, setPedalboard] = useState([]);
 
   // 3. The DAW State
   //  TO-DO: Integrate with Backend DAW state
   // (should be upgraded to get the current state it will be in from the Backend)
   // Should prompt viewer if they wish to save the current state before loading a new page or new DAW
-  const [dawState, setDawState] = useState<DawDTO>({
+  const [dawState, setDawState] = useState({
                                             id: 'daw1',
                                             userId: 1,
                                             name: 'My First DAW',
