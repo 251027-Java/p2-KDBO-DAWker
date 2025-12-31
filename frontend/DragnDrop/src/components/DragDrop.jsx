@@ -37,6 +37,14 @@ export default function DragDrop() {
 
 
   // 1. The "Library" of available effects
+
+  const dawService = new DawService();
+  dawService.getDawById("587990d4-ede8-475a-a0a6-ee10c067f433").then((daw) => {
+    console.log("Fetched DAW:", daw);
+  }).catch((error) => {
+    console.error("Error fetching DAW:", error);
+  });
+
   const effectLibrary = [
     { id: 'Chorus', text: 'Chorus', type: 'Modulation', export_location: '/exports/Chorus/rnbo.chorus.json' },
     { id: 'filterDelay', text: 'filter delay', type: 'Delay/Reverb', export_location: '/exports/filterDelay/rnbo.filterDelay.json' },

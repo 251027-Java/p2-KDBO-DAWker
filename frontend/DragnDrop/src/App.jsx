@@ -1,11 +1,12 @@
-import DragDrop from './components/DragDrop'
-import Search from './components/Search'
-import './App.css'
+// import DragDrop from './components/DragDrop'
+// // import Search from './components/Search'
+// import './App.css'
+import TestComponent from './components/TestComponent'
 
 function App() {
   return (
     <main>
-      <DragDrop />
+      <TestComponent />
     </main>
   )
 }

@@ -18,7 +18,7 @@ export interface ConfigDTO {
 // 2. The Individual components within the chain. 
 // Order is important here as you decide how the audio signal flows
 export interface ComponentDTO {
-  id?: string;
+  id?: number;
   configId: number
   instanceId: string; // You can have many of one component, they should have unique ids within the chain
   name: string;
@@ -32,7 +32,7 @@ export interface ComponentDTO {
 // export_names are to help decide what Device within RNBO you are working with
 // Basically, individual settings for each component
 export interface SettingsDTO {
-    id?: string;
+    id?: number;
     Technology: 'RNBO' | 'TONEJS';
     export_name: string;
     parameters: Record<string, number | string | boolean>;

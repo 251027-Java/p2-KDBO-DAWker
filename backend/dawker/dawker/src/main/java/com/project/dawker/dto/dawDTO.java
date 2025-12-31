@@ -2,6 +2,15 @@ package com.project.dawker.dto;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data // Generates ALL getters, setters, and toString
+@NoArgsConstructor // Generates empty constructor (Essential for Jackson)
+@AllArgsConstructor
 public class dawDTO {
 
     private String dawId;
@@ -9,57 +18,59 @@ public class dawDTO {
     private String name;
     private List<configDTO> listOfConfigs;
 
-    public dawDTO() {
+    // public dawDTO() {
 
-    }
+    // }
 
-    public dawDTO(String dawId, Long userId, String name, List<configDTO> listOfConfigs) {
-        this.dawId = dawId;
-        this.userId = userId;
-        this.name = name;
-        this.listOfConfigs = listOfConfigs;
-    }
+    // public dawDTO(String dawId, Long userId, String name, List<configDTO>
+    // listOfConfigs) {
+    // this.dawId = dawId;
+    // this.userId = userId;
+    // this.name = name;
+    // this.listOfConfigs = listOfConfigs;
+    // }
 
-    public String getDawId() {
-        return dawId;
-    }
+    // public String getDawId() {
+    // return dawId;
+    // }
 
-    public void setDawId(String dawId) {
-        this.dawId = dawId;
-    }
+    // public void setDawId(String dawId) {
+    // this.dawId = dawId;
+    // }
 
-    public Long getUserId() {
-        return userId;
-    }
+    // public Long getUserId() {
+    // return userId;
+    // }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
+    // public void setUserId(Long userId) {
+    // this.userId = userId;
+    // }
 
-    public String getName() {
-        return name;
-    }
+    // public String getName() {
+    // return name;
+    // }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    // public void setName(String name) {
+    // this.name = name;
+    // }
 
-    public List<configDTO> getListOfConfigs() {
-        return listOfConfigs;
-    }
+    // public List<configDTO> getListOfConfigs() {
+    // return listOfConfigs;
+    // }
 
-    public void setListOfConfigs(List<configDTO> listOfConfigs) {
-        this.listOfConfigs = listOfConfigs;
-    }
+    // public void setListOfConfigs(List<configDTO> listOfConfigs) {
+    // this.listOfConfigs = listOfConfigs;
+    // }
 
-    @Override
-    public String toString() {
-        return "dawDTO{" +
-                "dawId='" + dawId + '\'' +
-                ", userId=" + userId +
-                ", name='" + name + '\'' +
-                ", listOfConfigs=" + (listOfConfigs != null ? listOfConfigs.toString() : "null") +
-                '}';
-    }
+    // @Override
+    // public String toString() {
+    // return "dawDTO{" +
+    // "dawId='" + dawId + '\'' +
+    // ", userId=" + userId +
+    // ", name='" + name + '\'' +
+    // ", listOfConfigs=" + (listOfConfigs != null ? listOfConfigs.toString() :
+    // "null") +
+    // '}';
+    // }
 
 }

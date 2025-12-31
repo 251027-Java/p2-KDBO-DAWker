@@ -1,8 +1,10 @@
 package com.project.dawker.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,7 +17,7 @@ import com.project.dawker.service.UserService;
 import com.project.dawker.service.useService;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import org.springframework.web.bind.annotation.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
 import java.util.List;
@@ -23,6 +25,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
+@CrossOrigin(origins = "http://localhost:5173")
 public class dawController {
 
     private final DawService dawService;
@@ -68,15 +71,12 @@ public class dawController {
         this.dawService.createDaw(userId, dawName);
     }
 
-    @PostMapping(value = "/save/Daw", consumes = "application/json", produces = "application/json")
-    public ResponseEntity<?> saveDaw(@RequestBody Map<String, Object> payload) {
+    @PostMapping("/save/Daw")
+    public ResponseEntity<?> saveDaw(@RequestBody dawDTO payload) {
 
         // System.out.println("Saving DAW with ID: " + payload.getDawId() + " and name:
         // " + payload.getName());
-        System.out.println(payload);
-        dawDTO dawToSave = new dawDTO();
-
-        System.out.println("Payload received: " + payload);
+        dawService.saveDaw(payload);
 
         return ResponseEntity.ok(payload);
 

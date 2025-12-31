@@ -18,15 +18,15 @@ public class PresetCategoryController {
         serv = presetCategoryService;
     }
 
-    @GetMapping(params = { "id", "!presetId", "!categoryId" })
-    public PresetCategoryDTO findById(@RequestParam Long id) {
-        return serv.findById(id);
-    }
+    // @GetMapping(params = { "id", "!presetId", "!categoryId" })
+    // public PresetCategoryDTO findById(@RequestParam Long id) {
+    // return serv.findById(id);
+    // }
 
-    @GetMapping(params = { "!id", "presetId", "!categoryId" })
-    public List<PresetCategoryDTO> findByPresetId(@RequestParam Long presetId) {
-        return serv.findByPresetId(presetId);
-    }
+    // @GetMapping(params = { "!id", "presetId", "!categoryId" })
+    // public List<PresetCategoryDTO> findByPresetId(@RequestParam Long presetId) {
+    // return serv.findByPresetId(presetId);
+    // }
 
     @GetMapping(params = { "!id", "!presetId", "categoryId" })
     public List<PresetCategoryDTO> findByCategoryId(@RequestParam Long categoryId) {
@@ -55,9 +55,9 @@ public class PresetCategoryController {
         return serv.updatePresetCategory(id, dto);
     }
 
-    @DeleteMapping
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deletePresetCategory(@RequestParam Long id) {
-        serv.deletePresetCategory(id);
-    }
+    // @DeleteMapping
+    // @ResponseStatus(HttpStatus.NO_CONTENT)
+    // public void deletePresetCategory(@RequestParam Long id) {
+    // serv.deletePresetCategory(id);
+    // }
 }
