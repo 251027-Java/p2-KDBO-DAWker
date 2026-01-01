@@ -84,12 +84,12 @@ public class DawService {
                         config.getId(),
                         config.getName(),
                         daw.getId(),
-                        config.getComponentChain().stream()
+                        config.getComponents().stream()
                                 .map(this::mapToComponentDto)
                                 .collect(Collectors.toList())))
                 .collect(Collectors.toList());
 
-        return new dawDTO(daw.getId(), daw.getUser().getId(), daw.getName(), configs);
+        return new dawDTO(daw.getId(), daw.getUser().getId(), daw.getName(), daw.getDescription(), configs);
     }
 
     private componentDTO mapToComponentDto(ComponentEntity component) {
@@ -155,7 +155,7 @@ public class DawService {
         config.setId(dto.getId());
         config.setName(dto.getName());
         config.setDaw(this.dawRepository.findById(dto.getDawId()).orElseThrow());
-        config.setComponentChain(
+        config.setComponents(
                 dto.getComponents().stream().map(this::mapToComponentEntity).collect(Collectors.toList()));
         return config;
     }
@@ -175,7 +175,7 @@ public class DawService {
         return this.dawRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("No DAWs found for user ID: " + userId))
                 .stream()
-                .map(daw -> new dawDTO(daw.getId(), daw.getUser().getId(), daw.getName(), null))
+                .map(daw -> new dawDTO(daw.getId(), daw.getUser().getId(), daw.getName(), daw.getDescription(), null))
                 .collect(Collectors.toList());
     }
 
@@ -210,6 +210,7 @@ public class DawService {
         DawEntity entity = new DawEntity();
         entity.setName(dto.getName());
         entity.setId(dto.getDawId());
+        entity.setDescription(dto.getDescription());
         entity.setListOfConfigs(dto.getListOfConfigs().stream()
                 .map(this::mapToConfigEntity)
                 .collect(Collectors.toList()));

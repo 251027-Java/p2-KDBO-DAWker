@@ -16,6 +16,7 @@ public class dawDTO {
     private String dawId;
     private Long userId;
     private String name;
+    private String description;
     private List<configDTO> listOfConfigs;
 
     // public dawDTO() {

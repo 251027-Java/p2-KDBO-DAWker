@@ -22,8 +22,9 @@ public class useService {
         return this.userRepository.findAll().stream()
                 .map(user -> new userDTO(user.getId(), user.getUsername(), user.getEmail(), user.getRole(),
                         user.getDaws().stream()
-                                .map(daw -> new dawDTO(daw.getId(), daw.getUser().getId(), daw.getName(), null)) // Simplified
-                                                                                                                 // dawDTO
+                                .map(daw -> new dawDTO(daw.getId(), daw.getUser().getId(), daw.getName(),
+                                        daw.getDescription(), null)) // Simplified
+                                // dawDTO
                                 .toList()))
                 .collect(Collectors.toList());
     }
