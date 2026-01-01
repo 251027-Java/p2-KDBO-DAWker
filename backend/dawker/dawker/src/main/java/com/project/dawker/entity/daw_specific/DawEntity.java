@@ -45,6 +45,8 @@ public class DawEntity {
 
     private String name;
 
+    private String description;
+
     @OneToMany(mappedBy = "daw", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ConfigEntity> listOfConfigs = new ArrayList<>();
 }

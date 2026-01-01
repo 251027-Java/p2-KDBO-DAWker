@@ -45,6 +45,8 @@ public class DataSeeder implements CommandLineRunner {
         // 2. Create the Top-Level DAW project
         DawEntity project = new DawEntity();
         project.setName("Atmospheric Post-Rock Rig");
+        project.setDescription(
+                "A DAW setup for creating lush, atmospheric post-rock soundscapes with an emphasis on reverb and delay effects.");
         project.setUser(user);
 
         // 3. Create a Configuration (A specific Signal Chain)
@@ -75,7 +77,7 @@ public class DataSeeder implements CommandLineRunner {
         reverb.setSettings(reverbSettings);
 
         // 7. Add Component to the Config's list
-        mainChain.getComponentChain().add(reverb);
+        mainChain.getComponents().add(reverb);
 
         // 8. Add Config to the DAW's list
         project.getListOfConfigs().add(mainChain);

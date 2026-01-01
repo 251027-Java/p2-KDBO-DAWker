@@ -29,5 +29,5 @@ public class ConfigEntity {
 
     @OneToMany(mappedBy = "config", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderColumn(name = "chain_order") // Crucial: maintains the Drag & Drop order in DB. Order of chain MATTERS
-    private List<ComponentEntity> componentChain = new ArrayList<>();
+    private List<ComponentEntity> components = new ArrayList<>();
 }

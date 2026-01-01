@@ -13,38 +13,39 @@ import org.springframework.stereotype.Service;
 public class CategoryService {
     private final CategoryRepository repo;
 
-    public CategoryService(CategoryRepository categoryRepository){
+    public CategoryService(CategoryRepository categoryRepository) {
         repo = categoryRepository;
     }
 
-    public CategoryDTO findById(Long id){
+    public CategoryDTO findById(Long id) {
         return categoryToDTO(repo.findById(id).orElseThrow(() -> new CategoryNotFoundException(
-            String.format("Category ID = %d not found.", id))));
+                String.format("Category ID = %d not found.", id))));
     }
 
-    public CategoryDTO findByCategoryType(String categoryType){
+    public CategoryDTO findByCategoryType(String categoryType) {
         CategoryType type;
 
         try {
             type = CategoryType.valueOf(categoryType);
         } catch (IllegalArgumentException | NullPointerException e) {
             throw new CategoryTypeNotFoundException(
-                String.format("Category Type = %s not found.", categoryType));
+                    String.format("Category Type = %s not found.", categoryType));
         }
 
         return findByCategoryType(type);
     }
-    public CategoryDTO findByCategoryType(CategoryType categoryType){
+
+    public CategoryDTO findByCategoryType(CategoryType categoryType) {
         return categoryToDTO(repo.findByCategoryType(categoryType).orElseThrow(() -> new CategoryNotFoundException(
-            String.format("Category = %s not found.", categoryType))));
+                String.format("Category = %s not found.", categoryType))));
     }
 
-    public boolean existsByCategoryType(String categoryType){
+    public boolean existsByCategoryType(String categoryType) {
         return repo.existsByCategoryType(categoryType);
     }
 
-    private CategoryDTO categoryToDTO(Category category){
+    private CategoryDTO categoryToDTO(Category category) {
         return new CategoryDTO(category.getId(), category.getCategoryType().toString(),
-            category.getPresetCategories().stream().map(PresetCategory::getId).toList());
+                category.getPresetCategories().stream().map(PresetCategory::getId).toList());
     }
 }
