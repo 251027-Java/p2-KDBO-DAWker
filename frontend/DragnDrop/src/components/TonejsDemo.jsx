@@ -218,7 +218,7 @@ const TonejsDemo = () => {
     }
   };
 
-  // Load saved DAWs on mount
+  // load saved DAWs on mount
   useEffect(() => {
     const loadDaws = async () => {
       try {
@@ -226,13 +226,12 @@ const TonejsDemo = () => {
         setSavedDaws(daws);
       } catch (error) {
         console.error('Error loading DAWs:', error);
-        // Don't show error if backend isn't ready yet
       }
     };
     loadDaws();
   }, []);
 
-  // Save DAW handler - saves current pedal/amp/cabinet settings as a DAW configuration
+  // saves current pedal/amp/cabinet settings as a DAW configuration
   const handleSavePreset = async () => {
     if (!dawName.trim() || !configName.trim()) {
       alert('Please enter both DAW name and Config name');
@@ -277,7 +276,7 @@ const TonejsDemo = () => {
     }
   };
 
-  // Load DAW handler - loads a DAW and applies the first config's component chain
+  // loads a DAW and applies the first config's component chain
   const handleLoadPreset = async (dawId) => {
     try {
       const daw = await getDawById(dawId);
@@ -287,7 +286,7 @@ const TonejsDemo = () => {
         return;
       }
 
-      // Use the first config's component chain
+      // use the first config's component chain
       const firstConfig = daw.listOfConfigs[0];
       if (!firstConfig.componentChain || firstConfig.componentChain.length === 0) {
         alert('This configuration has no components');
