@@ -1,5 +1,4 @@
 import { useState} from 'react';
-import { projects } from './mockData';
 
 export default function Search() {
     const [query, setQuery] = useState('');

@@ -1,8 +1,8 @@
-
 // 4. The Top-Level DAW State. What is sent out on search
 export interface DawDTO {
   dawId: string;
   userId: number;
+  description?: string;
   name: string;
   listOfConfigs: ConfigDTO[];
 }
@@ -12,13 +12,13 @@ export interface ConfigDTO {
   dawId?: string;
   id: string;
   name: string;
-  componentChain: ComponentDTO[];
+  components: ComponentDTO[];
 }
 
 // 2. The Individual components within the chain. 
 // Order is important here as you decide how the audio signal flows
 export interface ComponentDTO {
-  id?: string;
+  id?: number;
   configId: number
   instanceId: string; // You can have many of one component, they should have unique ids within the chain
   name: string;
@@ -32,8 +32,16 @@ export interface ComponentDTO {
 // export_names are to help decide what Device within RNBO you are working with
 // Basically, individual settings for each component
 export interface SettingsDTO {
-    id?: string;
+    id?: number;
     Technology: 'RNBO' | 'TONEJS';
     export_name: string;
-    parameters: Record<string, number | string | boolean>;
+    parameters:{[key: string]: any}; // Flexible key-value pairs for different settings
 }
+
+
+//-------Needed a workaround. .ts files do not work with .jsx---------
+/**
+ * These are "Factory Functions". They return a fresh object 
+ * that follows your DTO structure so you don't have to 
+ * type it out manually every time you create a new component.
+ */
