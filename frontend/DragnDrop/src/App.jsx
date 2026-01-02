@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import DragnDrop from './components/DragnDrop'
 // import TonejsDemo from './components/TonejsDemo'
 // import Login from './components/Login'
@@ -13,19 +13,36 @@ import UserPage from './components/UserPage'
 import Layout from './components/Layout'
 
 function App() {
-  // const [user, setUser] = useState(null)
+  const [user, setUser] = useState(null)
 
-  // function handleLogin(userObj) {
-  //   setUser(userObj)
-  // }
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('dawker_user')
+      if (raw) setUser(JSON.parse(raw))
+    } catch (err) {
+      // ignore
+    }
+  }, [])
 
-  // function handleLogout() {
-  //   setUser(null)
-  // }
+  function handleLogin(userObj) {
+    setUser(userObj)
+    try { localStorage.setItem('dawker_user', JSON.stringify(userObj)) } catch {}
+  }
 
-  // if (!user) {
-  //   return <Login onLogin={handleLogin} />
-  // }
+  function handleLogout() {
+    setUser(null)
+    try { localStorage.removeItem('dawker_user') } catch {}
+  }
+
+  useEffect(() => {
+    const onLogout = () => handleLogout();
+    window.addEventListener('dawker:logout', onLogout);
+    return () => window.removeEventListener('dawker:logout', onLogout);
+  }, []);
+
+  if (!user) {
+    return <Loggin onLogin={handleLogin} />
+  }
 
   return (
     // <main>
@@ -46,7 +63,7 @@ function App() {
           {/* Separates the landing page from the other component types */}
           <Route path="/landing" element={<Landing />} />
           <Route path="/login" element={<Loggin />} />
-          <Route path="/" element={<DragnDrop />} />
+          <Route path="/" element={<Searchts />} />
 
           {/* Makes it so that all other components have a sidebar */}
           <Route element={<Layout />} >

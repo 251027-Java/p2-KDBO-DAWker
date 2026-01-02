@@ -34,7 +34,16 @@ export default function Loggin({ onLogin }: LoginProps) {
       email 
     };
 
+    // persist simple user info so Search components can read it
+    try {
+      localStorage.setItem('dawker_user', JSON.stringify(loggedInUser));
+    } catch (err) {
+      // ignore storage errors
+    }
+
     onLogin(loggedInUser);
+    // notify other components
+    window.dispatchEvent(new CustomEvent('dawker:login', { detail: loggedInUser }));
   }
 
   return (

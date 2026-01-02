@@ -14,7 +14,16 @@ export default function Login({ onLogin }) {
     }
     // Simple fake auth: accept any non-empty credentials
     setError('')
-    onLogin({ name: email.split('@')[0] || 'User', email })
+    const userObj = { name: email.split('@')[0] || 'User', email }
+    // persist simple user info so search can read it
+    try {
+      localStorage.setItem('dawker_user', JSON.stringify(userObj))
+    } catch (err) {
+      // ignore storage errors
+    }
+    onLogin(userObj)
+    // dispatch an event so any open components can react immediately
+    window.dispatchEvent(new CustomEvent('dawker:login', { detail: userObj }))
   }
 
   return (
