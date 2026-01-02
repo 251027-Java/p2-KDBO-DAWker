@@ -1,45 +1,64 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, FC } from 'react';
 import * as Tone from 'tone';
 import { useCabinet } from './useCabinet';
 import { usePedal } from './usePedal';
 import { useNAMAmp } from './useNAMAmp';
+import { NAMNode } from './NAMAudioWorklet';
 
-const TonejsDemo = () => {
-  const [isEngineStarted, setIsEngineStarted] = useState(false);
-  const [useDirectMode, setUseDirectMode] = useState(false); // this is to test low latency
+// Standard Web Audio Type reinforcement
+declare global {
+  interface Window {
+    webkitAudioContext: typeof AudioContext;
+  }
+}
+
+// Define props for the internal Control component
+interface ControlProps {
+  label: string;
+  value: number;
+  min: number;
+  max: number;
+  step: number;
+  onChange: (val: number) => void;
+  unit?: string;
+}
+
+const TonejsDemo: FC = () => {
+  const [isEngineStarted, setIsEngineStarted] = useState<boolean>(false);
+  const [useDirectMode, setUseDirectMode] = useState<boolean>(false); // this is to test low latency
 
   // all the state variables for the amp simulation controls
-  const [distortionValue, setDistortionValue] = useState(0.4); // controls the gain applied to signal
-  const [bassValue, setBassValue] = useState(0); // controls the bass frequency band in the EQ
-  const [midValue, setMidValue] = useState(0); // controls the mid frequency band in the EQ
-  const [trebleValue, setTrebleValue] = useState(0); // controls the treble frequency band in the EQ
-  const [volumeValue, setVolumeValue] = useState(-6); // dB value
-  const [reverbValue, setReverbValue] = useState(0.3); // controls the wet/dry mix of the reverb effect
+  const [distortionValue, setDistortionValue] = useState<number>(0.4); // controls the gain applied to signal
+  const [bassValue, setBassValue] = useState<number>(0); // controls the bass frequency band in the EQ
+  const [midValue, setMidValue] = useState<number>(0); // controls the mid frequency band in the EQ
+  const [trebleValue, setTrebleValue] = useState<number>(0); // controls the treble frequency band in the EQ
+  const [volumeValue, setVolumeValue] = useState<number>(-6); // dB value
+  const [reverbValue, setReverbValue] = useState<number>(0.3); // controls the wet/dry mix of the reverb effect
   
   // pedal
-  const [pedalEnabled, setPedalEnabled] = useState(true);
-  const [pedalReverbMix, setPedalReverbMix] = useState(0.8); 
-  const [pedalReverbRoomSize, setPedalReverbRoomSize] = useState(0.9);
+  const [pedalEnabled, setPedalEnabled] = useState<boolean>(true);
+  const [pedalReverbMix, setPedalReverbMix] = useState<number>(0.8); 
+  const [pedalReverbRoomSize, setPedalReverbRoomSize] = useState<number>(0.9);
   
   // cabinet
-  const [cabinetEnabled, setCabinetEnabled] = useState(true);
-  const [cabinetLowCut, setCabinetLowCut] = useState(80); // Hz - removes sub-bass
-  const [cabinetHighCut, setCabinetHighCut] = useState(8000); // Hz - speaker roll-off
-  const [cabinetPresence, setCabinetPresence] = useState(0); // dB - mid-high frequency emphasis
+  const [cabinetEnabled, setCabinetEnabled] = useState<boolean>(true);
+  const [cabinetLowCut, setCabinetLowCut] = useState<number>(80); // Hz - removes sub-bass
+  const [cabinetHighCut, setCabinetHighCut] = useState<number>(8000); // Hz - speaker roll-off
+  const [cabinetPresence, setCabinetPresence] = useState<number>(0); // dB - mid-high frequency emphasis
   
   // NAM amp
-  const [useNAMAmpEnabled, setUseNAMAmpEnabled] = useState(false);
+  const [useNAMAmpEnabled, setUseNAMAmpEnabled] = useState<boolean>(false);
   // Default to the NAM file in the root of the project, or use the one in public folder
-  const [namFilePath, setNamFilePath] = useState('/Vox AC15CH Crunch Normal.nam');
-  const [namInputGain, setNamInputGain] = useState(1.0);
-  const [namOutputGain, setNamOutputGain] = useState(0.5);
+  const [namFilePath, setNamFilePath] = useState<string>('/Vox AC15CH Crunch Normal.nam');
+  const [namInputGain, setNamInputGain] = useState<number>(1.0);
+  const [namOutputGain, setNamOutputGain] = useState<number>(0.5);
   
-  // basic useRef hooks for the audio nodes
-  const mic = useRef(null);
-  const distortion = useRef(null);
-  const eq = useRef(null); // references the EQ3 node for bass mid treble (AMP)
-  const volume = useRef(null);
-  const reverb = useRef(null); // spatial ambience/reverberation
+  // Typed Audio Refs
+  const mic = useRef<Tone.UserMedia | null>(null);
+  const distortion = useRef<Tone.Distortion | null>(null);
+  const eq = useRef<Tone.EQ3 | null>(null); // references the EQ3 node for bass mid treble (AMP)
+  const volume = useRef<Tone.Volume | null>(null);
+  const reverb = useRef<Tone.Reverb | null>(null); // spatial ambience/reverberation
 
   // pedal hook - comes before amp in signal chain
   const pedal = usePedal(pedalEnabled, pedalReverbMix, pedalReverbRoomSize);
@@ -78,13 +97,15 @@ const TonejsDemo = () => {
     });
 
     // init signal chain
-    mic.current.chain(
-      distortion.current, 
-      eq.current, 
-      reverb.current, 
-      volume.current, 
-      Tone.Destination
-    );
+    if (mic.current && distortion.current && eq.current && reverb.current && volume.current) {
+      mic.current.chain(
+        distortion.current, 
+        eq.current, 
+        reverb.current, 
+        volume.current, 
+        Tone.Destination
+      );
+    }
     
     // cleanup function
     // just properly discs and disposes of nodes to prevent memory leaks
@@ -113,7 +134,7 @@ const TonejsDemo = () => {
     const pedalNode = getPedalNode();
     if (pedalNode) {
       try {
-        pedalNode.disconnect();
+        (pedalNode as any).disconnect();
       } catch (e) {
         // ignore errors if already disconnected
       }
@@ -124,7 +145,7 @@ const TonejsDemo = () => {
       cabinetChain.forEach(node => {
         if (node) {
           try {
-            node.disconnect();
+            (node as any)?.disconnect();
           } catch (e) {
             // ignore errors if already disconnected
           }
@@ -141,27 +162,29 @@ const TonejsDemo = () => {
       const namAmpChain = getNAMAmpChain();
       
       // mic -> pedal -> (NAM amp OR distortion+EQ) -> cabinet -> reverb -> volume -> output
-      let currentOutput = mic.current;
+      let currentOutput: Tone.ToneAudioNode = mic.current;
       
       // connect pedal 
       if (currentPedalNode && pedalEnabled) {
-        currentOutput.connect(currentPedalNode);
-        currentOutput = currentPedalNode;
+        currentOutput.connect(currentPedalNode as any);
+        currentOutput = currentPedalNode as any;
       }
       
       // connect amp (either NAM or fallback distortion+EQ)
       if (namAmpChain && namAmpChain.length > 0 && useNAMAmpEnabled) {
         // Use NAM amp
         const namNode = namAmpChain[0];
-        if (namNode && namNode.input) {
-          currentOutput.connect(namNode.input);
-          currentOutput = namNode.output;
+        if (namNode && (namNode as NAMNode).input) {
+          currentOutput.connect((namNode as NAMNode).input);
+          currentOutput = (namNode as NAMNode).output;
         }
       } else {
         // Use fallback distortion + EQ
-        currentOutput.connect(distortion.current);
-        distortion.current.connect(eq.current);
-        currentOutput = eq.current;
+        if (distortion.current && eq.current) {
+          currentOutput.connect(distortion.current);
+          distortion.current.connect(eq.current);
+          currentOutput = eq.current;
+        }
       }
       
       // connect cabinet
@@ -171,9 +194,11 @@ const TonejsDemo = () => {
       }
       
       // connect reverb -> volume -> output
-      currentOutput.connect(reverb.current);
-      reverb.current.connect(volume.current);
-      volume.current.connect(Tone.Destination);
+      if (reverb.current && volume.current) {
+        currentOutput.connect(reverb.current);
+        reverb.current.connect(volume.current);
+        volume.current.connect(Tone.Destination);
+      }
       
       console.log("Chain connected:", {
         pedal: pedalEnabled && currentPedalNode ? 'enabled' : 'disabled',
@@ -190,13 +215,13 @@ const TonejsDemo = () => {
     if (namAmp.isNAMLoaded) {
       namAmp.updateInputGain(namInputGain);
     }
-  }, [namInputGain, namAmp.isNAMLoaded]);
+  }, [namInputGain, namAmp.isNAMLoaded, namAmp]);
 
   useEffect(() => {
     if (namAmp.isNAMLoaded) {
       namAmp.updateOutputGain(namOutputGain);
     }
-  }, [namOutputGain, namAmp.isNAMLoaded]);
+  }, [namOutputGain, namAmp.isNAMLoaded, namAmp]);
 
   // effect hook: updates distortion in real time whenever user adjusts it
   useEffect(() => {
@@ -230,7 +255,7 @@ const TonejsDemo = () => {
 
 
   const togglePower = async () => {
-    if (!isEngineStarted) {
+    if (!isEngineStarted && mic.current) {
       await Tone.start();
       
       try {
@@ -241,23 +266,23 @@ const TonejsDemo = () => {
       } catch (e) {
         console.error("interface access error", e);
       }
-    } else {
+    } else if (mic.current) {
       mic.current.close();
       setIsEngineStarted(false);
     }
   };
 
   // Control component: Text input for numeric values
-  const Control = ({ label, value, min, max, step, onChange, unit = '' }) => {
-    const [inputValue, setInputValue] = useState(value.toFixed(step < 1 ? 2 : 1));
-    const inputRef = useRef(null);
+  const Control: FC<ControlProps> = ({ label, value, min, max, step, onChange, unit = '' }) => {
+    const [inputValue, setInputValue] = useState<string>(value.toFixed(step < 1 ? 2 : 1));
+    const inputRef = useRef<HTMLInputElement | null>(null);
 
     // Update input value when prop changes
     useEffect(() => {
       setInputValue(value.toFixed(step < 1 ? 2 : 1));
     }, [value, step]);
 
-    const handleChange = (e) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const newValue = e.target.value;
       setInputValue(newValue);
     };
@@ -275,9 +300,9 @@ const TonejsDemo = () => {
       onChange(steppedValue);
     };
 
-    const handleKeyDown = (e) => {
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (e.key === 'Enter') {
-        e.target.blur(); // Trigger validation
+        e.currentTarget.blur(); // Trigger validation
       }
     };
 
@@ -290,7 +315,7 @@ const TonejsDemo = () => {
           </div>
         </div>
         
-        <div className="control-input-wrapper">
+        <div className="control-input-wrapper" style={{ position: 'relative' }}>
           <input
             ref={inputRef}
             type="number"
