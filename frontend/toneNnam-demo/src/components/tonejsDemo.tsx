@@ -28,12 +28,12 @@ const TonejsDemo: FC = () => {
   const [useDirectMode, setUseDirectMode] = useState<boolean>(false); // this is to test low latency
 
   // all the state variables for the amp simulation controls
-  const [distortionValue, setDistortionValue] = useState<number>(0.4); // controls the gain applied to signal
+  const [distortionValue, setDistortionValue] = useState<number>(0.7); // controls the gain applied to signal (increased for more noticeable effect)
   const [bassValue, setBassValue] = useState<number>(0); // controls the bass frequency band in the EQ
   const [midValue, setMidValue] = useState<number>(0); // controls the mid frequency band in the EQ
   const [trebleValue, setTrebleValue] = useState<number>(0); // controls the treble frequency band in the EQ
-  const [volumeValue, setVolumeValue] = useState<number>(-6); // dB value
-  const [reverbValue, setReverbValue] = useState<number>(0.3); // controls the wet/dry mix of the reverb effect
+  const [volumeValue, setVolumeValue] = useState<number>(0); // dB value (increased from -6 to 0 for more audible output)
+  const [reverbValue, setReverbValue] = useState<number>(0.3); // controls the wet/dry mix (0.3 = 30% wet, 70% dry - allows original signal to be heard)
   
   // pedal
   const [pedalEnabled, setPedalEnabled] = useState<boolean>(true);
@@ -52,6 +52,7 @@ const TonejsDemo: FC = () => {
   const [namFilePath, setNamFilePath] = useState<string>('/Vox AC15CH Crunch Normal.nam');
   const [namInputGain, setNamInputGain] = useState<number>(1.0);
   const [namOutputGain, setNamOutputGain] = useState<number>(0.5);
+  const [reverbReady, setReverbReady] = useState<boolean>(false);
   
   // Typed Audio Refs
   const mic = useRef<Tone.UserMedia | null>(null);
@@ -74,13 +75,21 @@ const TonejsDemo: FC = () => {
 
   useEffect(() => {
     // this is to test low latency
-    Tone.Transport.lookAhead = 0.05;
+    Tone.getContext().lookAhead = 0.05;
 
     // grabs interface stream
     mic.current = new Tone.UserMedia();
 
-    // actual distortion effect node
+    // actual distortion effect node (use current distortionValue)
     distortion.current = new Tone.Distortion(distortionValue);
+    console.log(`Distortion node created with value: ${distortionValue}, actual: ${distortion.current.distortion}`);
+    
+    // Verify distortion is working by checking the node
+    if (distortion.current) {
+      // Force set it to ensure it's applied
+      distortion.current.distortion = distortionValue;
+      console.log(`Distortion verified: ${distortion.current.distortion}`);
+    }
 
     // eq3 so you can control the bass mid treble (values in decibels)
     eq.current = new Tone.EQ3({
@@ -91,21 +100,28 @@ const TonejsDemo: FC = () => {
     
     volume.current = new Tone.Volume(volumeValue);
     
+    // Reverb needs to be generated before use
+    // Create reverb with proper options
     reverb.current = new Tone.Reverb({
-      roomSize: 0.7,     // room size for amp-like reverb
-      wet: reverbValue   // wet/dry mix controlled by user
+      decay: 1.5,
+      preDelay: 0.01,
+      wet: reverbValue
     });
 
-    // init signal chain
-    if (mic.current && distortion.current && eq.current && reverb.current && volume.current) {
-      mic.current.chain(
-        distortion.current, 
-        eq.current, 
-        reverb.current, 
-        volume.current, 
-        Tone.Destination
-      );
-    }
+    // Generate reverb impulse response (required for reverb to work)
+    // Store the promise so we can check if it's ready
+    reverb.current.generate().then(() => {
+      console.log('Reverb generated successfully');
+      // Ensure wet value is set after generation
+      if (reverb.current) {
+        reverb.current.wet.value = reverbValue;
+        console.log(`Reverb wet set to: ${reverbValue} after generation`);
+      }
+      setReverbReady(true);
+    }).catch((err) => {
+      console.error('Error generating reverb:', err);
+      setReverbReady(false);
+    });
     
     // cleanup function
     // just properly discs and disposes of nodes to prevent memory leaks
@@ -125,90 +141,167 @@ const TonejsDemo: FC = () => {
   useEffect(() => {
     if (!mic.current || !isEngineStarted) return;
     
-    mic.current.disconnect();
-    distortion.current?.disconnect();
-    eq.current?.disconnect();
-    reverb.current?.disconnect();
-    volume.current?.disconnect();
-    
-    const pedalNode = getPedalNode();
-    if (pedalNode) {
+    // Helper function to rebuild the chain
+    const rebuildChain = async () => {
+      // Disconnect all nodes first
       try {
-        (pedalNode as any).disconnect();
+        mic.current?.disconnect();
       } catch (e) {
-        // ignore errors if already disconnected
+        // Already disconnected
       }
-    }
-    
-    const cabinetChain = getCabinetChain();
-    if (cabinetChain && cabinetEnabled) {
-      cabinetChain.forEach(node => {
-        if (node) {
-          try {
-            (node as any)?.disconnect();
-          } catch (e) {
-            // ignore errors if already disconnected
+      
+      distortion.current?.disconnect();
+      eq.current?.disconnect();
+      reverb.current?.disconnect();
+      volume.current?.disconnect();
+      
+      const pedalNode = getPedalNode();
+      if (pedalNode) {
+        try {
+          (pedalNode as any).disconnect();
+        } catch (e) {
+          // ignore errors if already disconnected
+        }
+      }
+      
+      const cabinetChain = getCabinetChain();
+      if (cabinetChain && cabinetEnabled) {
+        cabinetChain.forEach(node => {
+          if (node) {
+            try {
+              (node as any)?.disconnect();
+            } catch (e) {
+              // ignore errors if already disconnected
+            }
+          }
+        });
+      }
+      
+      // Also disconnect NAM amp nodes if they exist
+      const namAmpChain = getNAMAmpChain();
+      if (namAmpChain) {
+        namAmpChain.forEach(node => {
+          if (node) {
+            try {
+              (node as any)?.disconnect();
+            } catch (e) {
+              // ignore errors
+            }
+          }
+        });
+      }
+      
+      if (useDirectMode) {
+        // Direct mode: mic -> output (bypass all effects)
+        if (mic.current) {
+          mic.current.connect(Tone.Destination);
+        }
+        console.log("Chain: Direct mode (no effects)");
+      } else {
+        // Full signal chain: mic -> pedal -> (NAM amp OR distortion+EQ) -> cabinet -> reverb -> volume -> output
+        if (!mic.current) return;
+        
+        let currentOutput: Tone.ToneAudioNode = mic.current;
+        
+        // connect pedal 
+        const currentPedalNode = getPedalNode();
+        if (currentPedalNode && pedalEnabled) {
+          currentOutput.connect(currentPedalNode as any);
+          currentOutput = currentPedalNode as any;
+          console.log("✓ Pedal connected");
+        }
+        
+        // connect amp (either NAM or fallback distortion+EQ)
+        const currentNamAmpChain = getNAMAmpChain();
+        if (currentNamAmpChain && currentNamAmpChain.length > 0 && useNAMAmpEnabled) {
+          // Use NAM amp
+          const namNode = currentNamAmpChain[0];
+          if (namNode && (namNode as NAMNode).input) {
+            currentOutput.connect((namNode as NAMNode).input);
+            currentOutput = (namNode as NAMNode).output;
+            console.log("✓ NAM amp connected");
+          }
+        } else {
+          // Use fallback distortion + EQ
+          if (distortion.current && eq.current) {
+            // CRITICAL: Ensure distortion value is set before connecting
+            distortion.current.distortion = distortionValue;
+            console.log(`Connecting distortion with value: ${distortionValue} (verified: ${distortion.current.distortion})`);
+            
+            // Connect: currentOutput -> distortion -> EQ
+            currentOutput.connect(distortion.current);
+            distortion.current.connect(eq.current);
+            currentOutput = eq.current;
+            
+            console.log("✓ Distortion + EQ connected", {
+              distortionValue: distortion.current.distortion,
+              distortionInputs: distortion.current.numberOfInputs,
+              distortionOutputs: distortion.current.numberOfOutputs,
+              eqInputs: eq.current.numberOfInputs,
+              eqOutputs: eq.current.numberOfOutputs
+            });
+          } else {
+            console.error("⚠ Distortion or EQ not available!", {
+              distortion: !!distortion.current,
+              eq: !!eq.current
+            });
           }
         }
-      });
-    }
+        
+        // connect cabinet
+        const currentCabinetChain = getCabinetChain();
+        if (currentCabinetChain && cabinetEnabled && currentCabinetChain[0] && currentCabinetChain[3]) {
+          currentOutput.connect(currentCabinetChain[0]);
+          currentOutput = currentCabinetChain[3]; // output from cabinet's presence filter
+          console.log("✓ Cabinet connected");
+        }
+        
+        // Connect to volume and output
+        // NOTE: Reverb wet/dry mix explanation:
+        // - wet: 0 = 100% dry (no reverb, original signal)
+        // - wet: 1 = 100% wet (only reverb tail, no original signal)
+        // For best results, keep wet between 0.2-0.5 to hear both original and reverb
+        if (reverb.current && volume.current && reverbReady) {
+          // Connect through reverb (which mixes wet/dry based on reverbValue)
+          currentOutput.connect(reverb.current);
+          reverb.current.connect(volume.current);
+          volume.current.connect(Tone.Destination);
+          console.log("✓ Reverb + Volume connected", {
+            reverbWet: reverb.current.wet.value,
+            reverbDry: 1 - reverb.current.wet.value,
+            volume: volume.current.volume.value,
+            distortionValue: distortion.current?.distortion
+          });
+        } else if (volume.current) {
+          // If reverb not ready, connect volume directly (bypass reverb temporarily)
+          currentOutput.connect(volume.current);
+          volume.current.connect(Tone.Destination);
+          console.log("⚠ Reverb not ready, connecting volume directly", {
+            volume: volume.current.volume.value,
+            distortionValue: distortion.current?.distortion
+          });
+        } else {
+          // Last resort: connect directly to output
+          currentOutput.connect(Tone.Destination);
+          console.log("⚠ Volume not available, connecting directly to output");
+        }
+        
+        console.log("Chain connected:", {
+          pedal: pedalEnabled && currentPedalNode ? 'enabled' : 'disabled',
+          amp: useNAMAmpEnabled && currentNamAmpChain ? 'NAM' : 'fallback',
+          cabinet: cabinetEnabled && currentCabinetChain ? 'enabled' : 'disabled',
+          reverb: reverb.current ? 'ready' : 'not ready',
+          volume: volume.current ? 'ready' : 'not ready',
+          distortion: distortion.current ? 'ready' : 'not ready',
+          eq: eq.current ? 'ready' : 'not ready',
+          namLoaded: namAmp.isNAMLoaded,
+          namError: namAmp.loadingError
+        });
+      }
+    };
     
-    if (useDirectMode) {
-      mic.current.connect(Tone.Destination);
-    } else {
-      // get pedal, cabinet, and NAM amp nodes
-      const currentPedalNode = getPedalNode();
-      const currentCabinetChain = getCabinetChain();
-      const namAmpChain = getNAMAmpChain();
-      
-      // mic -> pedal -> (NAM amp OR distortion+EQ) -> cabinet -> reverb -> volume -> output
-      let currentOutput: Tone.ToneAudioNode = mic.current;
-      
-      // connect pedal 
-      if (currentPedalNode && pedalEnabled) {
-        currentOutput.connect(currentPedalNode as any);
-        currentOutput = currentPedalNode as any;
-      }
-      
-      // connect amp (either NAM or fallback distortion+EQ)
-      if (namAmpChain && namAmpChain.length > 0 && useNAMAmpEnabled) {
-        // Use NAM amp
-        const namNode = namAmpChain[0];
-        if (namNode && (namNode as NAMNode).input) {
-          currentOutput.connect((namNode as NAMNode).input);
-          currentOutput = (namNode as NAMNode).output;
-        }
-      } else {
-        // Use fallback distortion + EQ
-        if (distortion.current && eq.current) {
-          currentOutput.connect(distortion.current);
-          distortion.current.connect(eq.current);
-          currentOutput = eq.current;
-        }
-      }
-      
-      // connect cabinet
-      if (currentCabinetChain && cabinetEnabled && currentCabinetChain[0] && currentCabinetChain[3]) {
-        currentOutput.connect(currentCabinetChain[0]);
-        currentOutput = currentCabinetChain[3]; // output from cabinet's presence filter
-      }
-      
-      // connect reverb -> volume -> output
-      if (reverb.current && volume.current) {
-        currentOutput.connect(reverb.current);
-        reverb.current.connect(volume.current);
-        volume.current.connect(Tone.Destination);
-      }
-      
-      console.log("Chain connected:", {
-        pedal: pedalEnabled && currentPedalNode ? 'enabled' : 'disabled',
-        amp: useNAMAmpEnabled && namAmpChain ? 'NAM' : 'fallback',
-        cabinet: cabinetEnabled && currentCabinetChain ? 'enabled' : 'disabled',
-        namLoaded: namAmp.isNAMLoaded,
-        namError: namAmp.loadingError
-      });
-    }
-  }, [useDirectMode, isEngineStarted, pedalEnabled, cabinetEnabled, useNAMAmpEnabled, getPedalNode, getCabinetChain, getNAMAmpChain, namAmp.isNAMLoaded, namAmp.loadingError]);
+    rebuildChain();
+  }, [useDirectMode, isEngineStarted, pedalEnabled, cabinetEnabled, useNAMAmpEnabled, reverbReady, getPedalNode, getCabinetChain, getNAMAmpChain, namAmp.isNAMLoaded, namAmp.loadingError]);
 
   // effect hook: updates NAM input/output gain
   useEffect(() => {
@@ -226,7 +319,32 @@ const TonejsDemo: FC = () => {
   // effect hook: updates distortion in real time whenever user adjusts it
   useEffect(() => {
     if (distortion.current) {
+      // Set the distortion value - try both direct assignment and using the set method
       distortion.current.distortion = distortionValue;
+      
+      // Also try setting it via the distortion property directly
+      // Some versions of Tone.js might need this
+      if (typeof distortion.current.set === 'function') {
+        distortion.current.set({ distortion: distortionValue });
+      }
+      
+      // Verify it was set correctly
+      const actualValue = distortion.current.distortion;
+      console.log(`Distortion updated to: ${distortionValue}, actual node value: ${actualValue}`);
+      
+      // If values don't match, there might be an issue
+      if (Math.abs(actualValue - distortionValue) > 0.01) {
+        console.warn(`⚠ Distortion value mismatch! Expected: ${distortionValue}, Got: ${actualValue}`);
+      }
+      
+      // Test if distortion is actually processing
+      if (distortion.current.numberOfInputs > 0 && distortion.current.numberOfOutputs > 0) {
+        console.log(`✓ Distortion node is connected (inputs: ${distortion.current.numberOfInputs}, outputs: ${distortion.current.numberOfOutputs})`);
+      } else {
+        console.error(`⚠ Distortion node connection issue! (inputs: ${distortion.current.numberOfInputs}, outputs: ${distortion.current.numberOfOutputs})`);
+      }
+    } else {
+      console.warn('⚠ Distortion node not available when trying to update');
     }
   }, [distortionValue]);
 
@@ -250,6 +368,14 @@ const TonejsDemo: FC = () => {
   useEffect(() => {
     if (reverb.current) {
       reverb.current.wet.value = reverbValue;
+      const actualWet = reverb.current.wet.value;
+      const dry = 1 - actualWet;
+      console.log(`Reverb wet updated to: ${reverbValue}, actual: ${actualWet} (${(actualWet * 100).toFixed(0)}% wet, ${(dry * 100).toFixed(0)}% dry)`);
+      
+      // Warn if reverb is too high (will mask the original signal)
+      if (actualWet > 0.8) {
+        console.warn(`⚠ Reverb wet is very high (${(actualWet * 100).toFixed(0)}%) - you may only hear reverb tail, not the original signal with effects!`);
+      }
     }
   }, [reverbValue]);
 
@@ -262,7 +388,9 @@ const TonejsDemo: FC = () => {
         await mic.current.open();
         setIsEngineStarted(true);
         console.log("input works");
-        console.log(`latency: ${(Tone.context.latency * 1000).toFixed(2)}ms`);
+        const context = Tone.getContext();
+        const latency = (context as any).latency || 0;
+        console.log(`latency: ${(latency * 1000).toFixed(2)}ms`);
       } catch (e) {
         console.error("interface access error", e);
       }
@@ -471,16 +599,16 @@ const TonejsDemo: FC = () => {
                       )}
                       {namAmp.namMetadata && (
                         <div style={{ fontSize: '0.8em', color: '#b0b0b0', marginTop: '8px' }}>
-                          <div>Architecture: {namAmp.namMetadata.architecture}</div>
-                          {namAmp.namMetadata.modelName && (
-                            <div>Model: {namAmp.namMetadata.modelName}</div>
+                          <div>Architecture: {(namAmp.namMetadata as any).architecture}</div>
+                          {(namAmp.namMetadata as any).modelName && (
+                            <div>Model: {(namAmp.namMetadata as any).modelName}</div>
                           )}
-                          {namAmp.namMetadata.inputLevelDBU !== undefined && (
-                            <div>Input Level: {namAmp.namMetadata.inputLevelDBU} dBu</div>
+                          {(namAmp.namMetadata as any).inputLevelDBU !== undefined && (
+                            <div>Input Level: {(namAmp.namMetadata as any).inputLevelDBU} dBu</div>
                           )}
-                          {namAmp.namMetadata.hasCondition && namAmp.namMetadata.conditionSize > 1 && (
+                          {(namAmp.namMetadata as any).hasCondition && (namAmp.namMetadata as any).conditionSize > 1 && (
                             <div style={{ color: '#ffa500', marginTop: '5px' }}>
-                              Note: This model has {namAmp.namMetadata.conditionSize} condition inputs
+                              Note: This model has {(namAmp.namMetadata as any).conditionSize} condition inputs
                             </div>
                           )}
                         </div>
