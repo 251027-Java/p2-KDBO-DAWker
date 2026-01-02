@@ -26,6 +26,7 @@ interface ControlProps {
 const TonejsDemo: FC = () => {
   const [isEngineStarted, setIsEngineStarted] = useState<boolean>(false);
   const [useDirectMode, setUseDirectMode] = useState<boolean>(false); // this is to test low latency
+  const [testDistortionOnly, setTestDistortionOnly] = useState<boolean>(false); // TEST MODE: bypass everything except distortion
 
   // all the state variables for the amp simulation controls
   const [distortionValue, setDistortionValue] = useState<number>(0.7); // controls the gain applied to signal (increased for more noticeable effect)
@@ -54,7 +55,15 @@ const TonejsDemo: FC = () => {
   const [namOutputGain, setNamOutputGain] = useState<number>(0.5);
   const [reverbReady, setReverbReady] = useState<boolean>(false);
   
-  // Typed Audio Refs
+  // NATIVE WEB AUDIO API REFS (primary implementation)
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const mediaStreamRef = useRef<MediaStream | null>(null);
+  const mediaStreamSourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
+  const distortionNodeRef = useRef<WaveShaperNode | null>(null);
+  const gainNodeRef = useRef<GainNode | null>(null);
+  const outputGainRef = useRef<GainNode | null>(null);
+  
+  // Tone.js refs (keeping for compatibility/fallback)
   const mic = useRef<Tone.UserMedia | null>(null);
   const distortion = useRef<Tone.Distortion | null>(null);
   const eq = useRef<Tone.EQ3 | null>(null); // references the EQ3 node for bass mid treble (AMP)
@@ -80,16 +89,86 @@ const TonejsDemo: FC = () => {
     // grabs interface stream
     mic.current = new Tone.UserMedia();
 
-    // actual distortion effect node (use current distortionValue)
-    distortion.current = new Tone.Distortion(distortionValue);
-    console.log(`Distortion node created with value: ${distortionValue}, actual: ${distortion.current.distortion}`);
+    // Create custom distortion using Web Audio API WaveShaperNode
+    // This is more reliable than Tone.js Distortion
+    const audioContext = Tone.getContext().rawContext as AudioContext;
+    const waveshaper = audioContext.createWaveShaper();
     
-    // Verify distortion is working by checking the node
-    if (distortion.current) {
-      // Force set it to ensure it's applied
-      distortion.current.distortion = distortionValue;
-      console.log(`Distortion verified: ${distortion.current.distortion}`);
+    // Create distortion curve function - make it MORE aggressive
+    const makeDistortionCurve = (amount: number) => {
+      const samples = 44100;
+      const curve = new Float32Array(samples);
+      const deg = Math.PI / 180;
+      // Scale amount to make distortion more noticeable (multiply by 50-100)
+      const scaledAmount = amount * 50; // Much more aggressive
+      
+      for (let i = 0; i < samples; i++) {
+        const x = (i * 2) / samples - 1;
+        curve[i] = ((3 + scaledAmount) * x * 20 * deg) / (Math.PI + scaledAmount * Math.abs(x));
+      }
+      return curve;
+    };
+    
+    waveshaper.curve = makeDistortionCurve(distortionValue);
+    waveshaper.oversample = '4x';
+    
+    // Create input and output gain nodes to wrap the WaveShaper
+    // Add a BOOST before distortion to make it more noticeable
+    const inputGain = new Tone.Gain(5.0); // 5x boost = ~14dB - makes distortion VERY noticeable
+    const outputGain = new Tone.Gain(0.2); // Reduce output to prevent clipping
+    
+    // Connect input -> waveshaper -> output using raw Web Audio API nodes
+    // Get the underlying GainNode from Tone.js Gain objects
+    // IMPORTANT: Tone.js Gain nodes expose their underlying node via _gainNode
+    const inputGainNode = (inputGain as any)._gainNode as GainNode;
+    const outputGainNode = (outputGain as any)._gainNode as GainNode;
+    
+    // CRITICAL: Disconnect any default connections first
+    // Tone.js Gain nodes might auto-connect to destination
+    try {
+      inputGainNode.disconnect();
+    } catch (e) {
+      // Already disconnected
     }
+    try {
+      outputGainNode.disconnect();
+    } catch (e) {
+      // Already disconnected
+    }
+    
+    // Connect: inputGain -> waveshaper -> outputGain
+    // This creates the audio path: Tone.js input -> raw GainNode -> WaveShaper -> raw GainNode -> Tone.js output
+    inputGainNode.connect(waveshaper);
+    waveshaper.connect(outputGainNode);
+    
+    console.log(`WaveShaperNode connected: inputGain(${inputGainNode.gain.value}x) -> waveshaper -> outputGain(${outputGainNode.gain.value}x)`);
+    
+    // Create a wrapper object that acts like a Tone.js node
+    const distortionWrapper = {
+      input: inputGain,
+      output: outputGain,
+      connect: (destination: any) => outputGain.connect(destination),
+      disconnect: () => {
+        inputGainNode.disconnect();
+        waveshaper.disconnect();
+        outputGain.disconnect();
+      },
+      dispose: () => {
+        inputGainNode.disconnect();
+        waveshaper.disconnect();
+        outputGainNode.disconnect();
+        inputGain.dispose();
+        outputGain.dispose();
+      },
+      _waveshaper: waveshaper,
+      _makeCurve: makeDistortionCurve,
+      distortion: distortionValue,
+      numberOfInputs: 1,
+      numberOfOutputs: 1
+    };
+    
+    distortion.current = distortionWrapper as any;
+    console.log(`Custom WaveShaper distortion created with value: ${distortionValue}, input boost: 5x, output: 0.2x`);
 
     // eq3 so you can control the bass mid treble (values in decibels)
     eq.current = new Tone.EQ3({
@@ -130,7 +209,11 @@ const TonejsDemo: FC = () => {
         mic.current.disconnect();  // disconnect from audio graph
         mic.current.dispose();      // release microphone resources
       }
-      if (distortion.current) distortion.current.dispose();
+      if (distortion.current) {
+        if (typeof (distortion.current as any).dispose === 'function') {
+          (distortion.current as any).dispose();
+        }
+      }
       if (eq.current) eq.current.dispose();
       if (volume.current) volume.current.dispose();
       if (reverb.current) reverb.current.dispose();
@@ -150,10 +233,10 @@ const TonejsDemo: FC = () => {
         // Already disconnected
       }
       
-      distortion.current?.disconnect();
-      eq.current?.disconnect();
-      reverb.current?.disconnect();
-      volume.current?.disconnect();
+        distortion.current?.disconnect();
+        eq.current?.disconnect();
+        reverb.current?.disconnect();
+        volume.current?.disconnect();
       
       const pedalNode = getPedalNode();
       if (pedalNode) {
@@ -198,6 +281,29 @@ const TonejsDemo: FC = () => {
         }
         console.log("Chain: Direct mode (no effects)");
       } else {
+        // ULTRA SIMPLE TEST: Just mic -> Tone.js Distortion (max) -> output
+        // This bypasses everything to test if distortion works at all
+        if (mic.current) {
+          console.log(`🔴 ULTRA SIMPLE TEST: mic -> distortion(max) -> output`);
+          
+          // Create a fresh Tone.js Distortion with maximum settings
+          const testDistortion = new Tone.Distortion(1.0); // Maximum distortion
+          (testDistortion as any).oversample = '4x';
+          
+          // Create a huge gain boost before distortion
+          const boostGain = new Tone.Gain(10.0); // 10x = 20dB boost
+          
+          // Connect: mic -> boost -> distortion -> output
+          mic.current.connect(boostGain);
+          boostGain.connect(testDistortion);
+          testDistortion.connect(Tone.Destination);
+          
+          console.log("🔴 ULTRA SIMPLE TEST: Chain connected! You should hear EXTREME distortion!");
+          console.log("🔴 Chain: mic -> gain(10x) -> Tone.Distortion(1.0, 4x oversample) -> output");
+          console.log("🔴 If you still don't hear distortion, the problem is NOT with the distortion node itself.");
+          return; // Skip the rest of the chain for testing
+        }
+        
         // Full signal chain: mic -> pedal -> (NAM amp OR distortion+EQ) -> cabinet -> reverb -> volume -> output
         if (!mic.current) return;
         
@@ -225,13 +331,45 @@ const TonejsDemo: FC = () => {
           // Use fallback distortion + EQ
           if (distortion.current && eq.current) {
             // CRITICAL: Ensure distortion value is set before connecting
-            distortion.current.distortion = distortionValue;
-            console.log(`Connecting distortion with value: ${distortionValue} (verified: ${distortion.current.distortion})`);
+            if ((distortion.current as any)._waveshaper) {
+              // Custom WaveShaper distortion
+              const waveshaper = (distortion.current as any)._waveshaper;
+              const makeCurve = (distortion.current as any)._makeCurve;
+              waveshaper.curve = makeCurve(distortionValue);
+              (distortion.current as any).distortion = distortionValue;
+              console.log(`Connecting custom WaveShaper distortion with value: ${distortionValue}`);
+            } else {
+              // Tone.js Distortion
+              (distortion.current as any).distortion = distortionValue;
+              console.log(`Connecting Tone.js distortion with value: ${distortionValue}`);
+            }
             
             // Connect: currentOutput -> distortion -> EQ
-            currentOutput.connect(distortion.current);
-            distortion.current.connect(eq.current);
-            currentOutput = eq.current;
+            // Use the input/output properties of our custom node
+            if ((distortion.current as any).input && (distortion.current as any).output) {
+              // Custom node with input/output
+              currentOutput.connect((distortion.current as any).input);
+              (distortion.current as any).output.connect(eq.current);
+              currentOutput = eq.current;
+              
+              // Verify the WaveShaperNode is actually connected
+              const waveshaper = (distortion.current as any)._waveshaper;
+              if (waveshaper) {
+                const inputGain = (distortion.current as any).input;
+                const outputGain = (distortion.current as any).output;
+                console.log(`✓ Custom distortion (input/output) -> EQ connected`);
+                console.log(`  WaveShaperNode: curve=${waveshaper.curve ? waveshaper.curve.length + ' samples' : 'null'}, oversample=${waveshaper.oversample}`);
+                console.log(`  Input gain: ${(inputGain as any).gain?.value || 'unknown'}, Output gain: ${(outputGain as any).gain?.value || 'unknown'}`);
+              } else {
+                console.error(`⚠ WaveShaperNode not found in distortion wrapper!`);
+              }
+            } else {
+              // Standard Tone.js node
+              currentOutput.connect(distortion.current);
+              distortion.current.connect(eq.current);
+              currentOutput = eq.current;
+              console.log(`✓ Tone.js distortion -> EQ connected`);
+            }
             
             console.log("✓ Distortion + EQ connected", {
               distortionValue: distortion.current.distortion,
@@ -318,33 +456,34 @@ const TonejsDemo: FC = () => {
 
   // effect hook: updates distortion in real time whenever user adjusts it
   useEffect(() => {
-    if (distortion.current) {
-      // Set the distortion value - try both direct assignment and using the set method
-      distortion.current.distortion = distortionValue;
+    // Update native Web Audio API distortion
+    if (distortionNodeRef.current && audioContextRef.current) {
+      const makeDistortionCurve = (amount: number) => {
+        const samples = 44100;
+        const curve = new Float32Array(samples);
+        const deg = Math.PI / 180;
+        const scaledAmount = amount * 50; // Make it aggressive
+        
+        for (let i = 0; i < samples; i++) {
+          const x = (i * 2) / samples - 1;
+          curve[i] = ((3 + scaledAmount) * x * 20 * deg) / (Math.PI + scaledAmount * Math.abs(x));
+        }
+        return curve;
+      };
       
-      // Also try setting it via the distortion property directly
-      // Some versions of Tone.js might need this
-      if (typeof distortion.current.set === 'function') {
-        distortion.current.set({ distortion: distortionValue });
-      }
-      
-      // Verify it was set correctly
-      const actualValue = distortion.current.distortion;
-      console.log(`Distortion updated to: ${distortionValue}, actual node value: ${actualValue}`);
-      
-      // If values don't match, there might be an issue
-      if (Math.abs(actualValue - distortionValue) > 0.01) {
-        console.warn(`⚠ Distortion value mismatch! Expected: ${distortionValue}, Got: ${actualValue}`);
-      }
-      
-      // Test if distortion is actually processing
-      if (distortion.current.numberOfInputs > 0 && distortion.current.numberOfOutputs > 0) {
-        console.log(`✓ Distortion node is connected (inputs: ${distortion.current.numberOfInputs}, outputs: ${distortion.current.numberOfOutputs})`);
-      } else {
-        console.error(`⚠ Distortion node connection issue! (inputs: ${distortion.current.numberOfInputs}, outputs: ${distortion.current.numberOfOutputs})`);
-      }
-    } else {
-      console.warn('⚠ Distortion node not available when trying to update');
+      distortionNodeRef.current.curve = makeDistortionCurve(distortionValue);
+      console.log(`✅ NATIVE WEB AUDIO: Distortion updated to ${distortionValue} (scaled: ${distortionValue * 50})`);
+    } else if (distortion.current && (distortion.current as any)._waveshaper) {
+      // Fallback to Tone.js wrapper
+      const waveshaper = (distortion.current as any)._waveshaper as WaveShaperNode;
+      const makeCurve = (distortion.current as any)._makeCurve;
+      const newCurve = makeCurve(distortionValue);
+      waveshaper.curve = newCurve;
+      (distortion.current as any).distortion = distortionValue;
+      console.log(`Distortion updated to: ${distortionValue} (Tone.js wrapper)`);
+    } else if (distortion.current) {
+      (distortion.current as any).distortion = distortionValue;
+      console.log(`Distortion updated to: ${distortionValue} (Tone.js API)`);
     }
   }, [distortionValue]);
 
@@ -381,22 +520,87 @@ const TonejsDemo: FC = () => {
 
 
   const togglePower = async () => {
-    if (!isEngineStarted && mic.current) {
-      await Tone.start();
-      
+    if (!isEngineStarted) {
       try {
-        await mic.current.open();
+        // Use native Web Audio API instead of Tone.js
+        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+        const context = new AudioContextClass();
+        audioContextRef.current = context;
+        
+        // Request microphone access
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            echoCancellation: false,
+            noiseSuppression: false,
+            autoGainControl: false
+          }
+        });
+        mediaStreamRef.current = stream;
+        
+        // Create source from media stream
+        const source = context.createMediaStreamSource(stream);
+        mediaStreamSourceRef.current = source;
+        
+        // Create distortion using WaveShaperNode
+        const waveshaper = context.createWaveShaper();
+        const makeDistortionCurve = (amount: number) => {
+          const samples = 44100;
+          const curve = new Float32Array(samples);
+          const deg = Math.PI / 180;
+          const scaledAmount = amount * 50; // Make it aggressive
+          
+          for (let i = 0; i < samples; i++) {
+            const x = (i * 2) / samples - 1;
+            curve[i] = ((3 + scaledAmount) * x * 20 * deg) / (Math.PI + scaledAmount * Math.abs(x));
+          }
+          return curve;
+        };
+        
+        waveshaper.curve = makeDistortionCurve(distortionValue);
+        waveshaper.oversample = '4x';
+        distortionNodeRef.current = waveshaper;
+        
+        // Create gain nodes
+        const inputGain = context.createGain();
+        inputGain.gain.value = 5.0; // 5x boost
+        gainNodeRef.current = inputGain;
+        
+        const outputGain = context.createGain();
+        outputGain.gain.value = 0.5; // Prevent clipping
+        outputGainRef.current = outputGain;
+        
+        // Connect: source -> inputGain -> waveshaper -> outputGain -> destination
+        source.connect(inputGain);
+        inputGain.connect(waveshaper);
+        waveshaper.connect(outputGain);
+        outputGain.connect(context.destination);
+        
         setIsEngineStarted(true);
-        console.log("input works");
-        const context = Tone.getContext();
-        const latency = (context as any).latency || 0;
-        console.log(`latency: ${(latency * 1000).toFixed(2)}ms`);
+        console.log("✅ NATIVE WEB AUDIO API: Audio chain connected!");
+        console.log("✅ Chain: mic -> gain(5x) -> waveshaper(distortion) -> outputGain -> speakers");
+        console.log(`✅ Latency: ${(context.baseLatency * 1000).toFixed(2)}ms`);
+        console.log(`✅ Distortion value: ${distortionValue}, scaled: ${distortionValue * 50}`);
+        
       } catch (e) {
-        console.error("interface access error", e);
+        console.error("❌ Web Audio API error:", e);
+        alert("Could not access microphone. Please check permissions.");
       }
-    } else if (mic.current) {
-      mic.current.close();
+    } else {
+      // Stop audio
+      if (mediaStreamRef.current) {
+        mediaStreamRef.current.getTracks().forEach(track => track.stop());
+        mediaStreamRef.current = null;
+      }
+      if (mediaStreamSourceRef.current) {
+        mediaStreamSourceRef.current.disconnect();
+        mediaStreamSourceRef.current = null;
+      }
+      if (audioContextRef.current) {
+        audioContextRef.current.close();
+        audioContextRef.current = null;
+      }
       setIsEngineStarted(false);
+      console.log("Audio stopped");
     }
   };
 
