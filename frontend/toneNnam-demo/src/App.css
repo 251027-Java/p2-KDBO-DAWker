@@ -134,6 +134,9 @@
   border-radius: 15px;  /* Rounded corners */
   padding: 25px;         /* Internal spacing */
   border: 1px solid rgba(255, 255, 255, 0.1);  /* Subtle border */
+  box-sizing: border-box;  /* Include padding and border in width calculation */
+  overflow: hidden;        /* Prevent content from overflowing */
+  min-width: 0;            /* Allow flex items to shrink */
 }
 
 /* Section title: Styling for "EQ" and "Effects" headings */
@@ -152,6 +155,8 @@
   display: flex;
   flex-direction: column;  /* Stack sliders vertically */
   gap: 25px;               /* Space between sliders */
+  width: 100%;             /* Full width of container */
+  box-sizing: border-box;  /* Include padding in width calculation */
 }
 
 /* Slider container: Individual slider wrapper with label, slider, and value display */
@@ -159,6 +164,55 @@
   display: flex;
   flex-direction: column;  /* Stack header and slider vertically */
   gap: 12px;               /* Space between header and slider */
+  width: 100%;             /* Full width of container */
+  box-sizing: border-box;  /* Include padding in width calculation */
+  min-width: 0;            /* Allow flex items to shrink */
+}
+
+/* Control input wrapper */
+.control-input-wrapper {
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;  /* Include padding in width calculation */
+  max-width: 100%;         /* Prevent overflow */
+}
+
+/* Control input styling */
+.control-input {
+  width: 100%;
+  max-width: 100%;         /* Prevent overflow */
+  padding: 8px 12px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  color: #fff;
+  font-size: 1em;
+  text-align: center;
+  outline: none;
+  transition: all 0.2s ease;
+  box-sizing: border-box;  /* Include padding and border in width calculation */
+}
+
+.control-input:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.control-input:focus {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 215, 0, 0.5);
+  box-shadow: 0 0 8px rgba(255, 215, 0, 0.3);
+}
+
+/* Remove number input spinners */
+.control-input::-webkit-inner-spin-button,
+.control-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.control-input[type=number] {
+  -moz-appearance: textfield;
 }
 
 /* Slider header: Container for label and value display side by side */
@@ -166,6 +220,9 @@
   display: flex;
   justify-content: space-between;  /* Label on left, value on right */
   align-items: center;            /* Vertically center both */
+  width: 100%;                    /* Full width of container */
+  box-sizing: border-box;         /* Include padding in width calculation */
+  min-width: 0;                   /* Allow flex items to shrink */
 }
 
 /* Slider label: Text label for each slider (e.g., "Bass", "Treble") */
@@ -196,8 +253,14 @@
   outline: none;           /* Remove default outline */
   -webkit-appearance: none;  /* Remove default webkit styling */
   appearance: none;       /* Remove default browser styling */
-  cursor: pointer;        /* Pointer cursor on hover */
+  cursor: grab;           /* Grab cursor to indicate draggable */
   transition: background 0.2s ease;  /* Smooth background transition */
+  touch-action: none;     /* Prevent touch scrolling while dragging */
+}
+
+/* Change cursor to grabbing when actively dragging */
+.slider-input:active {
+  cursor: grabbing;
 }
 
 /* Slider input hover state: Slightly brighter track */
@@ -224,12 +287,12 @@
   height: 20px;            /* Height of the thumb */
   border-radius: 50%;      /* Perfect circle */
   background: linear-gradient(145deg, #ffd700, #ffaa00);  /* Gold gradient */
-  cursor: pointer;        /* Pointer cursor */
+  cursor: grab;            /* Grab cursor */
   box-shadow: 
     0 2px 4px rgba(0, 0, 0, 0.3),
     0 0 8px rgba(255, 215, 0, 0.5);  /* Gold glow effect */
   border: 2px solid rgba(255, 255, 255, 0.3);  /* Subtle border */
-  transition: all 0.2s ease;  /* Smooth transitions */
+  transition: box-shadow 0.2s ease;  /* Only transition shadow, not transform */
   margin-top: -6px;        /* Center vertically on track */
 }
 
@@ -243,7 +306,7 @@
 
 /* Slider thumb active state (while dragging) - Webkit browsers */
 .slider-input::-webkit-slider-thumb:active {
-  transform: scale(1.15);  /* Slightly larger when active */
+  cursor: grabbing;        /* Grabbing cursor when active */
   box-shadow: 
     0 4px 8px rgba(0, 0, 0, 0.5),
     0 0 16px rgba(255, 215, 0, 0.8);  /* Even stronger glow */
@@ -267,12 +330,12 @@
   height: 20px;           /* Height of the thumb */
   border-radius: 50%;     /* Perfect circle */
   background: linear-gradient(145deg, #ffd700, #ffaa00);  /* Gold gradient */
-  cursor: pointer;        /* Pointer cursor */
+  cursor: grab;           /* Grab cursor */
   box-shadow: 
     0 2px 4px rgba(0, 0, 0, 0.3),
     0 0 8px rgba(255, 215, 0, 0.5);  /* Gold glow effect */
   border: 2px solid rgba(255, 255, 255, 0.3);  /* Subtle border */
-  transition: all 0.2s ease;  /* Smooth transitions */
+  transition: box-shadow 0.2s ease;  /* Only transition shadow */
 }
 
 /* Slider thumb hover state - Firefox */
@@ -285,7 +348,7 @@
 
 /* Slider thumb active state (while dragging) - Firefox */
 .slider-input::-moz-range-thumb:active {
-  transform: scale(1.15);  /* Slightly larger when active */
+  cursor: grabbing;        /* Grabbing cursor when active */
   box-shadow: 
     0 4px 8px rgba(0, 0, 0, 0.5),
     0 0 16px rgba(255, 215, 0, 0.8);  /* Even stronger glow */
