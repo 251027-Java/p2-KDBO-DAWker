@@ -1,5 +1,6 @@
 package com.project.dawker.dto;
 
+// YOU'RE IN THE RIGHT FOLDER PRANAV!!!!
 public class componentDTO {
     private Long id;
     private String instanceId; // From React Date.now()

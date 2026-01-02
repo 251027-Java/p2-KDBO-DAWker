@@ -10,6 +10,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import lombok.Data;
 
+// CORRECT ENTITIES FOLDER PRANAV!!!!
 @Entity
 @Data
 public class ComponentEntity {
