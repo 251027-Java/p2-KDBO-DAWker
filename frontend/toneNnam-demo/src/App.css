@@ -134,6 +134,9 @@
   border-radius: 15px;  /* Rounded corners */
   padding: 25px;         /* Internal spacing */
   border: 1px solid rgba(255, 255, 255, 0.1);  /* Subtle border */
+  box-sizing: border-box;  /* Include padding and border in width calculation */
+  overflow: hidden;        /* Prevent content from overflowing */
+  min-width: 0;            /* Allow flex items to shrink */
 }
 
 /* Section title: Styling for "EQ" and "Effects" headings */
@@ -152,6 +155,8 @@
   display: flex;
   flex-direction: column;  /* Stack sliders vertically */
   gap: 25px;               /* Space between sliders */
+  width: 100%;             /* Full width of container */
+  box-sizing: border-box;  /* Include padding in width calculation */
 }
 
 /* Slider container: Individual slider wrapper with label, slider, and value display */
@@ -159,17 +164,23 @@
   display: flex;
   flex-direction: column;  /* Stack header and slider vertically */
   gap: 12px;               /* Space between header and slider */
+  width: 100%;             /* Full width of container */
+  box-sizing: border-box;  /* Include padding in width calculation */
+  min-width: 0;            /* Allow flex items to shrink */
 }
 
 /* Control input wrapper */
 .control-input-wrapper {
   position: relative;
   width: 100%;
+  box-sizing: border-box;  /* Include padding in width calculation */
+  max-width: 100%;         /* Prevent overflow */
 }
 
 /* Control input styling */
 .control-input {
   width: 100%;
+  max-width: 100%;         /* Prevent overflow */
   padding: 8px 12px;
   background-color: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -179,6 +190,7 @@
   text-align: center;
   outline: none;
   transition: all 0.2s ease;
+  box-sizing: border-box;  /* Include padding and border in width calculation */
 }
 
 .control-input:hover {
@@ -208,6 +220,9 @@
   display: flex;
   justify-content: space-between;  /* Label on left, value on right */
   align-items: center;            /* Vertically center both */
+  width: 100%;                    /* Full width of container */
+  box-sizing: border-box;         /* Include padding in width calculation */
+  min-width: 0;                   /* Allow flex items to shrink */
 }
 
 /* Slider label: Text label for each slider (e.g., "Bass", "Treble") */

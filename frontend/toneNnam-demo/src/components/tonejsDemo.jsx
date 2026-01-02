@@ -290,7 +290,7 @@ const TonejsDemo = () => {
           </div>
         </div>
         
-        <div className="control-input-wrapper" style={{ position: 'relative', width: '100%' }}>
+        <div className="control-input-wrapper">
           <input
             ref={inputRef}
             type="number"
