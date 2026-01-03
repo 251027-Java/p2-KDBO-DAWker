@@ -25,6 +25,8 @@ const TonejsDemo: FC = () => {
   const [midValue, setMidValue] = useState<number>(0); // dB
   const [trebleValue, setTrebleValue] = useState<number>(0); // dB
   const [reverbAmount, setReverbAmount] = useState<number>(0.3); // 0-1 wet/dry mix
+  const [baseReverbAmount, setBaseReverbAmount] = useState<number>(0.3); // Normal reverb setting (when pedal not pressed)
+  const [isPedalPressed, setIsPedalPressed] = useState<boolean>(false); // Spacebar pedal state
   const [volumeValue, setVolumeValue] = useState<number>(-6); // dB
   
   // Native Web Audio API refs
@@ -172,11 +174,11 @@ const TonejsDemo: FC = () => {
           
           // Reverb wet/dry mix
           const reverbGain = context.createGain();
-          reverbGain.gain.value = reverbAmount;
+          reverbGain.gain.value = isPedalPressed ? 0.95 : reverbAmount; // Use pedal state if active
           reverbGainRef.current = reverbGain;
           
           const dryGain = context.createGain();
-          dryGain.gain.value = 1 - reverbAmount;
+          dryGain.gain.value = isPedalPressed ? 0.05 : (1 - reverbAmount); // Use pedal state if active
           dryGainRef.current = dryGain;
           
           // Master volume
@@ -368,11 +370,11 @@ const TonejsDemo: FC = () => {
       reverbConvolverRef.current = reverbConvolver;
       
       const reverbGain = context.createGain();
-      reverbGain.gain.value = reverbAmount;
+      reverbGain.gain.value = isPedalPressed ? 0.95 : baseReverbAmount; // Use pedal state if active
       reverbGainRef.current = reverbGain;
       
       const dryGain = context.createGain();
-      dryGain.gain.value = 1 - reverbAmount;
+      dryGain.gain.value = isPedalPressed ? 0.05 : (1 - baseReverbAmount); // Use pedal state if active
       dryGainRef.current = dryGain;
       
       const masterVolume = context.createGain();
@@ -398,7 +400,7 @@ const TonejsDemo: FC = () => {
       
       console.log(`✅ Effects mode: Full amp chain rebuilt`);
     }
-  }, [directMode, isOn, inputGain, distortionAmount, bassValue, midValue, trebleValue, reverbAmount, volumeValue]);
+  }, [directMode, isOn, inputGain, distortionAmount, bassValue, midValue, trebleValue, baseReverbAmount, isPedalPressed, volumeValue]);
 
   // Update input gain when slider changes
   useEffect(() => {
@@ -438,14 +440,53 @@ const TonejsDemo: FC = () => {
     }
   }, [trebleValue, directMode, isOn]);
 
-  // Update reverb when slider changes
+  // Update base reverb when slider changes (only if pedal is not pressed)
+  useEffect(() => {
+    if (!isPedalPressed) {
+      setBaseReverbAmount(reverbAmount);
+    }
+  }, [reverbAmount, isPedalPressed]);
+
+  // Update reverb audio nodes when pedal state or base reverb changes
   useEffect(() => {
     if (reverbGainRef.current && dryGainRef.current && !directMode && isOn) {
-      reverbGainRef.current.gain.value = reverbAmount;
-      dryGainRef.current.gain.value = 1 - reverbAmount;
-      console.log(`🎛️ Reverb updated to: ${(reverbAmount * 100).toFixed(0)}% wet`);
+      const currentReverb = isPedalPressed ? 0.95 : baseReverbAmount; // High reverb when pedal pressed
+      reverbGainRef.current.gain.value = currentReverb;
+      dryGainRef.current.gain.value = 1 - currentReverb;
+      console.log(`🎛️ Reverb updated to: ${(currentReverb * 100).toFixed(0)}% wet${isPedalPressed ? ' (PEDAL PRESSED)' : ''}`);
     }
-  }, [reverbAmount, directMode, isOn]);
+  }, [baseReverbAmount, isPedalPressed, directMode, isOn]);
+
+  // Spacebar pedal: increase reverb when spacebar is pressed
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Only activate if spacebar and not already pressed
+      if (event.code === 'Space' && !isPedalPressed && !directMode && isOn) {
+        event.preventDefault(); // Prevent page scroll
+        setIsPedalPressed(true);
+        console.log('🎹 PEDAL PRESSED - Reverb increased!');
+      }
+    };
+
+    const handleKeyUp = (event: KeyboardEvent) => {
+      // Only deactivate if spacebar and currently pressed
+      if (event.code === 'Space' && isPedalPressed) {
+        event.preventDefault(); // Prevent page scroll
+        setIsPedalPressed(false);
+        console.log('🎹 PEDAL RELEASED - Reverb back to normal');
+      }
+    };
+
+    // Add event listeners
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, [isPedalPressed, directMode, isOn]);
 
   // Update master volume when slider changes
   useEffect(() => {
@@ -712,7 +753,8 @@ const TonejsDemo: FC = () => {
           {/* Reverb */}
           <div style={{ marginBottom: '15px', paddingTop: '15px', borderTop: '1px solid #ddd' }}>
             <label style={{ display: 'block', marginBottom: '5px' }}>
-              Reverb: {(reverbAmount * 100).toFixed(0)}% wet
+              Reverb: {(isPedalPressed ? 95 : reverbAmount * 100).toFixed(0)}% wet
+              {isPedalPressed && <span style={{ color: '#4CAF50', fontWeight: 'bold', marginLeft: '10px' }}>🎹 PEDAL ACTIVE</span>}
             </label>
             <input
               type="range"
@@ -722,7 +764,11 @@ const TonejsDemo: FC = () => {
               value={reverbAmount}
               onChange={(e) => setReverbAmount(parseFloat(e.target.value))}
               style={{ width: '100%' }}
+              disabled={isPedalPressed}
             />
+            <div style={{ fontSize: '12px', color: '#666', marginTop: '5px' }}>
+              💡 <strong>Tip:</strong> Hold <strong>SPACEBAR</strong> for maximum reverb (sustain pedal effect)
+            </div>
           </div>
 
           {/* Master Volume */}
