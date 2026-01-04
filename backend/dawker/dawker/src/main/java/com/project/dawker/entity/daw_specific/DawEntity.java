@@ -1,8 +1,10 @@
 package com.project.dawker.entity.daw_specific;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.project.dawker.entity.User;
 
 import jakarta.persistence.CascadeType;
@@ -41,11 +43,16 @@ public class DawEntity {
 
     @ManyToOne(fetch = jakarta.persistence.FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnoreProperties({ "password", "daws", "posts", "presets" })
     private User user;
+
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     private String name;
 
     private String description;
+
+    private int exportCount;
 
     @OneToMany(mappedBy = "daw", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ConfigEntity> listOfConfigs = new ArrayList<>();

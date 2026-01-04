@@ -7,18 +7,29 @@ public class userDTO {
     private Long id;
     private String username;
     private String password;
+    private String email;
     private String role;
     private List<dawDTO> daws;
+    private List<forumPostDTO> forumPosts;
 
     public userDTO() {
     }
 
-    public userDTO(Long id, String username, String password, String role, List<dawDTO> daws) {
+    public userDTO(
+            Long id,
+            String username,
+            String password,
+            String email,
+            String role,
+            List<dawDTO> daws,
+            List<forumPostDTO> forumPosts) {
         this.id = id;
         this.username = username;
         this.password = password;
+        this.email = email;
         this.role = role;
         this.daws = daws;
+        this.forumPosts = forumPosts;
     }
 
     // Getters
@@ -34,12 +45,20 @@ public class userDTO {
         return password;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
     public String getRole() {
         return role;
     }
 
     public List<dawDTO> getDaws() {
         return daws;
+    }
+
+    public List<forumPostDTO> getForumPosts() {
+        return forumPosts;
     }
 
     // Setters
@@ -55,12 +74,20 @@ public class userDTO {
         this.password = password;
     }
 
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
     public void setRole(String role) {
         this.role = role;
     }
 
     public void setDaws(List<dawDTO> daws) {
         this.daws = daws;
+    }
+
+    public void setForumPosts(List<forumPostDTO> forumPosts) {
+        this.forumPosts = forumPosts;
     }
 
     @Override
