@@ -10,10 +10,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.project.dawker.dto.dawDTO;
+import com.project.dawker.dto.forumPostDTO;
 import com.project.dawker.dto.userDTO;
+import com.project.dawker.dto.recievedDto.receivedCommentDTO;
+import com.project.dawker.dto.recievedDto.receivedForumDTO;
 import com.project.dawker.entity.User;
 import com.project.dawker.service.DawService;
 import com.project.dawker.service.UserService;
+import com.project.dawker.service.forumService;
 import com.project.dawker.service.useService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -31,10 +35,12 @@ public class dawController {
 
     private final DawService dawService;
     private final useService useService;
+    private final forumService forumService;
 
-    public dawController(DawService dawService, useService useService) {
+    public dawController(DawService dawService, useService useService, forumService forumService) {
         this.dawService = dawService;
         this.useService = useService;
+        this.forumService = forumService;
     }
 
     // ------------------ GET METHODS ------------------
@@ -63,6 +69,21 @@ public class dawController {
         return this.useService.getAllUsers();
     }
 
+    @GetMapping("/search/User")
+    public userDTO getAUserById(@RequestParam Long Id) {
+        return this.useService.getUserById(Id);
+    }
+
+    @GetMapping("/search/allForums")
+    public List<forumPostDTO> getAllForums() {
+        return this.forumService.getAllForums();
+    }
+
+    @GetMapping("/search/Forums")
+    public forumPostDTO getForumById(@RequestParam Long Id) {
+        return this.forumService.getForumById(Id);
+    }
+
     // ------------------- POST METHODS ------------------
 
     // Creates an empty daw method
@@ -82,4 +103,29 @@ public class dawController {
         return ResponseEntity.ok(payload);
 
     }
+
+    // Forum based post requests
+    @PostMapping("/saveForum")
+    public ResponseEntity<?> saveForum(@RequestBody receivedForumDTO payload) {
+
+        System.out.println("Saving Forum with userID: " + payload.getUserId());
+
+        forumService.saveForum(payload);
+
+        return ResponseEntity.ok(payload);
+
+    }
+
+    @PostMapping("/saveComment")
+    public ResponseEntity<?> saveComment(@RequestBody receivedCommentDTO payload) {
+
+        System.out.println(
+                "Saving comment with userID: " + payload.getUserId() + ", on post: " + payload.getParentPostId());
+
+        forumService.saveComment(payload);
+
+        return ResponseEntity.ok(payload);
+
+    }
+
 }

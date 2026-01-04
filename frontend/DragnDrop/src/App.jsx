@@ -11,6 +11,9 @@ import Loggin from './components/Loggin'
 import Landing from './components/Landing'
 import UserPage from './components/UserPage'
 import Layout from './components/Layout'
+import Forums from './components/Forums'
+import ForumPage from './components/ForumPage'
+import SettingsPage from './components/SettingsPage'
 
 function App() {
   const [user, setUser] = useState(null)
@@ -71,6 +74,9 @@ function App() {
             {/* <Route path="/demo" element={<TestComponent />} />
             <Route path="/test" element={<ToneJsDemo />} /> */}
             <Route path="/userpage" element={<UserPage />} />
+            <Route path="/forums" element={<Forums/>} />
+            <Route path="/forums/:postId" element={<ForumPage/>} />
+            <Route path="/settings" element={<SettingsPage/>} />
           </Route>
         </Routes>
       </BrowserRouter>

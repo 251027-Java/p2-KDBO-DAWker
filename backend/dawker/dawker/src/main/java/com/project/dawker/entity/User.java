@@ -5,7 +5,9 @@ import lombok.*;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.project.dawker.entity.daw_specific.DawEntity;
+import com.project.dawker.entity.daw_specific.ForumPost;
 
 // user entity : account info
 @Entity
@@ -37,7 +39,12 @@ public class User {
     private List<Preset> presets;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnoreProperties({ "listOfConfigs" })
     private List<DawEntity> daws;
+
+    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL)
+    @JsonIgnoreProperties({ "comments", "User" })
+    private List<ForumPost> posts;
 
     public void addPreset(Preset preset) {
         presets.add(preset);
