@@ -218,27 +218,6 @@
 //     }
 //   };
 
-<<<<<<< HEAD
-  // load saved DAWs on mount
-  useEffect(() => {
-    const loadDaws = async () => {
-      try {
-        const daws = await getAllDaws();
-        setSavedDaws(daws);
-      } catch (error) {
-        console.error('Error loading DAWs:', error);
-      }
-    };
-    loadDaws();
-  }, []);
-
-  // saves current pedal/amp/cabinet settings as a DAW configuration
-  const handleSavePreset = async () => {
-    if (!dawName.trim() || !configName.trim()) {
-      alert('Please enter both DAW name and Config name');
-      return;
-    }
-=======
 //   // Load saved DAWs on mount
 //   useEffect(() => {
 //     const loadDaws = async () => {
@@ -259,7 +238,6 @@
 //       alert('Please enter both DAW name and Config name');
 //       return;
 //     }
->>>>>>> main
 
 //     try {
 //       const dawDTO = buildDawDTOFromPreset(
@@ -299,38 +277,22 @@
 //     }
 //   };
 
-<<<<<<< HEAD
-  // loads a DAW and applies the first config's component chain
-  const handleLoadPreset = async (dawId) => {
-    try {
-      const daw = await getDawById(dawId);
-=======
 //   // Load DAW handler - loads a DAW and applies the first config's component chain
 //   const handleLoadPreset = async (dawId) => {
 //     try {
 //       const daw = await getDawById(dawId);
->>>>>>> main
       
 //       if (!daw.listOfConfigs || daw.listOfConfigs.length === 0) {
 //         alert('This DAW has no configurations');
 //         return;
 //       }
 
-<<<<<<< HEAD
-      // use the first config's component chain
-      const firstConfig = daw.listOfConfigs[0];
-      if (!firstConfig.componentChain || firstConfig.componentChain.length === 0) {
-        alert('This configuration has no components');
-        return;
-      }
-=======
 //       // Use the first config's component chain
 //       const firstConfig = daw.listOfConfigs[0];
 //       if (!firstConfig.componentChain || firstConfig.componentChain.length === 0) {
 //         alert('This configuration has no components');
 //         return;
 //       }
->>>>>>> main
 
 //       const success = applyPresetFromComponentDTOs(firstConfig.componentChain, {
 //         setPedalEnabled,
