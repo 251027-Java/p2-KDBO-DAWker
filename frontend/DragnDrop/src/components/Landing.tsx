@@ -1,63 +1,128 @@
+import React from "react";
 import "../Landing.css";
-import { Button} from "@blueprintjs/core"
+import { Link } from "react-router-dom";
 
-function Landing() {
+const Landing: React.FC = () => {
   return (
-    
-    // <>
-    // <style>
-    //   @import url('https://fonts.googleapis.com/css2?family=Gruppo&display=swap');
-    // </style>
+    <div>
+      <style>
+        @import url('https://fonts.googleapis.com/css2?family=Gruppo&display=swap');
+      </style>
+      <nav className="navbar">
+        <div className="nav-container">
+          <div className="logo">DAWKER</div>
 
-    //   <nav className="navbar">
-    //     <div className="nav-container">
-    //       <p className="logo">Amplify</p>
+          <ul className="links">
+            <li>
+              <Link to="/myDaws">My DAWs</Link>
+            </li>
+            <li>
+              <Link to="/search">Search</Link>
+            </li>
+          </ul>
 
-    //       <ul className="links">
-    //         <li>
-    //           <a href="/myDaws">My DAWs</a>
-    //         </li>
-    //         <li>
-    //           <a href="/search">Search</a>
-    //         </li>
-    //       </ul>
+          <div className="buttons">
+            <Link to="/signup">Sign Up</Link>
+            <Link to="/login">Log In</Link>
+          </div>
+        </div>
+      </nav>
 
-    //       <div className="auth-buttons">
-    //         <button className="signup">Sign Up</button>
-    //         <button className="login">Log In</button>
-    //       </div>
-    //     </div>
-    //   </nav>
-
-    //   <main className="hero">
-    //     <h1 className="welcome">Welcome to<br />Amplify</h1>
-
-    //     <p className="subtitle">
-    //       The free site where you can configure your own Digital Audio
-    //       Workstations (DAWs), use them to edit audio files, and share those
-    //       configurations with others!
-    //     </p>
-
-    //     <ul className="features">
-    //       <li>Sign up or log in to your own account</li>
-    //       <li>Create and keep track of all of your custom DAWs, one for any scenario that you need them for</li>
-    //       <li>Record audio or upload your own audio files</li>
-    //       <li>Browse other user’s DAWs and save them to use yourself. Leave comments on them to support your fellow artists!</li>
-    //     </ul>
-
-    //     <h2>Get started with<br />Amplify today!</h2>
-
-    //     <div className="cta-buttons">
-    //       <button className="signup">Sign Up</button>
-    //       <button className="login">Log In</button>
-    //     </div>
-    //   </main>
-    // </>
-    <div className="mt-20 " >
-      <Button intent="success" text="button content" onClick={() => {}} />
-      <p>This is text</p>
+      <main>
+        <section className="hero-section">
+          <h1>Build, Share, and Use Custom DAWs</h1>
+          <p>
+            DAWKER lets you design Digital Audio Workstations for any workflow,
+            edit audio directly, and share setups with the community.
+          </p>
+        
+          <div className="buttons">
+            <Link to="/signup" className="button">Get Started Free</Link>
+            <Link to="/search" className="button">Explore DAWs</Link>
+          </div>
+        </section>
+        <section className="how-it-works">
+          <h2>How DAWKER Works</h2>
+        
+          <div className="steps">
+            <div className="step">
+              <h3>Create</h3>
+              <p>Design a DAW for recording, mixing, or sound design.</p>
+            </div>
+            <br></br>
+            <div className="step">
+              <h3>Edit</h3>
+              <p>Record or upload audio and work directly in your DAW.</p>
+            </div>
+            <br></br>
+            <div className="step">
+              <h3>Share</h3>
+              <p>Publish your setup so others can use or remix it.</p>
+            </div>
+          </div>
+        </section>
+        <section className="features-section">
+          <h2>Everything You Need</h2>
+        
+          <div className="feature-grid">
+            <div className="feature-card">
+              <h3>User Accounts</h3>
+              <p>Sign up and manage all your DAWs in one place.</p>
+            </div>
+        
+            <div className="feature-card">
+              <h3>Custom DAWs</h3>
+              <p>Create DAWs for recording, mixing, or live performance.</p>
+            </div>
+        
+            <div className="feature-card">
+              <h3>Audio Editing</h3>
+              <p>Record or upload audio files directly into your workspace.</p>
+            </div>
+        
+            <div className="feature-card">
+              <h3>Community Sharing</h3>
+              <p>Browse and save DAWs created by other users.</p>
+            </div>
+          </div>
+        </section>
+        <section className="showcase-section">
+          <h2>Designed for Musicians & Producers</h2>
+        
+          <div className="showcase-row">
+            <img
+              src="/src/assets/homepage.png"
+              alt="homepage screenshot"
+              className="showcase-image"
+            />
+            <div className="showcase-text">
+              <p>Build workflows that match your creative process.</p>
+            </div>
+          </div>
+        
+          <div className="showcase-row reverse">
+            <img
+              src="/src/assets/community.png"
+              alt="community screenshot"
+              className="showcase-image"
+            />
+            <div className="showcase-text">
+              <p>Share and receive workflows with the community.</p>
+            </div>
+          </div>
+        </section>
+        <section className="cta-section">
+          <h2>Start Building Your DAWs Today</h2>
+          <p>It’s free, fast, and built for creators.</p>
+          <div className="buttons">
+            <Link to="/signup" className="button">
+              Create Your Account
+            </Link>
+          </div>
+        </section>
+      </main>
     </div>
   );
-}
+};
 
 export default Landing;
