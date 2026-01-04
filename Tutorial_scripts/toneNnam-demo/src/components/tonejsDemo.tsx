@@ -80,7 +80,7 @@ const TonejsDemo: FC = () => {
     if (!isOn) {
       // Turn ON
       try {
-        console.log('▶️ Starting audio with native Web Audio API...');
+        console.log('Starting audio with native Web Audio API...');
         
         // Create AudioContext
         const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
@@ -92,11 +92,11 @@ const TonejsDemo: FC = () => {
           await context.resume();
         }
         
-        console.log(`📊 AudioContext state: ${context.state}`);
-        console.log(`📊 Sample rate: ${context.sampleRate}Hz`);
+        console.log(`AudioContext state: ${context.state}`);
+        console.log(`Sample rate: ${context.sampleRate}Hz`);
         
         // Get microphone access
-        console.log('🎤 Requesting microphone access...');
+        console.log('Requesting microphone access...');
         const stream = await navigator.mediaDevices.getUserMedia({ 
           audio: {
             echoCancellation: false,
@@ -106,8 +106,8 @@ const TonejsDemo: FC = () => {
         });
         mediaStreamRef.current = stream;
         
-        console.log('✅ Microphone access granted');
-        console.log(`📊 Audio tracks: ${stream.getAudioTracks().length}`);
+        console.log('Microphone access granted');
+        console.log(`Audio tracks: ${stream.getAudioTracks().length}`);
         stream.getAudioTracks().forEach((track, i) => {
           console.log(`  Track ${i}: ${track.label}`);
           console.log(`    Enabled: ${track.enabled}, Muted: ${track.muted}`);
@@ -133,7 +133,7 @@ const TonejsDemo: FC = () => {
           source.connect(inputGainNode);
           inputGainNode.connect(analyser);
           inputGainNode.connect(context.destination);
-          console.log(`✅ Direct mode: source -> inputGain(${inputGain}x) -> destination (no effects)`);
+          console.log(`Direct mode: source -> inputGain(${inputGain}x) -> destination (no effects)`);
         } else {
           // EFFECTS MODE: Build full amp chain
           // source -> inputGain -> distortion -> EQ -> reverb (wet/dry) -> volume -> analyser -> destination
@@ -207,12 +207,12 @@ const TonejsDemo: FC = () => {
           masterVolume.connect(analyser);
           masterVolume.connect(context.destination);
           
-          console.log(`✅ Effects mode: Full amp chain connected`);
+          console.log(`Effects mode: Full amp chain connected`);
           console.log(`   Chain: inputGain(${inputGain}x) -> distortion(${distortionAmount}) -> EQ(bass:${bassValue}dB, mid:${midValue}dB, treble:${trebleValue}dB) -> reverb(${reverbAmount}) -> volume(${volumeValue}dB)`);
         }
         
         setIsOn(true);
-        console.log('✅ Audio ON - You should hear your guitar now!');
+        console.log('Audio ON - You should hear your guitar now!');
         
         // Test audio level after 1 second
         setTimeout(() => {
@@ -221,23 +221,23 @@ const TonejsDemo: FC = () => {
             analyserRef.current.getByteFrequencyData(data);
             const avg = data.reduce((a, b) => a + b) / data.length;
             const max = Math.max(...data);
-            console.log(`📊 Native audio test (after 1s): avg=${avg.toFixed(1)}/255, max=${max}`);
+            console.log(`Native audio test (after 1s): avg=${avg.toFixed(1)}/255, max=${max}`);
             if (avg < 1 && max < 5) {
-              console.error('❌ CRITICAL: No audio signal detected!');
-              console.error('❌ Check: Focusrite input gain, guitar volume, cable connection');
+              console.error('CRITICAL: No audio signal detected!');
+              console.error('Check: Focusrite input gain, guitar volume, cable connection');
             } else {
-              console.log('✅ Audio signal detected!');
+              console.log('Audio signal detected!');
             }
           }
         }, 1000);
         
       } catch (error: any) {
-        console.error('❌ Failed to start audio:', error);
+        console.error('Failed to start audio:', error);
         alert(`Failed to access microphone: ${error.message}\n\nPlease check:\n1. Browser permissions\n2. Microphone is connected\n3. No other app is using the microphone`);
       }
     } else {
       // Turn OFF
-      console.log('⏹️ Stopping audio...');
+      console.log('Stopping audio...');
       
       // Stop all tracks
       if (mediaStreamRef.current) {
@@ -271,7 +271,7 @@ const TonejsDemo: FC = () => {
       
       setIsOn(false);
       setAudioLevel(0);
-      console.log('✅ Audio OFF');
+      console.log('Audio OFF');
     }
   };
 
@@ -281,7 +281,7 @@ const TonejsDemo: FC = () => {
     
     const context = audioContextRef.current;
     
-    console.log(`🔗 Rebuilding audio chain (direct mode: ${directMode})`);
+    console.log(`Rebuilding audio chain (direct mode: ${directMode})`);
     
     // Disconnect everything
     if (sourceNodeRef.current) {
@@ -337,7 +337,7 @@ const TonejsDemo: FC = () => {
       sourceNodeRef.current!.connect(inputGainNode);
       inputGainNode.connect(analyserRef.current!);
       inputGainNode.connect(context.destination);
-      console.log(`✅ Direct mode: source -> inputGain(${inputGain}x) -> destination (no effects)`);
+      console.log(`Direct mode: source -> inputGain(${inputGain}x) -> destination (no effects)`);
     } else {
       // EFFECTS MODE: Full amp chain
       const distortion = context.createWaveShaper();
@@ -398,7 +398,7 @@ const TonejsDemo: FC = () => {
       masterVolume.connect(analyserRef.current!);
       masterVolume.connect(context.destination);
       
-      console.log(`✅ Effects mode: Full amp chain rebuilt`);
+      console.log(`Effects mode: Full amp chain rebuilt`);
     }
   }, [directMode, isOn, inputGain, distortionAmount, bassValue, midValue, trebleValue, baseReverbAmount, isPedalPressed, volumeValue]);
 
@@ -406,7 +406,7 @@ const TonejsDemo: FC = () => {
   useEffect(() => {
     if (inputGainNodeRef.current && isOn) {
       inputGainNodeRef.current.gain.value = inputGain;
-      console.log(`🎛️ Input gain updated to: ${inputGain}x (${(20 * Math.log10(inputGain)).toFixed(1)}dB)`);
+      console.log(`Input gain updated to: ${inputGain}x (${(20 * Math.log10(inputGain)).toFixed(1)}dB)`);
     }
   }, [inputGain, isOn]);
 
@@ -414,7 +414,7 @@ const TonejsDemo: FC = () => {
   useEffect(() => {
     if (distortionNodeRef.current && !directMode && isOn) {
       (distortionNodeRef.current as any).curve = makeDistortionCurve(distortionAmount * 100);
-      console.log(`🎛️ Distortion updated to: ${distortionAmount}`);
+      console.log(`Distortion updated to: ${distortionAmount}`);
     }
   }, [distortionAmount, directMode, isOn]);
 
@@ -422,21 +422,21 @@ const TonejsDemo: FC = () => {
   useEffect(() => {
     if (bassFilterRef.current && !directMode && isOn) {
       bassFilterRef.current.gain.value = bassValue;
-      console.log(`🎛️ Bass EQ updated to: ${bassValue}dB`);
+      console.log(`Bass EQ updated to: ${bassValue}dB`);
     }
   }, [bassValue, directMode, isOn]);
 
   useEffect(() => {
     if (midFilterRef.current && !directMode && isOn) {
       midFilterRef.current.gain.value = midValue;
-      console.log(`🎛️ Mid EQ updated to: ${midValue}dB`);
+      console.log(`Mid EQ updated to: ${midValue}dB`);
     }
   }, [midValue, directMode, isOn]);
 
   useEffect(() => {
     if (trebleFilterRef.current && !directMode && isOn) {
       trebleFilterRef.current.gain.value = trebleValue;
-      console.log(`🎛️ Treble EQ updated to: ${trebleValue}dB`);
+      console.log(`Treble EQ updated to: ${trebleValue}dB`);
     }
   }, [trebleValue, directMode, isOn]);
 
@@ -453,7 +453,7 @@ const TonejsDemo: FC = () => {
       const currentReverb = isPedalPressed ? 0.95 : baseReverbAmount; // High reverb when pedal pressed
       reverbGainRef.current.gain.value = currentReverb;
       dryGainRef.current.gain.value = 1 - currentReverb;
-      console.log(`🎛️ Reverb updated to: ${(currentReverb * 100).toFixed(0)}% wet${isPedalPressed ? ' (PEDAL PRESSED)' : ''}`);
+      console.log(`Reverb updated to: ${(currentReverb * 100).toFixed(0)}% wet${isPedalPressed ? ' (PEDAL PRESSED)' : ''}`);
     }
   }, [baseReverbAmount, isPedalPressed, directMode, isOn]);
 
@@ -464,7 +464,7 @@ const TonejsDemo: FC = () => {
       if (event.code === 'Space' && !isPedalPressed && !directMode && isOn) {
         event.preventDefault(); // Prevent page scroll
         setIsPedalPressed(true);
-        console.log('🎹 PEDAL PRESSED - Reverb increased!');
+        console.log('PEDAL PRESSED - Reverb increased!');
       }
     };
 
@@ -473,7 +473,7 @@ const TonejsDemo: FC = () => {
       if (event.code === 'Space' && isPedalPressed) {
         event.preventDefault(); // Prevent page scroll
         setIsPedalPressed(false);
-        console.log('🎹 PEDAL RELEASED - Reverb back to normal');
+        console.log('PEDAL RELEASED - Reverb back to normal');
       }
     };
 
@@ -492,7 +492,7 @@ const TonejsDemo: FC = () => {
   useEffect(() => {
     if (masterVolumeRef.current && !directMode && isOn) {
       masterVolumeRef.current.gain.value = Math.pow(10, volumeValue / 20);
-      console.log(`🎛️ Master volume updated to: ${volumeValue}dB`);
+      console.log(`Master volume updated to: ${volumeValue}dB`);
     }
   }, [volumeValue, directMode, isOn]);
 
@@ -544,11 +544,11 @@ const TonejsDemo: FC = () => {
         
         // Log every 60 frames (~1 second)
         if (Math.random() < 0.016) {
-          console.log(`📊 Audio levels - RMS: ${(rms * 100).toFixed(1)}%, Peak: ${(peak * 100).toFixed(1)}%, Freq Max: ${freqMax}/255, Final: ${finalLevel.toFixed(1)}%`);
+          console.log(`Audio levels - RMS: ${(rms * 100).toFixed(1)}%, Peak: ${(peak * 100).toFixed(1)}%, Freq Max: ${freqMax}/255, Final: ${finalLevel.toFixed(1)}%`);
           if (finalLevel < 10) {
-            console.warn('⚠️ Very low audio level - check your guitar/interface input gain!');
+            console.warn('Very low audio level - check your guitar/interface input gain!');
           } else if (finalLevel > 90) {
-            console.warn('⚠️ Very high audio level - watch for clipping!');
+            console.warn('Very high audio level - watch for clipping!');
           }
         }
         
@@ -595,7 +595,7 @@ const TonejsDemo: FC = () => {
 
       {/* Status */}
       <div style={{ marginBottom: '20px' }}>
-        <p>Status: <strong>{isOn ? '🟢 Running' : '🔴 Stopped'}</strong></p>
+        <p>Status: <strong>{isOn ? 'Running' : 'Stopped'}</strong></p>
         
         {/* Audio Level Meter */}
         {isOn && (
@@ -628,9 +628,9 @@ const TonejsDemo: FC = () => {
               </span>
             </div>
             <div style={{ fontSize: '11px', color: '#666', marginTop: '5px' }}>
-              {audioLevel < 5 ? '⚠️ No audio detected - check your guitar/interface!' : 
-               audioLevel < 20 ? '⚠️ Low audio level - turn up input gain' :
-               '✅ Audio detected'}
+              {audioLevel < 5 ? 'No audio detected - check your guitar/interface!' : 
+               audioLevel < 20 ? 'Low audio level - turn up input gain' :
+               'Audio detected'}
             </div>
           </div>
         )}
@@ -671,8 +671,8 @@ const TonejsDemo: FC = () => {
               <strong>Direct Mode (No Effects)</strong>
               <div style={{ fontSize: '12px', color: '#666' }}>
                 {directMode 
-                  ? '✅ Bypassing all effects - you should hear clean guitar signal'
-                  : '🎛️ Effects enabled - distortion is active'}
+                  ? 'Bypassing all effects - you should hear clean guitar signal'
+                  : 'Effects enabled - distortion is active'}
               </div>
             </div>
           </label>
@@ -754,7 +754,7 @@ const TonejsDemo: FC = () => {
           <div style={{ marginBottom: '15px', paddingTop: '15px', borderTop: '1px solid #ddd' }}>
             <label style={{ display: 'block', marginBottom: '5px' }}>
               Reverb: {(isPedalPressed ? 95 : reverbAmount * 100).toFixed(0)}% wet
-              {isPedalPressed && <span style={{ color: '#4CAF50', fontWeight: 'bold', marginLeft: '10px' }}>🎹 PEDAL ACTIVE</span>}
+              {isPedalPressed && <span style={{ color: '#4CAF50', fontWeight: 'bold', marginLeft: '10px' }}>PEDAL ACTIVE</span>}
             </label>
             <input
               type="range"
@@ -767,7 +767,7 @@ const TonejsDemo: FC = () => {
               disabled={isPedalPressed}
             />
             <div style={{ fontSize: '12px', color: '#666', marginTop: '5px' }}>
-              💡 <strong>Tip:</strong> Hold <strong>SPACEBAR</strong> for maximum reverb (sustain pedal effect)
+              <strong>Tip:</strong> Hold <strong>SPACEBAR</strong> for maximum reverb (sustain pedal effect)
             </div>
           </div>
 

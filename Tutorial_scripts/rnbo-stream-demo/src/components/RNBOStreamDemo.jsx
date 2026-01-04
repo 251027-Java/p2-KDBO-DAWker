@@ -30,7 +30,7 @@ const RNBOStreamDemo = () => {
     // Setup microphone input (from toneNnam-demo)
     const setupMicInput = async (context) => {
         try {
-            console.log('🎤 Requesting microphone access...');
+            console.log('Requesting microphone access...');
             const stream = await navigator.mediaDevices.getUserMedia({ 
                 audio: {
                     echoCancellation: false,
@@ -44,10 +44,10 @@ const RNBOStreamDemo = () => {
             mediaStreamSourceRef.current = mediaStreamSource;
             
             setIsMicActive(true);
-            console.log('✅ Audio interface connected');
+            console.log('Audio interface connected');
             return mediaStreamSource;
         } catch (err) {
-            console.error('❌ Audio interface access error:', err);
+            console.error('Audio interface access error:', err);
             alert('Could not access microphone/audio interface. Please check permissions.');
             throw err;
         }
@@ -64,7 +64,7 @@ const RNBOStreamDemo = () => {
             mediaStreamSourceRef.current = null;
         }
         setIsMicActive(false);
-        console.log('🔴 Audio interface disconnected');
+        console.log('Audio interface disconnected');
     };
 
     // Setup audio with RNBO processing
@@ -79,8 +79,8 @@ const RNBOStreamDemo = () => {
                 await context.resume();
             }
 
-            console.log(`📊 AudioContext state: ${context.state}`);
-            console.log(`📊 Sample rate: ${context.sampleRate}Hz`);
+            console.log(`AudioContext state: ${context.state}`);
+            console.log(`Sample rate: ${context.sampleRate}Hz`);
 
             // Create Gain node for output volume control
             const gainNode = context.createGain();
@@ -99,7 +99,7 @@ const RNBOStreamDemo = () => {
                 audioSource = await setupMicInput(context);
             } else {
                 // Use WAV file playback
-                console.log('📁 Loading audio file...');
+                console.log('Loading audio file...');
                 const audioResponse = await fetch('/audio/practiceSetup.wav');
                 const arrayBuffer = await audioResponse.arrayBuffer(); 
                 const audioBuffer = await context.decodeAudioData(arrayBuffer);
@@ -111,7 +111,7 @@ const RNBOStreamDemo = () => {
             }
 
             // Load RNBO device
-            console.log('🎛️ Loading RNBO device...');
+            console.log('Loading RNBO device...');
             const response = await fetch('/export/rnbo.filterdelay.json');
             const patcher = await response.json();
 
@@ -145,11 +145,11 @@ const RNBOStreamDemo = () => {
             sourceNodeRef.current = audioSource;
             
             setIsLoaded(true);
-            console.log(`✅ Audio setup complete - ${useMicInput ? 'Live Input' : 'File Playback'} through RNBO`);
+            console.log(`Audio setup complete - ${useMicInput ? 'Live Input' : 'File Playback'} through RNBO`);
             console.log('Available parameters:', device.parameters.map(p => p.id));
 
         } catch (err) {
-            console.error('❌ Audio setup failed:', err);
+            console.error('Audio setup failed:', err);
             if (useMicInput) {
                 stopMicInput();
             }
@@ -183,7 +183,7 @@ const RNBOStreamDemo = () => {
 
     // Stop audio
     const stopAudio = async () => {
-        console.log('⏹️ Stopping audio...');
+        console.log('Stopping audio...');
         
         if (sourceNodeRef.current) {
             if (sourceNodeRef.current.stop) {
@@ -214,7 +214,7 @@ const RNBOStreamDemo = () => {
         
         setIsLoaded(false);
         setAudioLevel(0);
-        console.log('✅ Audio stopped');
+        console.log('Audio stopped');
     };
 
     // RNBO parameter handlers
@@ -223,7 +223,7 @@ const RNBOStreamDemo = () => {
             const param = deviceRef.current.parametersById.get(paramId);
             if (param) {
                 param.value = value;
-                console.log(`🎛️ RNBO param ${paramId} = ${value}`);
+                console.log(`RNBO param ${paramId} = ${value}`);
             } else {
                 console.warn(`Parameter '${paramId}' not found in RNBO device!`);
             }
@@ -356,7 +356,7 @@ const RNBOStreamDemo = () => {
             maxWidth: '800px',
             width: '100%'
         }}>
-            <h1>🎸 RNBO Stream Demo</h1>
+            <h1>RNBO Stream Demo</h1>
             <p style={{ color: '#aaa', marginBottom: '20px' }}>
                 Live audio input streaming + RNBO processing
             </p>
@@ -396,16 +396,16 @@ const RNBOStreamDemo = () => {
                             borderRadius: '5px' 
                         }}
                     >
-                        🔌 Power On
+                        Power On
                     </button>
                 </div>
             ) : (
                 <div>
                     <div style={{ marginBottom: '20px' }}>
-                        <h3>✅ Audio Active</h3>
+                        <h3>Audio Active</h3>
                         <div style={{ margin: '15px 0', padding: '10px', background: '#333', borderRadius: '5px' }}>
                             <div style={{ marginBottom: '10px' }}>
-                                <strong>Input:</strong> {useMicInput ? '🎤 Audio Interface' : '📁 Audio File'}
+                                <strong>Input:</strong> {useMicInput ? 'Audio Interface' : 'Audio File'}
                                 {isMicActive && <span style={{ color: '#4CAF50', marginLeft: '10px' }}>● Active</span>}
                             </div>
                             <button 
@@ -437,7 +437,7 @@ const RNBOStreamDemo = () => {
                                     marginTop: '5px'
                                 }}
                             >
-                                ⏹️ Stop
+                                Stop
                             </button>
                         </div>
 
@@ -483,7 +483,7 @@ const RNBOStreamDemo = () => {
                         borderRadius: '5px',
                         textAlign: 'left'
                     }}>
-                        <h3 style={{ textAlign: 'center', marginTop: 0 }}>🎛️ RNBO Controls</h3>
+                        <h3 style={{ textAlign: 'center', marginTop: 0 }}>RNBO Controls</h3>
                         
                         <div style={{ margin: '15px 0' }}>
                             <label style={{ display: 'block', marginBottom: '5px' }}>Time: {Math.round(time)}%</label>
@@ -587,8 +587,8 @@ const RNBOStreamDemo = () => {
 
                     <p style={{ color: '#888', marginTop: '20px' }}>
                         {useMicInput 
-                            ? '🎤 Live audio streaming through RNBO filter delay...' 
-                            : '📁 Audio file looping through RNBO filter delay...'}
+                            ? 'Live audio streaming through RNBO filter delay...' 
+                            : 'Audio file looping through RNBO filter delay...'}
                     </p>
                 </div>
             )}
