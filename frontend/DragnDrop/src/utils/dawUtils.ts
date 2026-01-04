@@ -111,12 +111,12 @@ export function buildConfigDTOFromPreset(
     cabinetPresence: number;
   }
 ): ConfigDTO {
-  const componentChain = buildComponentDTOsFromPreset(pedalState, ampState, cabinetState);
+  const components = buildComponentDTOsFromPreset(pedalState, ampState, cabinetState);
 
   return {
     id: `config-${Date.now()}`,
     name: configName,
-    componentChain,
+    components,
   };
 }
 
@@ -263,6 +263,161 @@ export function applyPresetFromComponentDTOs(
   setters.setCabinetLowCut(preset.cabinet.cabinetLowCut);
   setters.setCabinetHighCut(preset.cabinet.cabinetHighCut);
   setters.setCabinetPresence(preset.cabinet.cabinetPresence);
+
+  return true;
+}
+
+// ========== NATIVE WEB AUDIO API AMP UTILITIES ==========
+
+// builds componentDTOs from native amp state (input gain, distortion, EQ, reverb, volume)
+export function buildComponentDTOsFromNativeAmpState(
+  ampState: {
+    inputGain: number;
+    directMode: boolean;
+    distortionAmount: number;
+    bassValue: number;
+    midValue: number;
+    trebleValue: number;
+    reverbAmount: number;
+    volumeValue: number;
+  }
+): ComponentDTO[] {
+  const components: ComponentDTO[] = [];
+
+  // Single amp component containing all native amp settings
+  components.push({
+    instanceId: `native-amp-${Date.now()}`,
+    configId: 0, // will be set by parent config
+    name: 'NativeAmp',
+    type: 'distortion',
+    settings: {
+      Technology: 'TONEJS', // Using TONEJS even though it's native Web Audio API
+      export_name: 'native-web-audio-amp',
+      parameters: {
+        inputGain: ampState.inputGain,
+        directMode: ampState.directMode,
+        distortionAmount: ampState.distortionAmount,
+        bassValue: ampState.bassValue,
+        midValue: ampState.midValue,
+        trebleValue: ampState.trebleValue,
+        reverbAmount: ampState.reverbAmount,
+        volumeValue: ampState.volumeValue,
+      },
+    },
+  });
+
+  return components;
+}
+
+// builds configDTO containing native amp component
+export function buildConfigDTOFromNativeAmpState(
+  configName: string,
+  ampState: {
+    inputGain: number;
+    directMode: boolean;
+    distortionAmount: number;
+    bassValue: number;
+    midValue: number;
+    trebleValue: number;
+    reverbAmount: number;
+    volumeValue: number;
+  }
+): ConfigDTO {
+  const components = buildComponentDTOsFromNativeAmpState(ampState);
+
+  return {
+    id: `config-${Date.now()}`,
+    name: configName,
+    components,
+  };
+}
+
+// builds complete dawDTO with single config containing native amp preset
+export function buildDawDTOFromNativeAmpState(
+  dawName: string,
+  userId: number,
+  configName: string,
+  ampState: {
+    inputGain: number;
+    directMode: boolean;
+    distortionAmount: number;
+    bassValue: number;
+    midValue: number;
+    trebleValue: number;
+    reverbAmount: number;
+    volumeValue: number;
+  }
+): DawDTO {
+  const config = buildConfigDTOFromNativeAmpState(configName, ampState);
+
+  return {
+    dawId: `daw-${Date.now()}`,
+    userId,
+    name: dawName,
+    listOfConfigs: [config],
+  };
+}
+
+// extracts native amp settings from componentDTO array
+export function extractNativeAmpStateFromComponentDTOs(components: ComponentDTO[]): {
+  inputGain: number;
+  directMode: boolean;
+  distortionAmount: number;
+  bassValue: number;
+  midValue: number;
+  trebleValue: number;
+  reverbAmount: number;
+  volumeValue: number;
+} | null {
+  const ampComponent = components.find(c => c.name === 'NativeAmp');
+
+  if (!ampComponent) {
+    return null;
+  }
+
+  const params = (key: string, defaultValue: any) => {
+    return ampComponent.settings.parameters[key] ?? defaultValue;
+  };
+
+  return {
+    inputGain: params('inputGain', 5.0) as number,
+    directMode: params('directMode', false) as boolean,
+    distortionAmount: params('distortionAmount', 0.5) as number,
+    bassValue: params('bassValue', 0) as number,
+    midValue: params('midValue', 0) as number,
+    trebleValue: params('trebleValue', 0) as number,
+    reverbAmount: params('reverbAmount', 0.3) as number,
+    volumeValue: params('volumeValue', -6) as number,
+  };
+}
+
+// applies native amp preset settings from componentDTOs to component state setters
+export function applyNativeAmpStateFromComponentDTOs(
+  components: ComponentDTO[],
+  setters: {
+    setInputGain: (value: number) => void;
+    setDirectMode: (value: boolean) => void;
+    setDistortionAmount: (value: number) => void;
+    setBassValue: (value: number) => void;
+    setMidValue: (value: number) => void;
+    setTrebleValue: (value: number) => void;
+    setReverbAmount: (value: number) => void;
+    setVolumeValue: (value: number) => void;
+  }
+): boolean {
+  const state = extractNativeAmpStateFromComponentDTOs(components);
+  if (!state) {
+    return false;
+  }
+
+  setters.setInputGain(state.inputGain);
+  setters.setDirectMode(state.directMode);
+  setters.setDistortionAmount(state.distortionAmount);
+  setters.setBassValue(state.bassValue);
+  setters.setMidValue(state.midValue);
+  setters.setTrebleValue(state.trebleValue);
+  setters.setReverbAmount(state.reverbAmount);
+  setters.setVolumeValue(state.volumeValue);
 
   return true;
 }

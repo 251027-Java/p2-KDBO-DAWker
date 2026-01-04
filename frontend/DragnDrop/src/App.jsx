@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import './App.css'
 import TestComponent from './components/TestComponent'
 import ToneJsDemo from './components/TonetsDemo'
+import NativeAmpDemo from './components/NativeAmpDemo'
 
 function App() {
   // const [user, setUser] = useState(null)
@@ -43,6 +44,7 @@ function App() {
           <Route path="/search" element={<Searchts />} />
           <Route path="/demo" element={<TestComponent />} />
           <Route path="/test" element={<ToneJsDemo />} />
+          <Route path="/native-amp" element={<NativeAmpDemo />} />
         </Routes>
       </BrowserRouter>
     </>

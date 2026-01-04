@@ -131,6 +131,13 @@ const RNBOStreamDemo = () => {
                 device.setPreset(presets[6].preset || presets[0].preset);
             }
 
+            // Enable input processing (RNBO devices often have an input on/off parameter)
+            const inputParam = device.parametersById.get('input');
+            if (inputParam) {
+                inputParam.value = 1; // Turn input ON
+                console.log('RNBO input enabled');
+            }
+
             // Connect audio chain: source -> RNBO device -> analyser -> gain -> destination
             audioSource.connect(device.node);
             device.node.connect(analyser);
