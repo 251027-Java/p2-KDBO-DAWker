@@ -3,6 +3,8 @@ import "../Landing.css";
 import { Link } from "react-router-dom";
 
 const Landing: React.FC = () => {
+  const isLoggedIn = Boolean(localStorage.getItem("dawker_user"));
+
   return (
     <div>
       <style>
@@ -12,18 +14,14 @@ const Landing: React.FC = () => {
         <div className="nav-container">
           <div className="logo">DAWKER</div>
 
-          <ul className="links">
-            <li>
-              <Link to="/myDaws">My DAWs</Link>
-            </li>
-            <li>
-              <Link to="/search">Search</Link>
-            </li>
-          </ul>
-
           <div className="buttons">
-            <Link to="/signup">Sign Up</Link>
-            <Link to="/login">Log In</Link>
+            {isLoggedIn ? (
+              <Link to="/userpage">My Dashboard</Link>
+            ) : (
+              <>
+                <Link to="/login">Log In</Link>
+              </>
+            )}
           </div>
         </div>
       </nav>
@@ -37,7 +35,13 @@ const Landing: React.FC = () => {
           </p>
         
           <div className="buttons">
-            <Link to="/signup" className="button">Get Started Free</Link>
+            {isLoggedIn ? (
+              <Link to="/userpage" className="button">My Dashboard</Link>
+            ) : (
+              <>
+                <Link to="/login" className="button">Get Started For Free</Link>
+              </>
+            )}
             <Link to="/search" className="button">Explore DAWs</Link>
           </div>
         </section>
@@ -115,9 +119,13 @@ const Landing: React.FC = () => {
           <h2>Start Building Your DAWs Today</h2>
           <p>It’s free, fast, and built for creators.</p>
           <div className="buttons">
-            <Link to="/signup" className="button">
-              Create Your Account
-            </Link>
+            {isLoggedIn ? (
+              <Link to="/userpage" className="button">My Dashboard</Link>
+            ) : (
+              <>
+                <Link to="/login" className="button">Create Your Account</Link>
+              </>
+            )}
           </div>
         </section>
       </main>
