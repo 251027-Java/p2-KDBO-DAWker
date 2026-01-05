@@ -9,10 +9,18 @@ import { commentsPostDTO, forumPageDTO } from "../dtos/types";
 import { userAPI } from "../utils/userAPI";
 const ForumPage = () => {
 
-const { postId } = useParams<{ postId: string }>(); // Remove the '?' if this route requires an ID
-const [forumPage, setForumPage] = useState<forumPageDTO | null>(null);
-const [isReplying, setIsReplying] = useState(false);
-const [newComment, setNewComment] = useState("");
+  const navigate = useNavigate();
+  const { postId } = useParams<{ postId: string }>(); // Remove the '?' if this route requires an ID
+  const [forumPage, setForumPage] = useState<forumPageDTO | null>(null);
+  const [isReplying, setIsReplying] = useState(false);
+  const [newComment, setNewComment] = useState("");
+
+
+  useEffect(() => {
+    if(userAPI.currentUser == null){
+      navigate("/login")
+    }
+  }, [])
 
   useEffect(() => {
     const fetchForum = async () => {
@@ -114,7 +122,7 @@ const [newComment, setNewComment] = useState("");
         icon="plus" 
         text="Add Comment" 
         onClick={() => setIsReplying(true)}
-        className="text-emerald-400 hover:bg-emerald-400/10"
+        className="text-emerald-400 !hover:bg-emerald-400/10 !bg-white/5"
       />
     )}
   </div>
@@ -134,14 +142,14 @@ const [newComment, setNewComment] = useState("");
           minimal 
           text="Cancel" 
           onClick={() => { setIsReplying(false); setNewComment(""); }} 
-          className="text-zinc-500" 
+          className="text-zinc-500 !bg-white/5" 
         />
         <Button 
           intent="success" 
           text="Post Comment" 
           onClick={handleCommentSubmit} // You'll define this next
           disabled={!newComment.trim()}
-          className="rounded-xl px-6"
+          className="rounded-xl px-6 !bg-white/5" 
         />
       </div>
     </div>
@@ -156,13 +164,13 @@ const [newComment, setNewComment] = useState("");
           </span>
         </div>
         
-        <Card interactive={false} className="bg-zinc-950/50 border-zinc-800 p-6 text-zinc-400 leading-relaxed italic">
+        <Card interactive={false} className="!bg-zinc-950/50 !border-zinc-800 p-6 text-zinc-400 leading-relaxed italic">
           "{comment.content}"
         </Card>
         
         <div className="mt-4 flex gap-4">
-          <Button minimal icon="thumbs-up" className="text-zinc-500 hover:text-emerald-400" />
-          <Button minimal icon="chat" className="text-zinc-500" />
+          <Button minimal icon="thumbs-up" className="text-zinc-500 hover:text-emerald-400 !bg-white/5" />
+          <Button minimal icon="chat" className="text-zinc-500 !bg-white/5" />
         </div>
       </div>
     ))}

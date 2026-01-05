@@ -22,10 +22,6 @@ public class dawDTO {
     private int exportCount;
     private List<configDTO> listOfConfigs;
 
-    // public dawDTO() {
-
-    // }
-
     public dawDTO(
             String dawId,
             Long userId,

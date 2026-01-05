@@ -3,7 +3,7 @@
 
 import { DawDTO, ConfigDTO } from '../dtos/types';
 
-const API_BASE_URL = 'http://localhost:8080/api/search'; // update with API URL
+const API_BASE_URL = 'http://localhost:8080/api'; // update with API URL
 
 // gets a DAW by ID (configs, components, settings)
 export const dawAPI = {
@@ -12,7 +12,7 @@ export const dawAPI = {
 
   getDawById: async (dawId: string): Promise<DawDTO> => {
     try {
-      const response = await fetch(`${API_BASE_URL}/daw?dawId=${dawId}`);
+      const response = await fetch(`${API_BASE_URL}/search/daw?dawId=${dawId}`);
       
       if (!response.ok) {
         throw new Error(`Failed to load DAW: ${response.statusText}`);
@@ -28,7 +28,7 @@ export const dawAPI = {
   // get all daws
   getAllDaws: async (): Promise<DawDTO[]> => {
     try {
-      const response = await fetch(`${API_BASE_URL}/allDaws`);
+      const response = await fetch(`${API_BASE_URL}/search/allDaws`);
       
       if (!response.ok) {
         throw new Error(`Failed to load DAWs: ${response.statusText}`);
@@ -49,7 +49,7 @@ export const dawAPI = {
   saveDaw: async (daw: DawDTO): Promise<DawDTO> => {
     try {
       // update endpoint when backend implements POST/PUT
-      const response = await fetch(`${API_BASE_URL}`, {
+      const response = await fetch(`${API_BASE_URL}/save/Daw`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

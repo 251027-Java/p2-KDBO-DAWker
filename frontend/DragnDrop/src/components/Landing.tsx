@@ -8,7 +8,7 @@ const Landing: React.FC = () => {
       <style>
         @import url('https://fonts.googleapis.com/css2?family=Gruppo&display=swap');
       </style>
-      <nav className="navbar">
+      <nav className="navbar text-white">
         <div className="nav-container">
           <div className="logo">DAWKER</div>
 
@@ -29,7 +29,7 @@ const Landing: React.FC = () => {
       </nav>
 
       <main>
-        <section className="hero-section">
+        <section className="hero-section text-white">
           <h1>Build, Share, and Use Custom DAWs</h1>
           <p>
             DAWKER lets you design Digital Audio Workstations for any workflow,
@@ -41,10 +41,10 @@ const Landing: React.FC = () => {
             <Link to="/search" className="button">Explore DAWs</Link>
           </div>
         </section>
-        <section className="how-it-works">
+        <section className="how-it-works ">
           <h2>How DAWKER Works</h2>
         
-          <div className="steps">
+          <div className="steps text-white">
             <div className="step">
               <h3>Create</h3>
               <p>Design a DAW for recording, mixing, or sound design.</p>
@@ -64,7 +64,7 @@ const Landing: React.FC = () => {
         <section className="features-section">
           <h2>Everything You Need</h2>
         
-          <div className="feature-grid">
+          <div className="feature-grid text-white">
             <div className="feature-card">
               <h3>User Accounts</h3>
               <p>Sign up and manage all your DAWs in one place.</p>
@@ -111,7 +111,7 @@ const Landing: React.FC = () => {
             </div>
           </div>
         </section>
-        <section className="cta-section">
+        <section className="cta-section text-white">
           <h2>Start Building Your DAWs Today</h2>
           <p>It’s free, fast, and built for creators.</p>
           <div className="buttons">

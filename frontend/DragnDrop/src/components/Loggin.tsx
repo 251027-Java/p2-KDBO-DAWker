@@ -1,24 +1,21 @@
 import React, { useState, FormEvent, ChangeEvent } from 'react';
 import '../Login.css';
+import { userAPI } from '../utils/userAPI';
+import { useNavigate } from 'react-router-dom';
+import { userDTO } from '../dtos/types';
 
-// 1. Define the shape of the User object
-interface User {
-  name: string;
-  email: string;
-}
 
-// 2. Define the Props for the Login component
-interface LoginProps {
-  onLogin: (user: User) => void;
-}
 
-export default function Loggin({ onLogin }: LoginProps) {
+export default function Loggin() {
+
+  const navigate = useNavigate();
+
   // TypeScript infers string type automatically from the initial value ''
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [error, setError] = useState<string>('');
 
-  // 3. Type the FormEvent
+  // // 3. Type the FormEvent
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!email || !password) {
@@ -27,23 +24,32 @@ export default function Loggin({ onLogin }: LoginProps) {
     }
 
     setError('');
-    
-    // Construct the user object matching the User interface
-    const loggedInUser: User = { 
-      name: email.split('@')[0] || 'User', 
-      email 
-    };
 
     // persist simple user info so Search components can read it
     try {
-      localStorage.setItem('dawker_user', JSON.stringify(loggedInUser));
+        const handleLogin = async () => {
+
+          const user: userDTO | null = await userAPI.login(email, password);
+
+          if (user) {
+            const verifiedUser: userDTO = user; 
+            console.log("Logged in:", verifiedUser.email);
+            navigate('/userpage')
+            
+          } else {
+            alert("Invalid credentials");
+          }
+        }
+
+        handleLogin();
+
     } catch (err) {
       // ignore storage errors
     }
 
-    onLogin(loggedInUser);
-    // notify other components
-    window.dispatchEvent(new CustomEvent('dawker:login', { detail: loggedInUser }));
+    // onLogin(loggedInUser);
+    // // notify other components
+    // window.dispatchEvent(new CustomEvent('dawker:login', { detail: loggedInUser }));
   }
 
   return (
@@ -63,7 +69,7 @@ export default function Loggin({ onLogin }: LoginProps) {
               <input
                 className="input"
                 type="text"
-                placeholder="Phone, email, or username"
+                placeholder="Email"
                 aria-label="username"
                 autoComplete="username"
                 value={email}
