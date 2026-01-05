@@ -102,4 +102,11 @@ public class useService {
                                 .orElseThrow(() -> new UserNotFoundException("User could not be found by that Id"));
         }
 
+        public userDTO loginUser(String email, String password) {
+                return this.userRepository.findByEmailContainingIgnoreCase(email)
+                                .filter(user -> user.getPassword().equals(password))
+                                .map(this::mapToUserDTO)
+                                .orElse(null);
+        }
+
 }

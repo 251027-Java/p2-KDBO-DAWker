@@ -1,132 +1,191 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-
-type Rating = { userId: string | number; rating: number; comment?: string };
-type LocalProject = {
-  id: number;
-  dawId: number;
-  userId: string | number;
-  name: string;
-  description: string;
-  listOfConfigs: { name: string; componentChain: { name: string }[] }[];
-  ratings?: Rating[];
-};
-
-const projects: LocalProject[] = [
-  {
-    id: 1,
-    dawId: 2183908290381,
-    userId: 'omar',
-    name: 'Lo-Fi Beat',
-    description: 'Warm tape saturation and crunchy drums',
-    listOfConfigs: [{ name: 'Default', componentChain: [{ name: 'Chorus' }, { name: 'Delay' }] }],
-    ratings: [{ userId: 'omar', rating: 5, comment: 'Great vibe' }, { userId: 'alice', rating: 4, comment: 'Nice textures' }]
-  },
-  {
-    id: 2,
-    dawId: 2183908290382,
-    userId: 'alice',
-    name: 'Ambient Pad',
-    description: 'Evolving pad with long reverb tails',
-    listOfConfigs: [{ name: 'Pad-Long', componentChain: [{ name: 'Reverb' }, { name: 'Phaser' }] }],
-    ratings: [{ userId: 'bob', rating: 3, comment: 'Good, needs work' }]
-  },
-  {
-    id: 3,
-    dawId: 2183908290383,
-    userId: 'bob',
-    name: 'Crunch Rhythm',
-    description: 'Aggressive overdriven rhythm with gated delay',
-    listOfConfigs: [{ name: 'Crunch', componentChain: [{ name: 'Overdrive' }, { name: 'Delay' }] }],
-    ratings: []
-  }
-];
+import { userAPI } from '../utils/userAPI';
+import { useNavigate } from 'react-router-dom';
+import { DawDTO } from '../dtos/types';
+import { dawAPI } from '../utils/dawAPI';
+import { Button, Card, Classes, Divider, Drawer, Elevation, Icon, Position, Tag } from '@blueprintjs/core';
 
 export default function Search() {
+  const navigate = useNavigate();
+
   const [query, setQuery] = useState<string>('');
   const [onlyMine, setOnlyMine] = useState<boolean>(false);
-  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [daws, setDaws] = useState<DawDTO[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [selectedDaw, setSelectedDaw] = useState<DawDTO | null>(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem('dawker_user');
-      if (raw) setCurrentUser(JSON.parse(raw));
-    } catch (err) {
-      // ignore
+    if (userAPI.currentUser == null) {
+      navigate("/login");
     }
 
-    const handler = (e: any) => setCurrentUser(e.detail);
-    window.addEventListener('dawker:login', handler as EventListener);
-    return () => window.removeEventListener('dawker:login', handler as EventListener);
-  }, []);
+    const loadData = async () => {
+      try {
+        const data = await dawAPI.getAllDaws();
+        setDaws(data);
+      } catch (error) {
+        console.error("Failed to fetch forums:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const results = projects.filter((project) => {
-    const q = query.toLowerCase();
-    const projectMatch = project.name.toLowerCase().includes(q) || project.description.toLowerCase().includes(q);
-    const configMatch = project.listOfConfigs.some(cfg => cfg.name.toLowerCase().includes(q));
-    const componentMatch = project.listOfConfigs.some(cfg => cfg.componentChain.some(c => c.name.toLowerCase().includes(q)));
-    return projectMatch || configMatch || componentMatch;
-  });
+    loadData();
+  }, [navigate]);
+
+  const handleOpenSidebar = (daw: DawDTO) => {
+    setSelectedDaw(daw);
+    setIsDrawerOpen(true);
+  };
 
   return (
-    <div className="min-h-screen bg-zinc-900 text-white">
-      <div className="sticky top-0 bg-zinc-900 border-b border-zinc-800 p-4">
-        <div className="flex gap-3 items-center">
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search rigs, effects, projects"
-            className="w-full px-4 py-3 rounded-full bg-zinc-800 text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          />
-          <label className="flex items-center gap-2 ml-3 text-sm text-zinc-300">
-            <input type="checkbox" checked={onlyMine} onChange={(e) => setOnlyMine(e.target.checked)} className="rounded" />
-            My DAWs
+    <div className="!min-h-screen !bg-zinc-950 !text-white !p-6">
+      {/* SEARCH HEADER */}
+      <div className="sticky !top-0 !z-[100] !bg-zinc-950 !border-b !border-white/10 !p-6 !mb-8 !shadow-2xl">
+        <div className="!max-w-4xl !mx-auto !flex !gap-4 !items-center">
+          <div className="!relative !flex-1">
+            <Icon icon="search" className="!absolute !left-4 !top-1/2 !-translate-y-1/2 !text-zinc-500" />
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search rigs, effects, projects..."
+              className="!w-full !pl-12 !pr-4 !py-3 !rounded-xl !bg-zinc-900 !border !border-white/10 !text-white !placeholder-zinc-500 !outline-none !focus:ring-2 !focus:ring-emerald-500/50 !transition-all"
+            />
+          </div>
+          <label className="!flex !items-center !gap-2 !cursor-pointer !group">
+            <input 
+              type="checkbox" 
+              checked={onlyMine} 
+              onChange={(e) => setOnlyMine(e.target.checked)} 
+              className="!rounded !border-zinc-700 !bg-zinc-800 !text-emerald-500 !focus:ring-emerald-500/20" 
+            />
+            <span className="!text-sm !text-zinc-400 group-hover:!text-zinc-200 !transition-colors">My_Library</span>
           </label>
         </div>
       </div>
 
-      <div className="max-w-2xl mx-auto px-4 py-6 space-y-4">
-        {results
-          .filter(p => !onlyMine || (currentUser && String(p.userId) === String(currentUser.name || currentUser.email?.split?.('@')?.[0] || currentUser.email)))
-          .map(project => (
-            <div key={project.id} className="p-4 bg-zinc-800 rounded-xl hover:bg-zinc-700 transition">
-              <h3 className="text-lg font-semibold">{project.name}</h3>
-              <div className="text-sm text-zinc-400 mt-1">by User {project.userId}</div>
-              <div className="mt-2 text-sm text-yellow-300">
-                {project.ratings && project.ratings.length > 0 ? (
-                  <>
-                    Avg: {(project.ratings.reduce((a, b) => a + b.rating, 0) / project.ratings.length).toFixed(1)} • {project.ratings.length} ratings
-                  </>
-                ) : 'No ratings yet'}
-              </div>
-              {currentUser && (
-                <div className="mt-1 text-xs text-zinc-400">Your rating: {(() => {
-                  const unr = project.ratings?.find(r => String(r.userId) === String(currentUser.email?.split?.('@')?.[0] || currentUser.name));
-                  return unr ? `${unr.rating} — ${unr.comment}` : 'none';
-                })()}</div>
-              )}
+      {/* RESULTS GRID */}
+      <div className="!max-w-4xl !mx-auto !flex !flex-col !gap-4">
+        {daws.map((daw) => (
+          <Card 
+            key={daw.dawId} 
+            interactive={true} 
+            elevation={Elevation.ZERO}
+            onClick={() => handleOpenSidebar(daw)}
+            /* THE SINK EFFECT: Moves down on hover */
+            className="!bg-zinc-900/40 !p-0 !overflow-hidden !border !border-white/10 hover:!border-emerald-500/40 hover:!translate-y-1 hover:!bg-zinc-900/60 !transition-all !duration-300 !group"
+          >
+            <div className="!flex !flex-row !h-full !items-stretch">
+              {/* Left Stripe */}
+              <div className="!w-1 !bg-emerald-500/20 group-hover:!bg-emerald-500 !transition-colors" />
 
-              <div className="mt-3 space-y-2">
-                {project.listOfConfigs.map(cfg => (
-                  <div key={cfg.name}>
-                    <div className="text-sm font-medium text-indigo-400">{cfg.name}</div>
-                    <div className="flex flex-wrap gap-2 mt-1">
-                      {cfg.componentChain.map(c => (
-                        <span key={c.name} className="text-xs bg-zinc-700 px-2 py-1 rounded-full">{c.name}</span>
-                      ))}
-                    </div>
+              {/* Main Content Area */}
+              <div className="!flex-1 !p-6">
+                <div className="!flex !justify-between !items-start !mb-3">
+                  <div className="!space-y-1">
+                    <h3 className="!text-zinc-100 !font-bold !text-xl !m-0 !leading-none group-hover:!text-white">
+                      {daw.name}
+                    </h3>
+                    <p className="!text-zinc-600 !text-[10px] !font-mono !uppercase !tracking-widest">
+                      INSTANCE_ID: {daw.dawId.slice(0, 8)}
+                    </p>
                   </div>
-                ))}
+                  <Tag minimal className="!bg-emerald-500/10 !text-emerald-400 !border !border-emerald-500/20 !px-3">
+                    {daw.exportCount} EXPORTS
+                  </Tag>
+                </div>
+
+                <p className="!text-zinc-400 !text-sm !line-clamp-2 !mb-6 !italic !font-serif">
+                  {daw.description || "No system description found."}
+                </p>
+
+                {/* Metadata Rail */}
+                <div className="!flex !items-center !gap-8 !pt-4 !border-t !border-white/5">
+                  <div className="!flex !flex-col">
+                    <span className="!text-[9px] !text-zinc-600 !uppercase !font-black !tracking-widest">Initialization</span>
+                    <span className="!text-xs !text-zinc-400 !font-mono">
+                      {new Date(daw.createdAt).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <div className="!flex !flex-col">
+                    <span className="!text-[9px] !text-zinc-600 !uppercase !font-black !tracking-widest">Components</span>
+                    <span className="!text-xs !text-zinc-400 !font-mono">
+                      {daw.listOfConfigs.length.toString().padStart(2, '0')} ACTIVE_UNITS
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Indicator */}
+              <div className="!w-14 !flex !items-center !justify-center !bg-white/[0.02] !border-l !border-white/5 group-hover:!bg-emerald-500/5">
+                <Icon icon="chevron-right" className="!text-zinc-700 group-hover:!text-emerald-500 !transition-colors" />
               </div>
             </div>
-          ))}
-
-        {query && results.length === 0 && (
-          <div className="text-center text-zinc-500 pt-10">No results found for "{query}"</div>
-        )}
+          </Card>
+        ))}
       </div>
+
+      {/* DRAWER (Functionality Intact, Themes Overridden) */}
+      <Drawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        title={selectedDaw ? `PROJECT_LOG // ${selectedDaw.name}` : "Metadata"}
+        position={Position.RIGHT}
+        portalClassName='!z-[2000]'
+        size="700px"
+        className="!bg-zinc-950 !text-zinc-100 !border-l !border-emerald-500/30 shadow-2xl !z-[2000]"
+      >
+        <div className={`${Classes.DRAWER_BODY} !p-0`}>
+          {selectedDaw && (
+            <div className="!p-8 !space-y-8">
+              <section>
+                <h4 className="!text-[10px] !uppercase !tracking-[0.3em] !text-emerald-500 !mb-4 !font-black">01_System_Brief</h4>
+                <p className="!text-base !text-zinc-300 !leading-relaxed !bg-white/5 !p-4 !rounded-lg !border !border-white/5">
+                  {selectedDaw.description || "Metadata field returned empty."}
+                </p>
+              </section>
+
+              <Divider className="!border-white/10" />
+
+              <section>
+                <h4 className="!text-[10px] !uppercase !tracking-[0.3em] !text-emerald-500 !mb-6 !font-black">02_Signal_Chain</h4>
+                <div className="!space-y-4">
+                  {selectedDaw.listOfConfigs.map((config) => (
+                    <div key={config.id} className="!bg-zinc-900 !p-4 !rounded-xl !border !border-white/5 hover:!border-emerald-500/20 !transition-colors">
+                      <div className="!flex !items-center !justify-between !mb-3">
+                        <span className="!text-sm !font-bold !text-zinc-100 !tracking-tight">{config.name}</span>
+                        <Tag minimal className="!text-[10px] !bg-emerald-500/10 !text-emerald-500">{config.components.length} NODES</Tag>
+                      </div>
+                      <div className="!flex !gap-2 !flex-wrap">
+                        {config.components.map((comp, idx) => (
+                          <span key={idx} className="!text-[10px] !font-mono !text-zinc-500 !bg-black !px-2 !py-1 !rounded !border !border-white/5">
+                            {comp.type.toUpperCase()}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            </div>
+          )}
+        </div>
+        
+        <div className={`${Classes.DRAWER_FOOTER} !bg-zinc-900/50 !p-6 !border-t !border-white/5`}>
+          <Button 
+            fill 
+            intent="success" 
+            large
+            text="INITIALIZE WORKSPACE" 
+            icon="document-open"
+            className="!py-7 !font-black !tracking-[0.2em] !rounded-xl !bg-emerald-600 hover:!bg-emerald-500 !transition-colors"
+          />
+        </div>
+      </Drawer>
     </div>
   );
 }

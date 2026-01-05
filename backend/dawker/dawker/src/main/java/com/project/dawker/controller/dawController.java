@@ -14,6 +14,7 @@ import com.project.dawker.dto.forumPostDTO;
 import com.project.dawker.dto.userDTO;
 import com.project.dawker.dto.recievedDto.receivedCommentDTO;
 import com.project.dawker.dto.recievedDto.receivedForumDTO;
+import com.project.dawker.dto.recievedDto.recievedLoginRequest;
 import com.project.dawker.entity.User;
 import com.project.dawker.service.DawService;
 import com.project.dawker.service.UserService;
@@ -22,6 +23,8 @@ import com.project.dawker.service.useService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
 import java.util.List;
@@ -86,6 +89,7 @@ public class dawController {
 
     // ------------------- POST METHODS ------------------
 
+    // ------------------- Daw specific ----------------------------
     // Creates an empty daw method
     @PostMapping("/create/daw")
     public void createDaw(@RequestParam Long userId, @RequestParam String dawName) {
@@ -103,7 +107,10 @@ public class dawController {
         return ResponseEntity.ok(payload);
 
     }
+    // ---------------------------------------------------------------------
 
+    // ------------------------------- Forum specific
+    // -------------------------------
     // Forum based post requests
     @PostMapping("/saveForum")
     public ResponseEntity<?> saveForum(@RequestBody receivedForumDTO payload) {
@@ -116,6 +123,9 @@ public class dawController {
 
     }
 
+    // -------------------------------------------------------------------------
+
+    // ------------------------------- Comment ------------------------------------
     @PostMapping("/saveComment")
     public ResponseEntity<?> saveComment(@RequestBody receivedCommentDTO payload) {
 
@@ -127,5 +137,23 @@ public class dawController {
         return ResponseEntity.ok(payload);
 
     }
+    // ----------------------------------------------------------------------
 
+    // -------------------------------- User
+    // ----------------------------------------
+
+    @PostMapping("/User/auth")
+    public ResponseEntity<userDTO> login(@RequestBody recievedLoginRequest loginRequest) {
+        userDTO user = useService.loginUser(loginRequest.getEmail(), loginRequest.getUserPassword());
+
+        if (user == null) {
+            // This prevents the "Unexpected end of JSON" error in React
+            // because React will see the 401 and return null early.
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        return ResponseEntity.ok(user);
+    }
+
+    // -------------------------------------------------------------------
 }
