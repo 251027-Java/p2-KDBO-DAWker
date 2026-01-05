@@ -1,0 +1,27 @@
+server:
+  port: 8079
+
+spring:
+  application:
+    name: gateway
+
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            # Route: /api/** -> dawker service
+            - id: dawker-route
+              uri: lb://dawker
+              predicates:
+                - Path=/api/**          # Match all paths starting with /api/
+
+# Eureka Client Configuration
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
