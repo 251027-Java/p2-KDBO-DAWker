@@ -94,6 +94,33 @@ export interface commentsPostDTO{
   content: string;
 }
 
+export interface ratingsCommentPostDTO {
+  dawId: string;
+  rating: number; 
+  userId: number;
+  username: string;
+  comment: string;
+  createdAt: string; 
+}
+
+// ------------------- recieved -------------------
+
+export interface RatingsPageDTO {
+  id: number;
+  dawId: string;
+  rating: number; // Handles the double (e.g., 4.5)
+  comments: ReceivedRatingsCommentDTO[];
+}
+
+export interface ReceivedRatingsCommentDTO {
+  dawId: string;
+  rating: number;
+  userId: number;
+  username: string;
+  comment: string;
+  createdAt: string; // Received as "2025-10-31T10:00:00"
+}
+
 
 //-------Needed a workaround. .ts files do not work with .jsx---------
 /**
