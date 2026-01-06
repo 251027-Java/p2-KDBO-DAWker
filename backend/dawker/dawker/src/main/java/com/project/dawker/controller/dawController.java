@@ -92,7 +92,7 @@ public class dawController {
 
     @GetMapping("/search/allUsers")
     public List<userDTO> getAllUsers() {
-        logger.info("api-calls", "Getting all users", "dawController", "getAllUsers");
+        logger.trace("api-calls", "Getting all users", "dawController", "getAllUsers");
         return this.useService.getAllUsers();
     }
 
