@@ -16,7 +16,7 @@ code {
     monospace;
 }
 
-/* Custom slider styling */
+/* custom slider styling */
 input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
