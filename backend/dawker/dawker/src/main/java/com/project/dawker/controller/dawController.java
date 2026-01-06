@@ -16,11 +16,7 @@ import com.project.dawker.dto.recievedDto.receivedCommentDTO;
 import com.project.dawker.dto.recievedDto.receivedForumDTO;
 import com.project.dawker.dto.recievedDto.recievedLoginRequest;
 import com.project.dawker.dto.recievedDto.recievedRatingsCommentDTO;
-<<<<<<< HEAD
 import com.project.dawker.dto.recievedDto.recievedSessionNotesDTO;
-import com.project.dawker.entity.User;
-=======
->>>>>>> f7e0d6e2c8f93d2ab81e9a78edab83b9ad6efc87
 import com.project.dawker.entity.daw_specific.RatingsComment;
 import com.project.dawker.entity.daw_specific.RatingsPage;
 import com.project.dawker.repository.RatingsCommentRepository;
