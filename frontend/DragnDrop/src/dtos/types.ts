@@ -63,6 +63,7 @@ export interface forumsDTO{
   createdAt: Date;
   postType: string;
   userId: number;
+  username: string;
   title: string;
 }
 
@@ -71,6 +72,7 @@ export interface forumPageDTO{
   createdAt: Date;
   postType: string;
   userId: number;
+  userName: string;
   title: string;
   description: string;  
   comments: commentsDTO[];
@@ -82,6 +84,7 @@ export interface forumPagePostDTO {
   createdAt: Date;
   postType: string;
   userId: number;
+  userName: string;
   title: string;
   description: string;
   comments: commentsDTO[] | null;
@@ -90,6 +93,7 @@ export interface forumPagePostDTO {
 export interface commentsPostDTO{
   createdAt: Date;
   userId: number;
+  userName: string;
   parentPostId: number;
   content: string;
 }
@@ -101,6 +105,23 @@ export interface ratingsCommentPostDTO {
   username: string;
   comment: string;
   createdAt: string; 
+}
+
+// Also works as post. Didn't really need to add another but I will
+export interface recievedSessionNoteDTO {
+  id?: number;
+  userId?: number;
+  title?: string;
+  content?: string;
+
+}
+
+export interface SessionNotePostDTO {
+  id?: number;
+  userId?: number;
+  title?: string;
+  content?: string;
+
 }
 
 // ------------------- recieved -------------------

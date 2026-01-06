@@ -17,6 +17,7 @@ import com.project.dawker.dto.recievedDto.receivedCommentDTO;
 import com.project.dawker.dto.recievedDto.receivedForumDTO;
 import com.project.dawker.dto.recievedDto.recievedLoginRequest;
 import com.project.dawker.dto.recievedDto.recievedRatingsCommentDTO;
+import com.project.dawker.dto.recievedDto.recievedSessionNotesDTO;
 import com.project.dawker.entity.User;
 import com.project.dawker.entity.daw_specific.RatingsComment;
 import com.project.dawker.entity.daw_specific.RatingsPage;
@@ -26,6 +27,7 @@ import com.project.dawker.service.DawService;
 import com.project.dawker.service.RatingsPageService;
 import com.project.dawker.service.UserService;
 import com.project.dawker.service.forumService;
+import com.project.dawker.service.sessionNotesService;
 import com.project.dawker.service.useService;
 
 import io.micrometer.core.ipc.http.HttpSender.Response;
@@ -50,19 +52,22 @@ public class dawController {
     private final RatingsPageService ratingsService;
     private final RatingsPageRepository ratingsRepo;
     private final RatingsCommentRepository ratingsCommentRepo;
+    private final sessionNotesService notesService;
 
     public dawController(DawService dawService,
             useService useService,
             forumService forumService,
             RatingsPageService ratingsService,
             RatingsPageRepository ratingsRepo,
-            RatingsCommentRepository ratingsCommentRepo) {
+            RatingsCommentRepository ratingsCommentRepo,
+            sessionNotesService notesService) {
         this.dawService = dawService;
         this.useService = useService;
         this.forumService = forumService;
         this.ratingsService = ratingsService;
         this.ratingsRepo = ratingsRepo;
         this.ratingsCommentRepo = ratingsCommentRepo;
+        this.notesService = notesService;
     }
 
     // ------------------ GET METHODS ------------------
@@ -106,6 +111,11 @@ public class dawController {
         return this.forumService.getForumById(Id);
     }
 
+    @GetMapping("/search/Forums/User")
+    public List<forumPostDTO> getForumByUserId(@RequestParam Long Id) {
+        return this.forumService.getAllForumsByUserId(Id);
+    }
+
     // -------------------- ratings specific --------------
     @GetMapping("/search/ratingsPage")
     public ratingsPageDTO getRatingsPageById(@RequestParam String dawId) {
@@ -126,6 +136,23 @@ public class dawController {
         this.ratingsCommentRepo.findAll().forEach(System.out::println);
         return this.ratingsCommentRepo.findAll();
     }
+
+    // ---------------------------------------------------------------------
+
+    // -------------------- notes specific --------------------------
+
+    @GetMapping("/search/note")
+    public recievedSessionNotesDTO getNoteById(@RequestParam Long Id) {
+
+        return this.notesService.getNoteById(Id);
+    }
+
+    @GetMapping("/search/note/User")
+    public List<recievedSessionNotesDTO> getNotesOfUserByUserId(@RequestParam Long Id) {
+        return this.notesService.getAllNoteByUserId(Id);
+    }
+
+    // ------------------------------------------------------------------
 
     // ------------------- POST METHODS ------------------
 
@@ -218,4 +245,25 @@ public class dawController {
     }
 
     // --------------------------------------------------------------------------------------
+
+    // ----------------------------------------------- Session notes
+    // -----------------------------------
+    @PostMapping("/notes/create")
+    public recievedSessionNotesDTO createSessionNotes(@RequestBody recievedSessionNotesDTO note) {
+
+        // recievedRatingsCommentDTO(
+        // dawId=ef386469-4e01-4e5f-a5f3-7a825a2b2f4f,
+        // ratingsPageId=null,
+        // rating=5.0,
+        // userId=1,
+        // username=Donov,
+        // comment=Does this change the database?, createdAt=2026-01-05T15:03:04.480)
+
+        System.out.println("The sessionNote got to the backend right? ");
+        System.out.println(note);
+        recievedSessionNotesDTO dto = notesService.saveOrUpdateNote(note);
+        System.out.println("This is the DTO returned to the controller before going to the user: ");
+        System.out.println(dto);
+        return dto;
+    }
 }
