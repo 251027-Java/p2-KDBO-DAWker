@@ -30,6 +30,7 @@ class GearItemRepositoryTest {
         testGearItem = new GearItem();
         testGearItem.setModelName("Test Model");
         testGearItem.setGearType(GearType.AMP);
+        gearItemRepository.save(testGearItem);
     }
 
     @Test

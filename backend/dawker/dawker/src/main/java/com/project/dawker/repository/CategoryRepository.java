@@ -31,6 +31,6 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
      * @param categoryType the category to check
      * @return true if a category with this name exists
      */
-    boolean existsByCategoryType(String categoryType);
+    boolean existsByCategoryType(CategoryType categoryType);
 }
 
