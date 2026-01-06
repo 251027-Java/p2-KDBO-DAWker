@@ -23,9 +23,7 @@ import com.project.dawker.repository.UserRepository;
 public class forumService {
 
     private final ForumPostRepository forumRepository;
-
     private final UserRepository userRepository;
-
     private final CommentRepository commentRepository;
 
     public forumService(ForumPostRepository forumRepository, UserRepository userRepository,
@@ -58,7 +56,8 @@ public class forumService {
                 entity.getPostType(),
                 entity.getCreatedAt(),
                 entity.getAuthor() != null ? entity.getAuthor().getId() : null, // Flatten User to ID
-                commentDtos);
+                commentDtos,
+                entity.getAuthor().getUsername());
     }
 
     // --------------------Map to Entity-------------
@@ -110,6 +109,12 @@ public class forumService {
     public forumPostDTO getForumById(Long Id) {
         return this.forumRepository.findById(Id).map(this::mapToDto)
                 .orElseThrow(() -> new ForumNotFoundException("Forum request could not be found"));
+    }
+
+    // AJFEOA[FGOIEJAG[POJEAOGJ]]
+    public List<forumPostDTO> getAllForumsByUserId(Long Id) {
+        return this.forumRepository.findAllByAuthor_Id(Id).stream()
+                .map(this::mapToDto).toList();
     }
 
     // Save methods

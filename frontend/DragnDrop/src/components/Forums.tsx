@@ -35,6 +35,7 @@ const [formError, setFormError] = useState("")
       createdAt: new Date(),
       postType: tag,
       userId: currentUser.id,
+      userName: currentUser.username,
       title,
       description: content,
       comments: null
@@ -161,7 +162,7 @@ return (
   </header>
 
   {/* SECTION 2: Recent Activity */}
-  <section>
+  {/* <section>
     <h2 className="!text-zinc-500 !text-xs !font-bold !uppercase !tracking-[0.2em] !mb-4 !ml-2">Recent Activity</h2>
     <div className="!grid !grid-cols-1 !md:grid-cols-3 !gap-4">
       {[1,2,3].map((i) => (
@@ -175,7 +176,7 @@ return (
         </Card>
       ))}
     </div>
-  </section>
+  </section> */}
 
   {/* SECTION 3: All Discussions */}
   <section className="!bg-zinc-900 !border !border-zinc-800 !rounded-3xl !overflow-hidden">
@@ -195,7 +196,7 @@ return (
             <Icon icon="chat" className="!text-zinc-600 group-hover:text-amber-500" />
             <div>
               <h3 className="!text-zinc-200 !font-medium group-hover:text-white">{forum.title}</h3>
-              <p className="!text-zinc-500 !text-sm">Started by @{forum.userId} • 142 replies</p>
+              <p className="!text-zinc-500 !text-sm">Started by @{forum.username} • {forum.postType}</p>
             </div>
           </div>
           <Icon icon="chevron-right" className="!text-zinc-700" />

@@ -45,6 +45,26 @@ export const forumAPI = {
     }
   },
 
+    // get all daws
+    getAllForumsByUserId: async (userId: number): Promise<forumsDTO[]> => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/search/Forums/User?Id=${userId}`);
+        
+        if (!response.ok) {
+          throw new Error(`Failed to load Forums: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        
+        console.log(data);
+        console.log('Fetched all Forums successfully');
+        return data;
+      } catch (error) {
+        console.error('Error loading Forums:', error);
+        throw error;
+      }
+    },
+
 // inside class UserApiService...
 
   saveForumPost: async (post: forumPagePostDTO): Promise<forumPagePostDTO> => {

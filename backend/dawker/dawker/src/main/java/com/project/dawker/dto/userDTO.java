@@ -2,6 +2,8 @@ package com.project.dawker.dto;
 
 import java.util.List;
 
+import com.project.dawker.dto.recievedDto.recievedSessionNotesDTO;
+
 public class userDTO {
 
     private Long id;
@@ -11,6 +13,7 @@ public class userDTO {
     private String role;
     private List<dawDTO> daws;
     private List<forumPostDTO> forumPosts;
+    private List<recievedSessionNotesDTO> notes;
 
     public userDTO() {
     }
@@ -22,7 +25,8 @@ public class userDTO {
             String email,
             String role,
             List<dawDTO> daws,
-            List<forumPostDTO> forumPosts) {
+            List<forumPostDTO> forumPosts,
+            List<recievedSessionNotesDTO> notes) {
         this.id = id;
         this.username = username;
         this.password = password;
@@ -30,6 +34,7 @@ public class userDTO {
         this.role = role;
         this.daws = daws;
         this.forumPosts = forumPosts;
+        this.notes = notes;
     }
 
     // Getters
@@ -61,6 +66,10 @@ public class userDTO {
         return forumPosts;
     }
 
+    public List<recievedSessionNotesDTO> getSessionNotes() {
+        return notes;
+    }
+
     // Setters
     public void setId(Long id) {
         this.id = id;
@@ -88,6 +97,10 @@ public class userDTO {
 
     public void setForumPosts(List<forumPostDTO> forumPosts) {
         this.forumPosts = forumPosts;
+    }
+
+    public void setSessionNotes(List<recievedSessionNotesDTO> notes) {
+        this.notes = notes;
     }
 
     @Override

@@ -8,9 +8,11 @@ import org.springframework.stereotype.Service;
 import com.project.dawker.dto.dawDTO;
 import com.project.dawker.dto.forumPostDTO;
 import com.project.dawker.dto.userDTO;
+import com.project.dawker.dto.recievedDto.recievedSessionNotesDTO;
 import com.project.dawker.entity.User;
 import com.project.dawker.entity.daw_specific.DawEntity;
 import com.project.dawker.entity.daw_specific.ForumPost;
+import com.project.dawker.entity.daw_specific.sessionNotes;
 import com.project.dawker.exception.UserNotFoundException;
 import com.project.dawker.repository.UserRepository;
 
@@ -43,7 +45,20 @@ public class useService {
                                 post.getDescription(),
                                 post.getPostType(),
                                 post.getCreatedAt(),
-                                post.getAuthor().getId());
+                                post.getAuthor().getId(),
+                                post.getAuthor().getUsername());
+        }
+
+        private recievedSessionNotesDTO mapToSessionNoteDTO(sessionNotes entity) {
+
+                if (entity == null)
+                        return null;
+
+                return new recievedSessionNotesDTO(
+                                entity.getId(),
+                                entity.getAuthor() != null ? entity.getAuthor().getId() : null,
+                                entity.getTitle(),
+                                entity.getContent());
         }
 
         // 3. Main Mapping Function: User Entity -> UserDTO
@@ -91,8 +106,10 @@ public class useService {
                                                                                 posts.getDescription(),
                                                                                 posts.getPostType(),
                                                                                 posts.getCreatedAt(),
-                                                                                posts.getAuthor().getId()))
-                                                                .toList()))
+                                                                                posts.getAuthor().getId(),
+                                                                                posts.getAuthor().getUsername()))
+                                                                .toList(),
+                                                user.getNotes().stream().map(this::mapToSessionNoteDTO).toList()))
                                 .collect(Collectors.toList());
         }
 
