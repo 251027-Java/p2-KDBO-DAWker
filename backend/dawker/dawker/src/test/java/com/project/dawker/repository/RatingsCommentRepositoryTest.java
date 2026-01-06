@@ -64,6 +64,7 @@ class RatingsCommentRepositoryTest {
         testRatingsComment.setRatingsPage(savedRatingsPage);
         testRatingsComment.setComment("Great DAW!");
         testRatingsComment.setRating(4.5);
+        ratingsCommentRepository.save(testRatingsComment);
     }
 
     @Test

@@ -39,6 +39,7 @@ class DawRepositoryTest {
         testDaw = new DawEntity();
         testDaw.setName("Test Daw");
         testDaw.setUser(savedUser);
+        dawRepository.save(testDaw);
     }
 
     @Test
