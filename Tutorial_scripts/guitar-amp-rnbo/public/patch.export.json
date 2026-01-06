@@ -1,0 +1,5 @@
+{
+  "note": "Place your exported RNBO patch file here and rename it to patch.export.json",
+  "instructions": "1. Create your guitar amp patch in Max/MSP using RNBO\n2. Export the patch as 'patch.export.json'\n3. Replace this file with your exported patch"
+}
+
