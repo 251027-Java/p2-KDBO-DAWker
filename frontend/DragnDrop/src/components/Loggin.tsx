@@ -57,7 +57,7 @@ export default function Loggin() {
     <div className="login-page">
       <div className="dither-wrapper" aria-hidden>
         <Dither
-          waveColor={[0.32,0.15,1]}
+          waveColor={[0.133,0.773,0.369]}
           disableAnimation={false}
           enableMouseInteraction={true}
           mouseRadius={0.25}
