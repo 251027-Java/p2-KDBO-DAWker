@@ -5,7 +5,6 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
-import com.project.dawker.controller.dto.User.UserDTO;
 import com.project.dawker.dto.dawDTO;
 import com.project.dawker.dto.forumPostDTO;
 import com.project.dawker.dto.userDTO;

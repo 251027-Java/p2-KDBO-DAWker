@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import './App.css'
 import TestComponent from './components/TestComponent'
 import ToneJsDemo from './components/TonetsDemo'
+import NativeAmpDemo from './components/NativeAmpDemo'
 import Loggin from './components/Loggin'
 import Landing from './components/Landing'
 import UserPage from './components/UserPage'
@@ -35,7 +36,6 @@ function App() {
     <>
       <BrowserRouter>
         <Routes>
-          
           {/* Separates the landing page from the other component types */}
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Loggin />} />
@@ -43,8 +43,9 @@ function App() {
           {/* Makes it so that all other components have a sidebar */}
           <Route element={<Layout />} >
             <Route path="/search" element={<Searchts />} />
-            {/* <Route path="/demo" element={<TestComponent />} />
-            <Route path="/test" element={<ToneJsDemo />} /> */}
+            <Route path="/demo" element={<TestComponent />} />
+            <Route path="/test" element={<ToneJsDemo />} />
+            <Route path="/native-amp" element={<NativeAmpDemo />} />
             <Route path="/userpage" element={<UserPage />} />
             <Route path="/forums" element={<Forums/>} />
             <Route path="/forums/:postId" element={<ForumPage/>} />

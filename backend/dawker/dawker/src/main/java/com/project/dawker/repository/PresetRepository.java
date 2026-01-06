@@ -1,7 +1,6 @@
 package com.project.dawker.repository;
 
 import com.project.dawker.entity.Preset;
-import com.project.dawker.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

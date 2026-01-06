@@ -1,5 +1,6 @@
 import React, { useState, FormEvent, ChangeEvent } from 'react';
 import '../Login.css';
+import Dither from './Dither';
 import { userAPI } from '../utils/userAPI';
 import { useNavigate } from 'react-router-dom';
 import { userDTO } from '../dtos/types';
@@ -54,8 +55,22 @@ export default function Loggin() {
 
   return (
     <div className="login-page">
+      <div className="dither-wrapper" aria-hidden>
+        <Dither
+          waveColor={[0.32,0.15,1]}
+          disableAnimation={false}
+          enableMouseInteraction={true}
+          mouseRadius={0.25}
+          colorNum={4}
+          pixelSize={3}
+          waveAmplitude={0.3}
+          waveFrequency={3}
+          waveSpeed={0.25}
+        />
+      </div>
       <div className="login-card">
-        <h1 className="brand-main">Dawker</h1>
+        <h1 className="brand-main">DAWKER</h1>
+        <h2 className="login-subtitle">Where your audio dreams come to life.</h2>
         <h2 className="login-title">Login</h2>
 
         <form className="login-form" onSubmit={handleSubmit}>
@@ -69,11 +84,10 @@ export default function Loggin() {
               <input
                 className="input"
                 type="text"
-                placeholder="Email"
+                placeholder="Email or DawUserID"
                 aria-label="username"
                 autoComplete="username"
                 value={email}
-                // Optional: Explicitly typing ChangeEvent<HTMLInputElement>
                 onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
                 spellCheck={false}
               />
@@ -101,16 +115,7 @@ export default function Loggin() {
           {error && <div className="error">{error}</div>}
 
           <button className="btn primary gradient" type="submit">LOGIN</button>
-
-          <div className="or">Or Sign Up Using</div>
-
-          <div className="socials">
-            <button type="button" className="social-btn fb">F</button>
-            <button type="button" className="social-btn tw">T</button>
-            <button type="button" className="social-btn gg">G</button>
-          </div>
-
-          <div className="signup">Or Sign Up Using <a href="#">SIGN UP</a></div>
+        
         </form>
       </div>
     </div>
