@@ -1,5 +1,6 @@
 import React, { useState, FormEvent, ChangeEvent } from 'react';
 import '../Login.css';
+import Dither from './Dither';
 import { userAPI } from '../utils/userAPI';
 import { useNavigate } from 'react-router-dom';
 import { userDTO } from '../dtos/types';
@@ -54,6 +55,19 @@ export default function Loggin() {
 
   return (
     <div className="login-page">
+      <div className="dither-wrapper" aria-hidden>
+        <Dither
+          waveColor={[0.32,0.15,1]}
+          disableAnimation={false}
+          enableMouseInteraction={true}
+          mouseRadius={0.25}
+          colorNum={4}
+          pixelSize={3}
+          waveAmplitude={0.3}
+          waveFrequency={3}
+          waveSpeed={0.25}
+        />
+      </div>
       <div className="login-card">
         <h1 className="brand-main">DAWKER</h1>
         <h2 className="login-subtitle">Where your audio dreams come to life.</h2>
