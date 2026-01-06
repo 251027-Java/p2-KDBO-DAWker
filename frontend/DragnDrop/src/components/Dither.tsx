@@ -192,3 +192,7 @@ export default function Dither({
     <canvas ref={canvasRef} className="dither-canvas" style={{width:'100%',height:'100%',display:'block'}} />
   );
 }
+
+
+//if issues occur with run, might need to use this to install the library
+//npx shadcn@latest add @react-bits/Dither-JS-CSS
