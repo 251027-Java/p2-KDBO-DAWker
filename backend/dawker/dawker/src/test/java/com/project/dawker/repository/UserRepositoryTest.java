@@ -2,7 +2,7 @@ package com.project.dawker.repository;
 
 import com.project.dawker.entity.User;
 
-import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
@@ -20,61 +20,46 @@ class UserRepositoryTest {
     @Autowired
     private UserRepository userRepository;
 
-    @Test
-    @DisplayName("Should save and retrieve a user")
-    void testSaveAndFindUser() {
-        // Arrange
-        User user = new User();
-        user.setUsername("testuser");
-        user.setEmail("test@example.com");
-        user.setPassword("password");
-        user.setRole("USER");
+    private User test;
+    private User savedUser;
 
-        // Act
-        User savedUser = userRepository.save(user);
+    @BeforeEach
+    void setUp() {
+        userRepository.deleteAll();
+        test = new User();
+        test.setUsername("john_doe");
+        test.setEmail("john@example.com");
+        test.setPassword("securepassword");
+        test.setRole("USER");
+        savedUser = userRepository.save(test);
+    }
+
+    @Test
+    void findUserById_ReturnTrue() {
         Optional<User> retrievedUser = userRepository.findById(savedUser.getId());
-
-        // Assert
         assertThat(retrievedUser).isPresent();
-        assertThat(retrievedUser.get().getUsername()).isEqualTo("testuser");
+        assertThat(retrievedUser.get().getUsername()).isEqualTo("john_doe");
     }
 
     @Test
-    @DisplayName("Should find users by username containing")
-    void testFindByUsernameContainingIgnoreCase() {
-        User user1 = new User();
-        user1.setUsername("Alice");
-        user1.setEmail("alice@example.com");
-        user1.setPassword("pass");
-        user1.setRole("USER");
-
-        User user2 = new User();
-        user2.setUsername("Bob");
-        user2.setEmail("bob@example.com");
-        user2.setPassword("pass");
-        user2.setRole("USER");
-
-        userRepository.save(user1);
-        userRepository.save(user2);
-
-        List<User> result = userRepository.findByUsernameContainingIgnoreCase("ali");
-
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0).getUsername()).isEqualTo("Alice");
-    }
-
-    @Test
-    @DisplayName("Should check if username exists")
-    void testExistsByUsername() {
-        User user = new User();
-        user.setUsername("Charlie");
-        user.setEmail("charlie@example.com");
-        user.setPassword("pass");
-        user.setRole("USER");
-
-        userRepository.save(user);
-
-        assertThat(userRepository.existsByUsername("Charlie")).isTrue();
+    void existsByUsername_ReturnTrue() {
+        assertThat(userRepository.existsByUsername("john_doe")).isTrue();
         assertThat(userRepository.existsByUsername("NotFound")).isFalse();
     }
+
+    @Test
+    void findByEmailContainingIgnoreCase() {
+        Optional<User> result = userRepository.findByEmailContainingIgnoreCase("example");
+        assertThat(result).isPresent();
+        assertThat(result.get().getEmail()).isEqualTo("john@example.com");
+    }
+
+    @Test
+    void findByUsernameContainingIgnoreCase() {
+        List<User> result = userRepository.findByUsernameContainingIgnoreCase("john");
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getUsername()).isEqualTo("john_doe");
+    }
+
+    
 }

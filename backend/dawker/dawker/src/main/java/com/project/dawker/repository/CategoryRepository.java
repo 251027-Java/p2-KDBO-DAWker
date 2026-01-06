@@ -28,7 +28,7 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
      * Check if a category exists with the given name.
      * Used to avoid duplicate categories.
      *
-     * @param categoryType the category name to check
+     * @param categoryType the category to check
      * @return true if a category with this name exists
      */
     boolean existsByCategoryType(String categoryType);

@@ -7,7 +7,6 @@ import com.project.dawker.dto.recievedDto.recievedRatingsCommentDTO;
 import com.project.dawker.entity.daw_specific.RatingsPage;
 import com.project.dawker.exception.RatingsPageNotFoundException;
 import com.project.dawker.entity.daw_specific.RatingsComment;
-import com.project.dawker.repository.CommentRepository;
 import com.project.dawker.repository.RatingsCommentRepository;
 import com.project.dawker.repository.RatingsPageRepository;
 
@@ -15,7 +14,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 @Service
 public class RatingsPageService {
