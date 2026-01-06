@@ -1,5 +1,6 @@
 package com.project.dawker.controller;
 
+import com.project.dawker.kafka.KafkaLogProducer;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -50,19 +51,22 @@ public class dawController {
     private final RatingsPageService ratingsService;
     private final RatingsPageRepository ratingsRepo;
     private final RatingsCommentRepository ratingsCommentRepo;
+    private final KafkaLogProducer logger;
 
     public dawController(DawService dawService,
-            useService useService,
-            forumService forumService,
-            RatingsPageService ratingsService,
-            RatingsPageRepository ratingsRepo,
-            RatingsCommentRepository ratingsCommentRepo) {
+                         useService useService,
+                         forumService forumService,
+                         RatingsPageService ratingsService,
+                         RatingsPageRepository ratingsRepo,
+                         RatingsCommentRepository ratingsCommentRepo,
+                         KafkaLogProducer logProducer) {
         this.dawService = dawService;
         this.useService = useService;
         this.forumService = forumService;
         this.ratingsService = ratingsService;
         this.ratingsRepo = ratingsRepo;
         this.ratingsCommentRepo = ratingsCommentRepo;
+        logger = logProducer;
     }
 
     // ------------------ GET METHODS ------------------
@@ -88,6 +92,7 @@ public class dawController {
 
     @GetMapping("/search/allUsers")
     public List<userDTO> getAllUsers() {
+        logger.info("api-calls", "Getting all users", "dawController", "getAllUsers");
         return this.useService.getAllUsers();
     }
 
