@@ -1,6 +1,5 @@
 package com.project.dawker.config;
 
-import com.project.dawker.service.DawService;
 import com.project.dawker.entity.User;
 import com.project.dawker.entity.daw_specific.Comment;
 import com.project.dawker.entity.daw_specific.ComponentEntity;
@@ -18,7 +17,6 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
-import com.project.dawker.service.DawService;
 
 import java.time.LocalDateTime;
 import java.util.List;

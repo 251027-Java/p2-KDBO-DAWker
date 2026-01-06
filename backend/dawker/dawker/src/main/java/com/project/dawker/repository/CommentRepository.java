@@ -9,6 +9,5 @@ import com.project.dawker.entity.daw_specific.Comment;
 
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Long> {
-
     Optional<Comment> findById(Long configId);
 }

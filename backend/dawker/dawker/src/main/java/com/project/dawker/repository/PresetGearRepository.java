@@ -1,7 +1,5 @@
 package com.project.dawker.repository;
 
-import com.project.dawker.entity.GearItem;
-import com.project.dawker.entity.Preset;
 import com.project.dawker.entity.PresetGear;
 import com.project.dawker.repository.dto.GearItemUsageDTO;
 import org.springframework.data.domain.Pageable;
