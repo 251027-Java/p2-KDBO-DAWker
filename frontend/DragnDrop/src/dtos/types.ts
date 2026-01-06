@@ -4,6 +4,8 @@ export interface DawDTO {
   userId: number;
   description?: string;
   name: string;
+  exportCount: number;
+  createdAt: Date;
   listOfConfigs: ConfigDTO[];
 }
 
@@ -36,6 +38,87 @@ export interface SettingsDTO {
     Technology: 'RNBO' | 'TONEJS';
     export_name: string;
     parameters:{[key: string]: any}; // Flexible key-value pairs for different settings
+}
+
+export interface userDTO{
+  id?: number;
+  username: string;
+  email: string;
+  daws: DawDTO[];
+
+}
+
+// --------------------------Forums types---------------------
+
+export interface commentsDTO{
+  id?: number;
+  createdAt: Date;
+  userId: number;
+  parentPostId: number;
+  content: string;
+}
+
+export interface forumsDTO{
+  id?: number;
+  createdAt: Date;
+  postType: string;
+  userId: number;
+  title: string;
+}
+
+export interface forumPageDTO{
+  id?: number;
+  createdAt: Date;
+  postType: string;
+  userId: number;
+  title: string;
+  description: string;  
+  comments: commentsDTO[];
+}
+
+// The DTO objects that will be sent out
+
+export interface forumPagePostDTO {
+  createdAt: Date;
+  postType: string;
+  userId: number;
+  title: string;
+  description: string;
+  comments: commentsDTO[] | null;
+}
+
+export interface commentsPostDTO{
+  createdAt: Date;
+  userId: number;
+  parentPostId: number;
+  content: string;
+}
+
+export interface ratingsCommentPostDTO {
+  dawId: string;
+  rating: number; 
+  userId: number;
+  username: string;
+  comment: string;
+  createdAt: string; 
+}
+
+// ------------------- recieved -------------------
+
+export interface RatingsPageDTO {
+  id: number;
+  dawId: string;
+  rating: number; // Handles the double (e.g., 4.5)
+  comments: ReceivedRatingsCommentDTO[];
+}
+
+export interface ReceivedRatingsCommentDTO {
+  dawId: string;
+  rating: number;
+  userId: number;
+  username: string;
+  comment: string;
+  createdAt: string; // Received as "2025-10-31T10:00:00"
 }
 
 

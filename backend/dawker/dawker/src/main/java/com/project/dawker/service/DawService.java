@@ -22,7 +22,7 @@ import com.project.dawker.repository.DawRepository;
 import com.project.dawker.repository.UserRepository;
 
 // Add some more personal Error checks later.
-
+// DAW SERVICE PRANAV!!!!
 @Service
 public class DawService {
 
@@ -89,7 +89,8 @@ public class DawService {
                                 .collect(Collectors.toList())))
                 .collect(Collectors.toList());
 
-        return new dawDTO(daw.getId(), daw.getUser().getId(), daw.getName(), daw.getDescription(), configs);
+        return new dawDTO(daw.getId(), daw.getUser().getId(), daw.getName(), daw.getDescription(), daw.getCreatedAt(),
+                daw.getExportCount(), configs);
     }
 
     private componentDTO mapToComponentDto(ComponentEntity component) {
@@ -175,7 +176,8 @@ public class DawService {
         return this.dawRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("No DAWs found for user ID: " + userId))
                 .stream()
-                .map(daw -> new dawDTO(daw.getId(), daw.getUser().getId(), daw.getName(), daw.getDescription(), null))
+                .map(daw -> new dawDTO(daw.getId(), daw.getUser().getId(), daw.getName(), daw.getDescription(),
+                        daw.getCreatedAt(), daw.getExportCount()))
                 .collect(Collectors.toList());
     }
 

@@ -3,7 +3,7 @@
 
 import { DawDTO, ConfigDTO } from '../dtos/types';
 
-const API_BASE_URL = 'http://localhost:8080/api/search';
+const API_BASE_URL = 'http://localhost:8080/api'; // update with API URL
 
 // Gets a DAW by ID including configs, components, and settings
 export const dawAPI = {
@@ -13,9 +13,9 @@ export const dawAPI = {
   getDawById: async (dawId: string): Promise<DawDTO> => {
     try {
       console.log('GET DAW - Loading from backend');
-      console.log('URL:', `${API_BASE_URL}/daw?dawId=${dawId}`);
+      console.log('URL:', `${API_BASE_URL}/search/daw?dawId=${dawId}`);
       
-      const response = await fetch(`${API_BASE_URL}/daw?dawId=${dawId}`);
+      const response = await fetch(`${API_BASE_URL}/search/daw?dawId=${dawId}`);
       
       if (!response.ok) {
         console.error('GET DAW - Response error:', response.status, response.statusText);
@@ -44,7 +44,7 @@ export const dawAPI = {
   // Get all DAWs
   getAllDaws: async (): Promise<DawDTO[]> => {
     try {
-      const response = await fetch(`${API_BASE_URL}/allDaws`);
+      const response = await fetch(`${API_BASE_URL}/search/allDaws`);
       
       if (!response.ok) {
         throw new Error(`Failed to load DAWs: ${response.statusText}`);
@@ -66,11 +66,11 @@ export const dawAPI = {
     try {
       const requestBody = JSON.stringify(daw);
       console.log('SAVE DAW - Sending to backend');
-      console.log('URL:', `${API_BASE_URL}`);
+      console.log('URL:', `${API_BASE_URL}/save/Daw`);
       console.log('Method: POST');
       console.log('Request Body (DTO):', JSON.parse(requestBody));
       
-      const response = await fetch(`${API_BASE_URL}`, {
+      const response = await fetch(`${API_BASE_URL}/save/Daw`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

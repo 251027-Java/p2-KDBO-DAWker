@@ -1,4 +1,6 @@
-#root {
+@import "tailwindcss";
+
+/* #root {
   max-width: 1280px;
   margin: 0 auto;
   padding: 2rem;
@@ -39,10 +41,10 @@
 
 .read-the-docs {
   color: #888;
-}
+} */
 
 /* Drag & drop styles */
-.dd-root {
+/* .dd-root {
   max-width: 900px;
   margin: 1.5rem auto;
   text-align: left;
@@ -64,246 +66,246 @@
 }
 .dd-column h3 {
   margin: 0 0 0.5rem 0;
-  color: #000; /* make column titles black for readability */
+  color: #000; make column titles black for readability
   font-weight: 600;
 }
 .dd-item {
   padding: 0.6rem 0.9rem;
   background: #ffffff;
   border: 1.5px solid #9a9a9a; /* darker border for visibility */
-  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  /* box-shadow: 0 1px 2px rgba(0,0,0,0.04);
   border-radius: 6px;
   margin-bottom: 0.6rem;
   cursor: grab;
-  color: #111; /* ensure text is visible */
-  transition: background-color 120ms ease, box-shadow 120ms ease, transform 120ms ease, border-color 120ms ease;
+  /* color: #111; ensure text is visible */
+  /* transition: background-color 120ms ease, box-shadow 120ms ease, transform 120ms ease, border-color 120ms ease;
 }
 .dd-item:hover {
   background: #efefef; /* slightly darker on hover */
-  border-color: #666; /* stronger border on hover */
-  box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+  /* border-color: #666; /* stronger border on hover */
+/*  box-shadow: 0 6px 14px rgba(0,0,0,0.08);
   transform: translateY(-2px);
 }
 .dd-item:active { cursor: grabbing }
 .dd-empty {
   color: #888;
   font-style: italic;
-}
-
+} */ 
+/*
 @media (max-width: 900px) {
   .dd-container.columns-5 {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
-/* ToneJS Demo Styles */
+/* ToneJS Demo Styles *//*
 .app {
-  min-height: 100vh;  /* Full viewport height */
-  display: flex;      /* Flexbox layout for centering */
-  justify-content: center;  /* Center horizontally */
-  align-items: center;      /* Center vertically */
+  min-height: 100vh;  /* Full viewport height *//*
+  display: flex;      /* Flexbox layout for centering *//*
+  justify-content: center;  /* Center horizontally *//*
+  align-items: center;      /* Center vertically *//*
   background: linear-gradient(135deg, #1e1e1e 0%, #2d2d2d 100%);  /* Dark diagonal gradient background */
-  padding: 20px;      /* Padding around the edges */
-}
+ /* padding: 20px;      /* Padding around the edges */
+/*}
 
 /* Main demo container: The amp interface panel with 3D embossed effect */
-.demo {
+/* .demo {
   background: linear-gradient(145deg, #2a2a2a, #1f1f1f);  /* Dark gradient for depth */
-  border-radius: 20px;  /* Rounded corners */
-  padding: 40px;        /* Internal spacing */
+  /* border-radius: 20px;  /* Rounded corners */
+  /*padding: 40px;        /* Internal spacing */
   /* Multiple box shadows create a 3D embossed/raised panel effect */
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5),  /* Outer shadow for depth */
-              inset 0 1px 0 rgba(255, 255, 255, 0.1);  /* Inner highlight for embossed look */
-  border: 2px solid rgba(255, 255, 255, 0.1);  /* Subtle border */
-  max-width: 900px;     /* Maximum width constraint */
-  width: 100%;          /* Full width up to max-width */
-  color: #e0e0e0;       /* Light gray text color */
-}
+  /*box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5),  /* Outer shadow for depth */
+  /*            inset 0 1px 0 rgba(255, 255, 255, 0.1);  /* Inner highlight for embossed look */
+  /*border: 2px solid rgba(255, 255, 255, 0.1);  /* Subtle border */
+  /*max-width: 900px;     /* Maximum width constraint */
+  /*width: 100%;          /* Full width up to max-width */
+  /*color: #e0e0e0;       /* Light gray text color */
+/*} */ 
 
 /* Main heading styling: Large, centered title with text shadow */
-.demo h1 {
+/*.demo h1 {
   text-align: center;
   margin-bottom: 30px;
   color: #fff;         /* White text */
-  font-size: 2.5em;    /* Large font size */
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);  /* Drop shadow for depth */
-  letter-spacing: 2px; /* Spacing between letters */
-}
+  /*font-size: 2.5em;    /* Large font size */
+ /* text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);  /* Drop shadow for depth */
+  /*letter-spacing: 2px; /* Spacing between letters */
+/*}
 
 /* Power button base styles: Large, rounded button for turning amp on/off */
-.power-button {
+/*.power-button {
   display: block;
   margin: 0 auto 40px;  /* Centered with bottom margin */
-  padding: 15px 40px;    /* Internal padding */
-  font-size: 1.2em;      /* Large text */
-  font-weight: bold;
-  border: none;          /* No border */
-  border-radius: 50px;  /* Fully rounded (pill shape) */
-  cursor: pointer;       /* Pointer cursor on hover */
-  transition: all 0.3s ease;  /* Smooth transitions for all properties */
-  text-transform: uppercase;  /* Uppercase text */
-  letter-spacing: 2px;   /* Spacing between letters */
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);  /* Drop shadow */
-}
+ /* padding: 15px 40px;    /* Internal padding */
+ /* font-size: 1.2em;      /* Large text */
+ /* font-weight: bold;
+ /* border: none;          /* No border */
+ /* border-radius: 50px;  /* Fully rounded (pill shape) */
+ /* cursor: pointer;       /* Pointer cursor on hover */
+ /* transition: all 0.3s ease;  /* Smooth transitions for all properties */
+ /* text-transform: uppercase;  /* Uppercase text */
+  /*letter-spacing: 2px;   /* Spacing between letters */
+  /*box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);  /* Drop shadow */
+/*}
 
 /* Power button when OFF: Gray, inactive appearance */
-.power-button.off {
-  background: linear-gradient(145deg, #4a4a4a, #2a2a2a);  /* Dark gray gradient */
-  color: #ccc;  /* Light gray text */
-}
+/*.power-button.off {
+/*  background: linear-gradient(145deg, #4a4a4a, #2a2a2a);  /* Dark gray gradient */
+/*  color: #ccc;  /* Light gray text */
+/*}
 
 /* Power button OFF hover state: Slightly lighter and raised */
-.power-button.off:hover {
-  background: linear-gradient(145deg, #5a5a5a, #3a3a3a);  /* Lighter gray gradient */
-  transform: translateY(-2px);  /* Slight upward movement */
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);  /* Larger shadow for raised effect */
-}
+/*.power-button.off:hover {
+ /* background: linear-gradient(145deg, #5a5a5a, #3a3a3a);  /* Lighter gray gradient */
+ /* transform: translateY(-2px);  /* Slight upward movement */
+ /* box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);  /* Larger shadow for raised effect */
+/*}
 
 /* Power button when ON: Red, active appearance like a real amp power light */
-.power-button.on {
+/*.power-button.on {
   background: linear-gradient(145deg, #ff4444, #cc0000);  /* Red gradient */
-  color: #fff;  /* White text */
-  box-shadow: 0 4px 15px rgba(255, 68, 68, 0.4);  /* Red glow shadow */
-}
+ /* color: #fff;  /* White text */
+ /* box-shadow: 0 4px 15px rgba(255, 68, 68, 0.4);  /* Red glow shadow */
+/*}
 
 /* Power button ON hover state: Brighter red and raised */
-.power-button.on:hover {
+/*.power-button.on:hover {
   background: linear-gradient(145deg, #ff5555, #dd1111);  /* Brighter red gradient */
-  transform: translateY(-2px);  /* Slight upward movement */
-  box-shadow: 0 6px 20px rgba(255, 68, 68, 0.6);  /* Stronger red glow */
-}
+ /* transform: translateY(-2px);  /* Slight upward movement */
+ /* box-shadow: 0 6px 20px rgba(255, 68, 68, 0.6);  /* Stronger red glow */
+/*}
 
 /* Amp interface container: Flexbox column layout for organizing control sections */
-.amp-interface {
+/*.amp-interface {
   display: flex;
   flex-direction: column;  /* Stack sections vertically */
-  gap: 30px;               /* Space between sections */
-}
+ /* gap: 30px;               /* Space between sections */
+/*}
 
 /* Container for Amp and Cabinet sections side by side */
-.amp-cabinet-container {
+/*.amp-cabinet-container {
   display: flex;
   flex-direction: row;     /* Place Amp and Cabinet side by side */
-  gap: 30px;               /* Space between Amp and Cabinet */
-  width: 100%;
+ /* gap: 30px;               /* Space between Amp and Cabinet */
+ /* width: 100%;
 }
 
 /* Make sections equal width when side by side */
-.amp-cabinet-container > .sliders-section {
+/*.amp-cabinet-container > .sliders-section {
   flex: 1;                 /* Equal width for both sections */
-  min-width: 0;            /* Allow flex items to shrink below content size */
-}
+ /* min-width: 0;            /* Allow flex items to shrink below content size */
+/*}
 
 /* Control group: Container for toggle controls (like low latency mode) */
-.control-group {
+/*.control-group {
   text-align: center;  /* Center the control */
-  margin-bottom: 20px; /* Bottom spacing */
-}
+/*  margin-bottom: 20px; /* Bottom spacing */
+/*}
 
 /* Toggle label: Styling for the low latency mode checkbox label */
-.toggle-label {
+/*.toggle-label {
   color: #e0e0e0;      /* Light gray text */
-  font-size: 1.1em;    /* Slightly larger text */
-  cursor: pointer;     /* Pointer cursor to indicate clickable */
-  display: inline-flex;  /* Inline flex for alignment */
-  align-items: center;   /* Vertically center checkbox and text */
-  padding: 10px 20px;    /* Internal padding */
-  background: rgba(0, 0, 0, 0.3);  /* Semi-transparent black background */
-  border-radius: 8px;    /* Rounded corners */
-  transition: background 0.3s ease;  /* Smooth background color transition */
-}
+/*  font-size: 1.1em;    /* Slightly larger text */
+ /* cursor: pointer;     /* Pointer cursor to indicate clickable */
+ /* display: inline-flex;  /* Inline flex for alignment */
+ /* align-items: center;   /* Vertically center checkbox and text */
+ /* padding: 10px 20px;    /* Internal padding */
+/*  background: rgba(0, 0, 0, 0.3);  /* Semi-transparent black background */
+/*  border-radius: 8px;    /* Rounded corners */
+/*  transition: background 0.3s ease;  /* Smooth background color transition */
+/*}
 
 /* Toggle label hover state: Darker background on hover */
-.toggle-label:hover {
+/*.toggle-label:hover {
   background: rgba(0, 0, 0, 0.5);  /* More opaque black */
-}
+/*}
 
 /* Checkbox input styling within toggle label */
-.toggle-label input[type="checkbox"] {
+/*.toggle-label input[type="checkbox"] {
   width: 20px;   /* Checkbox width */
-  height: 20px;  /* Checkbox height */
-  cursor: pointer;  /* Pointer cursor */
-}
+/*  height: 20px;  /* Checkbox height */
+/*  cursor: pointer;  /* Pointer cursor */
+/*}
 
 /* Sliders section: Container for each group of sliders (EQ or Effects) */
-.sliders-section {
+/*.sliders-section {
   background: rgba(0, 0, 0, 0.3);  /* Semi-transparent black background */
-  border-radius: 15px;  /* Rounded corners */
-  padding: 25px;         /* Internal spacing */
-  border: 1px solid rgba(255, 255, 255, 0.1);  /* Subtle border */
-}
+/*  border-radius: 15px;  /* Rounded corners */
+ /* padding: 25px;         /* Internal spacing */
+ /* border: 1px solid rgba(255, 255, 255, 0.1);  /* Subtle border */
+/*}
 
 /* Section title: Styling for "EQ" and "Effects" headings */
-.section-title {
+/*.section-title {
   text-align: center;
   margin: 0 0 25px 0;    /* Bottom margin only */
-  color: #fff;           /* White text */
-  font-size: 1.5em;      /* Large font */
-  text-transform: uppercase;  /* Uppercase text */
-  letter-spacing: 3px;   /* Wide letter spacing */
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);  /* Subtle text shadow */
-}
+ /* color: #fff;           /* White text */
+ /* font-size: 1.5em;      /* Large font */
+ /* text-transform: uppercase;  /* Uppercase text */
+ /* letter-spacing: 3px;   /* Wide letter spacing */
+ /* text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);  /* Subtle text shadow */
+/*}
 
 /* Sliders column: Vertical container for multiple sliders */
-.sliders-column {
+/*.sliders-column {
   display: flex;
   flex-direction: column;  /* Stack sliders vertically */
-  gap: 25px;               /* Space between sliders */
-}
+ /* gap: 25px;               /* Space between sliders */
+/*}
 
 /* Slider container: Individual slider wrapper with label, slider, and value display */
-.slider-container {
+/*.slider-container {
   display: flex;
   flex-direction: column;  /* Stack header and slider vertically */
-  gap: 12px;               /* Space between header and slider */
-}
+ /* gap: 12px;               /* Space between header and slider */
+/*}
 
 /* Slider header: Container for label and value display side by side */
-.slider-header {
+/*.slider-header {
   display: flex;
   justify-content: space-between;  /* Label on left, value on right */
-  align-items: center;            /* Vertically center both */
-}
+/*  align-items: center;            /* Vertically center both */
+/*}
 
 /* Slider label: Text label for each slider (e.g., "Bass", "Treble") */
-.slider-label {
+/*.slider-label {
   font-size: 1.1em;        /* Slightly larger text */
-  font-weight: bold;        /* Bold text */
-  color: #fff;             /* White text */
-  text-transform: uppercase;  /* Uppercase text */
-  letter-spacing: 1px;     /* Letter spacing */
-}
+ /* font-weight: bold;        /* Bold text */
+ /* color: #fff;             /* White text */
+/*  text-transform: uppercase;  /* Uppercase text */
+ /* letter-spacing: 1px;     /* Letter spacing */
+/*}
 
 /* Slider value display: Shows the current numeric value */
-.slider-value {
+/*.slider-value {
   font-size: 1em;          /* Regular text size */
-  color: #ffd700;          /* Gold color for visibility */
-  font-weight: bold;       /* Bold text */
-  text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);  /* Gold glow effect */
-  min-width: 60px;         /* Minimum width to prevent layout shift */
-  text-align: right;       /* Right-align the value */
-}
+/*  color: #ffd700;          /* Gold color for visibility */
+/*  font-weight: bold;       /* Bold text */
+ /* text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);  /* Gold glow effect */
+/*  min-width: 60px;         /* Minimum width to prevent layout shift */
+/*  text-align: right;       /* Right-align the value */
+/*}
 
 /* Slider input: The actual range input element styled as a horizontal slider */
-.slider-input {
+/*.slider-input {
   width: 100%;             /* Full width of container */
-  height: 8px;             /* Height of the slider track */
-  border-radius: 4px;      /* Rounded track */
-  background: rgba(255, 255, 255, 0.1);  /* Semi-transparent white track */
-  outline: none;           /* Remove default outline */
-  -webkit-appearance: none;  /* Remove default webkit styling */
-  appearance: none;       /* Remove default browser styling */
-  cursor: pointer;        /* Pointer cursor on hover */
-  transition: background 0.2s ease;  /* Smooth background transition */
-}
+ /* height: 8px;             /* Height of the slider track */
+ /* border-radius: 4px;      /* Rounded track */
+ /* background: rgba(255, 255, 255, 0.1);  /* Semi-transparent white track */
+ /* outline: none;           /* Remove default outline */
+ /* -webkit-appearance: none;  /* Remove default webkit styling */
+ /* appearance: none;       /* Remove default browser styling */
+  /*cursor: pointer;        /* Pointer cursor on hover */
+ /* transition: background 0.2s ease;  /* Smooth background transition */
+/*}
 
 /* Slider input hover state: Slightly brighter track */
-.slider-input:hover {
+/*.slider-input:hover {
   background: rgba(255, 255, 255, 0.15);
 }
 
 /* Slider track styling (the background bar) - Webkit browsers (Chrome, Safari, Edge) */
-.slider-input::-webkit-slider-runnable-track {
+/*.slider-input::-webkit-slider-runnable-track {
   width: 100%;
   height: 8px;
   border-radius: 4px;
@@ -314,40 +316,40 @@
 }
 
 /* Slider thumb styling (the draggable handle) - Webkit browsers */
-.slider-input::-webkit-slider-thumb {
+/*.slider-input::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
   width: 20px;             /* Width of the thumb */
-  height: 20px;            /* Height of the thumb */
-  border-radius: 50%;      /* Perfect circle */
-  background: linear-gradient(145deg, #ffd700, #ffaa00);  /* Gold gradient */
-  cursor: pointer;        /* Pointer cursor */
-  box-shadow: 
+ /* height: 20px;            /* Height of the thumb */
+ /* border-radius: 50%;      /* Perfect circle */
+ /* background: linear-gradient(145deg, #ffd700, #ffaa00);  /* Gold gradient */
+ /* cursor: pointer;        /* Pointer cursor */
+ /* box-shadow: 
     0 2px 4px rgba(0, 0, 0, 0.3),
     0 0 8px rgba(255, 215, 0, 0.5);  /* Gold glow effect */
-  border: 2px solid rgba(255, 255, 255, 0.3);  /* Subtle border */
-  transition: all 0.2s ease;  /* Smooth transitions */
-  margin-top: -6px;        /* Center vertically on track */
-}
+ /* border: 2px solid rgba(255, 255, 255, 0.3);  /* Subtle border */
+ /* transition: all 0.2s ease;  /* Smooth transitions */
+  /*margin-top: -6px;        /* Center vertically on track */
+/*}
 
 /* Slider thumb hover state - Webkit browsers */
-.slider-input::-webkit-slider-thumb:hover {
+/*.slider-input::-webkit-slider-thumb:hover {
   transform: scale(1.1);   /* Slightly larger on hover */
-  box-shadow: 
+ /* box-shadow: 
     0 3px 6px rgba(0, 0, 0, 0.4),
     0 0 12px rgba(255, 215, 0, 0.7);  /* Stronger glow */
-}
+/*}
 
 /* Slider thumb active state (while dragging) - Webkit browsers */
-.slider-input::-webkit-slider-thumb:active {
+/*.slider-input::-webkit-slider-thumb:active {
   transform: scale(1.15);  /* Slightly larger when active */
-  box-shadow: 
+/*  box-shadow: 
     0 4px 8px rgba(0, 0, 0, 0.5),
     0 0 16px rgba(255, 215, 0, 0.8);  /* Even stronger glow */
-}
+/*}
 
 /* Slider track styling - Firefox */
-.slider-input::-moz-range-track {
+/*.slider-input::-moz-range-track {
   width: 100%;
   height: 8px;
   border-radius: 4px;
@@ -356,69 +358,69 @@
     rgba(255, 255, 255, 0.2) 100%);
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
   border: none;           /* Remove default border */
-}
+/*}
 
 /* Slider thumb styling - Firefox */
-.slider-input::-moz-range-thumb {
+/*.slider-input::-moz-range-thumb {
   width: 20px;            /* Width of the thumb */
-  height: 20px;           /* Height of the thumb */
-  border-radius: 50%;     /* Perfect circle */
-  background: linear-gradient(145deg, #ffd700, #ffaa00);  /* Gold gradient */
-  cursor: pointer;        /* Pointer cursor */
-  box-shadow: 
+/*  height: 20px;           /* Height of the thumb */
+ /* border-radius: 50%;     /* Perfect circle */
+/*  background: linear-gradient(145deg, #ffd700, #ffaa00);  /* Gold gradient */
+ /* cursor: pointer;        /* Pointer cursor */
+ /* box-shadow: 
     0 2px 4px rgba(0, 0, 0, 0.3),
     0 0 8px rgba(255, 215, 0, 0.5);  /* Gold glow effect */
-  border: 2px solid rgba(255, 255, 255, 0.3);  /* Subtle border */
-  transition: all 0.2s ease;  /* Smooth transitions */
-}
+ /* border: 2px solid rgba(255, 255, 255, 0.3);  /* Subtle border */
+ /* transition: all 0.2s ease;  /* Smooth transitions */
+/*}
 
 /* Slider thumb hover state - Firefox */
-.slider-input::-moz-range-thumb:hover {
+/*.slider-input::-moz-range-thumb:hover {
   transform: scale(1.1);   /* Slightly larger on hover */
-  box-shadow: 
+/*  box-shadow: 
     0 3px 6px rgba(0, 0, 0, 0.4),
     0 0 12px rgba(255, 215, 0, 0.7);  /* Stronger glow */
-}
+/*}
 
 /* Slider thumb active state (while dragging) - Firefox */
-.slider-input::-moz-range-thumb:active {
+/*.slider-input::-moz-range-thumb:active {
   transform: scale(1.15);  /* Slightly larger when active */
-  box-shadow: 
+/*  box-shadow: 
     0 4px 8px rgba(0, 0, 0, 0.5),
     0 0 16px rgba(255, 215, 0, 0.8);  /* Even stronger glow */
-}
+/*}
 
 /* Responsive design: Adjusts layout for smaller screens (mobile/tablet) */
-@media (max-width: 768px) {
+/*@media (max-width: 768px) {
   /* Reduce padding on smaller screens */
-  .demo {
+ /* .demo {
     padding: 20px;
   }
   
   /* Smaller heading on mobile */
-  .demo h1 {
+ /* .demo h1 {
     font-size: 1.8em;
   }
   
   /* Stack Amp and Cabinet vertically on mobile */
-  .amp-cabinet-container {
+ /* .amp-cabinet-container {
     flex-direction: column;  /* Stack vertically on mobile */
-    gap: 20px;               /* Less space on mobile */
-  }
+  /*  gap: 20px;               /* Less space on mobile */
+  /*}
   
   /* Less space between sliders on mobile */
-  .sliders-column {
-    gap: 20px;
+ /* .sliders-column {
+ /*   gap: 20px;
   }
   
   /* Smaller slider thumb on mobile for better touch interaction */
-  .slider-input::-webkit-slider-thumb {
+ /* .slider-input::-webkit-slider-thumb {
     width: 24px;    /* Slightly larger for easier touch */
-    height: 24px;   /* Slightly larger for easier touch */
-  }
+  /*  height: 24px;   /* Slightly larger for easier touch */
+  /*}
   
   .slider-input::-moz-range-thumb {
     width: 24px;    /* Slightly larger for easier touch */
-    height: 24px;   /* Slightly larger for easier touch */
-  }
-}
+  /*  height: 24px;   /* Slightly larger for easier touch */
+  /*} */
+
