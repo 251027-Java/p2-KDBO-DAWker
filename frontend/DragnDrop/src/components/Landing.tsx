@@ -95,7 +95,7 @@ const Landing: React.FC = () => {
         
           <div className="showcase-row">
             <img
-              src="/src/assets/homepage.png"
+              src="/src/assets/daw.png"
               alt="homepage screenshot"
               className="showcase-image"
             />

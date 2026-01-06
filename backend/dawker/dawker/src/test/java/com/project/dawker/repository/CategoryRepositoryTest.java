@@ -40,8 +40,8 @@ class CategoryRepositoryTest {
 
     @Test
     void existsByCategoryType_ReturnTrue() {
-        assertThat(categoryRepository.existsByCategoryType("POP")).isTrue();
-        assertThat(categoryRepository.existsByCategoryType("METAL")).isFalse();
+        assertThat(categoryRepository.existsByCategoryType(CategoryType.POP)).isTrue();
+        assertThat(categoryRepository.existsByCategoryType(CategoryType.ROCK)).isFalse();
     }
 
 }

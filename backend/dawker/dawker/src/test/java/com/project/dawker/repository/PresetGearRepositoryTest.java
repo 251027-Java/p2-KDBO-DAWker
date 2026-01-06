@@ -66,7 +66,6 @@ class PresetGearRepositoryTest {
         testPresetGear.setGainValue(5.0);
         testPresetGear.setToneValue(7.5);
         testPresetGear.setOrderIndex(1);
-        
         savedPresetGear = presetGearRepository.save(testPresetGear);
     }
 

@@ -32,6 +32,7 @@ class PresetCategoryRepositoryTest {
     private PresetCategory testPresetCategory;
     private PresetCategory savedPresetCategory;
     private Preset testPreset;
+    private Preset savedPreset;
     private Category testCategory;
     private Category savedCategory;
     private User testUser;
@@ -55,15 +56,15 @@ class PresetCategoryRepositoryTest {
         testPreset = new Preset();
         testPreset.setPresetName("Test Preset");
         testPreset.setUser(savedUser);
+        savedPreset = presetRepository.save(testPreset);
 
         testCategory = new Category();
         testCategory.setCategoryType(CategoryType.ROCK);
+        savedCategory = categoryRepository.save(testCategory);
 
         testPresetCategory = new PresetCategory();
-        testPresetCategory.setPreset(testPreset);
-        testPresetCategory.setCategory(testCategory);
-
-        savedCategory = categoryRepository.save(testCategory);
+        testPresetCategory.setPreset(savedPreset);
+        testPresetCategory.setCategory(savedCategory);
         savedPresetCategory = presetCategoryRepository.save(testPresetCategory);
     }
 

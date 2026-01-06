@@ -25,6 +25,7 @@ class ForumPostRepositoryTest {
         testForumPost = new ForumPost();
         testForumPost.setTitle("Test Post");
         testForumPost.setPostType("GENERAL");
+        forumPostRepository.save(testForumPost);
     }
 
     @Test
