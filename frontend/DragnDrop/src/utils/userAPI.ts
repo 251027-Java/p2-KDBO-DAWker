@@ -140,6 +140,28 @@ class UserApiService {
       }
     }
 
+  // changeUsername = async (userId: number, userName: String): Promise<userDTO> => {
+      
+  //   try {
+  //       const response = await fetch(`${API_BASE_URL}/saveComment`, {
+  //         method: 'POST',
+  //         headers: {
+  //           'Content-Type': 'application/json',
+  //         },
+  //         body: JSON.stringify(post),
+  //       });
+  
+  //       if (!response.ok) {
+  //         throw new Error(`Failed to save post: ${response.statusText}`);
+  //       }
+  
+  //       return await response.json();
+  //     } catch (error) {
+  //       console.error('Error saving forum post:', error);
+  //       throw error;
+  //     }
+  // }
+
 
 }
 
