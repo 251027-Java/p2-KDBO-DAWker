@@ -1,9 +1,10 @@
 import React from "react";
 import "../Landing.css";
 import { Link } from "react-router-dom";
+import { userAPI } from "../utils/userAPI";
 
 const Landing: React.FC = () => {
-  const isLoggedIn = Boolean(localStorage.getItem("dawker_user"));
+  const isLoggedIn = userAPI.currentUser != null ? true: false;
 
   return (
     <div>

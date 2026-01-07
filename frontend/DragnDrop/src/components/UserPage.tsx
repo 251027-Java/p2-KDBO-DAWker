@@ -53,11 +53,12 @@ function UserPage() {
     console.log(currentNote)
 
     if(currentNote != null){
+
       let note: recievedSessionNoteDTO = await notesApi.saveNote(currentNote);
       console.log("note save: ");
       console.log(note);
-      setListOfNotes(prevNotes => [...(prevNotes || []), note]);
 
+      if(currentNote.id == null){setListOfNotes(prevNotes => [...(prevNotes || []), note]);}
       setIsNoteOpen(false);
     }
   }
@@ -70,6 +71,10 @@ function UserPage() {
 
     navigate(`/native-amp/${id}`);
   }
+
+  const handleProfileClick = () => {
+    navigate(`/settings`)
+  };
 
   useEffect(() => {
     if(userAPI.currentUser == null){
@@ -108,6 +113,7 @@ function UserPage() {
     fetchUser();
     fetchNotes();
     fetchForums();
+    console.log(userAPI.currentUser);
   }, [])
 
   return (
@@ -136,6 +142,7 @@ function UserPage() {
             minimal 
             large 
             className="!bg-white/5 !rounded-full hover:!bg-white/10 hover:!scale-110 !transition-all" 
+            onClick={() => handleProfileClick()}
           />
         </div>
       </div>

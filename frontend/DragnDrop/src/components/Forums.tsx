@@ -46,7 +46,7 @@ const [formError, setFormError] = useState("")
   };
 
 const handlePostClick = (id?: number) => {
-    navigate(`/native-amp/${id}`);
+    navigate(`/forums/${id}`);
   };
 
 useEffect(() => {

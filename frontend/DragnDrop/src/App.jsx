@@ -47,7 +47,7 @@ function App() {
           <Route element={<Layout />} >
             <Route path="/search" element={<Searchts />} />
             <Route path="/demo" element={<TestComponent />} />
-            <Route path="/test" element={<ToneJsDemo />} />
+            {/* <Route path="/test" element={<ToneJsDemo />} /> */}
             <Route path="/native-amp/:dawId?" element={<NativeAmpDemo />} />
             <Route path="/userpage" element={<UserPage />} />
             <Route path="/forums" element={<Forums/>} />
