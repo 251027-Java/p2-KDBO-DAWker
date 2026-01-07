@@ -196,54 +196,360 @@ We sought to create a way for guitarists or just audio enthusiasts to not only h
 
 #### Services
 
-##### Service 1
+The backend is organized into multiple service layers, each handling specific domain logic. All endpoints are prefixed with `/api`.
+
+##### DAW Service (`dawController`)
+
+Handles Digital Audio Workstation (DAW) operations including creation, retrieval, and saving of DAW configurations.
 
 **Endpoints:**
 
-- `GET /endpoint` - Description
-- `POST /endpoint` - Description
-- `PUT /endpoint` - Description
-- `DELETE /endpoint` - Description
+- `GET /api/search/users?userId={id}` - Get all DAWs for a specific user
+- `GET /api/search/daw?dawId={id}` - Get a specific DAW by ID with full details (configs, components, settings)
+- `GET /api/search/allDaws` - Get all DAWs in the system
+- `POST /api/create/daw?userId={id}&dawName={name}` - Create an empty DAW for a user
+- `POST /api/save/Daw` - Save or update a complete DAW (handles both create and update operations)
 
-##### Service 2
+##### User Service (`dawController` - User endpoints)
+
+Manages user authentication, registration, and profile operations.
 
 **Endpoints:**
 
-- `GET /endpoint` - Description
-- `POST /endpoint` - Description
-- `PUT /endpoint` - Description
-- `DELETE /endpoint` - Description
+- `GET /api/search/allUsers` - Get all users in the system
+- `GET /api/search/User?Id={id}` - Get a specific user by ID
+- `POST /api/User/auth` - Authenticate user login (email and password)
+- `POST /api/User/register` - Register a new user account
+- `PUT /api/User/update` - Update user profile information
+- `DELETE /api/User/{id}` - Delete a user account
+
+##### Forum Service (`dawController` - Forum endpoints)
+
+Manages community forum posts and comments.
+
+**Endpoints:**
+
+- `GET /api/search/allForums` - Get all forum posts
+- `GET /api/search/Forums?Id={id}` - Get a specific forum post by ID
+- `GET /api/search/Forums/User?Id={id}` - Get all forum posts by a specific user
+- `POST /api/saveForum` - Create a new forum post
+- `POST /api/saveComment` - Add a comment to a forum post
+
+##### Ratings Service (`dawController` - Ratings endpoints)
+
+Handles ratings and comments on DAW presets.
+
+**Endpoints:**
+
+- `GET /api/search/ratingsPage?dawId={id}` - Get ratings page for a specific DAW
+- `GET /api/search/allRatingsPagesRepo` - Get all ratings pages (debug endpoint)
+- `GET /api/search/allRatingsCommentsRepo` - Get all ratings comments (debug endpoint)
+- `POST /api/ratings/create` - Create a new rating and comment for a DAW
+
+##### Session Notes Service (`dawController` - Notes endpoints)
+
+Manages user session notes for DAW configurations.
+
+**Endpoints:**
+
+- `GET /api/search/note?Id={id}` - Get a specific session note by ID
+- `GET /api/search/note/User?Id={id}` - Get all session notes for a user
+- `POST /api/notes/create` - Create or update a session note
 
 #### API Documentation
 
-[Spring API Documentation](#) - Link to generated API docs (if applicable)
+All endpoints support CORS from `http://localhost:5173` for frontend integration.
+
+**Base URL:** `http://localhost:8080/api`
+
+**Response Formats:**
+- Success responses return appropriate HTTP status codes (200, 201, etc.)
+- Error responses return 400, 401, 404, or 500 with error details
+- All responses are in JSON format
 
 #### Packages
 
+The backend follows a layered architecture pattern:
+
 ```
-com.example.project
-├── controller
-├── service
-├── repository
-├── model
-└── config
+com.project.dawker
+├── controller/          # REST API endpoints
+│   ├── dawController.java      # Main DAW, User, Forum, Ratings endpoints
+│   ├── UserController.java     # Additional user management
+│   ├── PresetController.java    # Preset management (legacy)
+│   └── ...
+├── service/             # Business logic layer
+│   ├── DawService.java          # DAW business logic
+│   ├── useService.java          # User authentication & management
+│   ├── forumService.java         # Forum operations
+│   ├── RatingsPageService.java  # Ratings & comments
+│   └── ...
+├── repository/         # Data access layer (Spring Data JPA)
+│   ├── DawRepository.java
+│   ├── UserRepository.java
+│   ├── ConfigRepository.java
+│   ├── ComponentRepository.java
+│   └── ...
+├── entity/             # JPA entities (database models)
+│   ├── User.java
+│   ├── daw_specific/
+│   │   ├── DawEntity.java
+│   │   ├── ConfigEntity.java
+│   │   ├── ComponentEntity.java
+│   │   ├── SettingsEntity.java
+│   │   ├── ForumPost.java
+│   │   ├── Comment.java
+│   │   ├── RatingsPage.java
+│   │   └── ...
+│   └── ...
+├── dto/                # Data Transfer Objects
+│   ├── dawDTO.java
+│   ├── configDTO.java
+│   ├── componentDTO.java
+│   ├── settingsDTO.java
+│   ├── userDTO.java
+│   └── recievedDto/    # DTOs for incoming requests
+│       └── ...
+├── exception/          # Custom exception handling
+│   ├── GlobalExceptionHandler.java
+│   ├── dawNotFoundException.java
+│   └── ...
+└── config/             # Configuration classes
+    └── DataSeeder.java  # Database seeding
 ```
 
 #### Database
 
-**Database Type:** PostgreSQL
+**Database Type:** PostgreSQL 15
 
 **Connection Details:**
+- Host: `db` (Docker service name) / `localhost:5432` (local)
+- Database: `dawker_db`
+- Username: `user`
+- Password: `password`
 
-**Schema:**
+**Schema Overview:**
 
-```sql
--- Table descriptions
-```
+The database follows a hierarchical structure for DAW management:
+
+**Core Tables:**
+
+1. **users** - User accounts
+   - `id` (PK, Long)
+   - `email` (String, unique)
+   - `username` (String, unique)
+   - `password` (String)
+   - `role` (String)
+
+2. **daw_entity** - Top-level DAW projects
+   - `id` (PK, UUID)
+   - `user_id` (FK → users.id)
+   - `name` (String)
+   - `description` (String)
+   - `created_at` (LocalDateTime)
+   - `export_count` (Integer)
+
+3. **config_entity** - DAW configurations (signal chains)
+   - `id` (PK, Long)
+   - `daw_id` (FK → daw_entity.id)
+   - `name` (String)
+
+4. **component_entity** - Audio components in a configuration
+   - `id` (PK, Long)
+   - `config_id` (FK → config_entity.id)
+   - `settings_id` (FK → settings_entity.id)
+   - `instance_id` (String)
+   - `name` (String)
+   - `type` (String) - e.g., "distortion", "reverb", "eq"
+
+5. **settings_entity** - Component settings (stored as JSONB)
+   - `id` (PK, Long)
+   - `technology` (String) - e.g., "RNBO", "TONEJS", "NATIVE"
+   - `export_name` (String)
+   - `parameters` (JSONB) - Flexible key-value pairs for component parameters
+
+6. **forum_posts** - Community forum posts
+   - `id` (PK, Long)
+   - `user_id` (FK → users.id)
+   - `title` (String)
+   - `description` (TEXT)
+   - `post_type` (String) - e.g., "convo", "collab", "Help"
+   - `created_at` (LocalDateTime)
+   - `tags` (ElementCollection)
+
+7. **comment** - Forum post comments
+   - `id` (PK, Long)
+   - `parent_post_id` (FK → forum_posts.id)
+   - `user_id` (FK → users.id)
+   - `content` (TEXT)
+   - `created_at` (LocalDateTime)
+
+8. **ratings_page** - Ratings aggregation for DAWs
+   - `id` (PK, Long)
+   - `daw_id` (String, references daw_entity.id)
+   - `rating` (Double) - Average rating
+
+9. **ratings_comment** - Individual rating comments
+   - `id` (PK, Long)
+   - `ratings_page_id` (FK → ratings_page.id)
+   - `user_id` (Long)
+   - `username` (String)
+   - `rating` (Double)
+   - `comment` (TEXT)
+   - `created_at` (LocalDateTime)
+
+10. **session_notes** - User notes for DAW sessions
+    - `id` (PK, Long)
+    - `user_id` (FK → users.id)
+    - `daw_id` (String)
+    - `content` (TEXT)
+    - `created_at` (LocalDateTime)
+
+**Relationships:**
+
+- **User → DAW**: One-to-Many (one user can have many DAWs)
+- **DAW → Config**: One-to-Many (one DAW can have many configurations)
+- **Config → Component**: One-to-Many (one config can have many components, ordered by `chain_order`)
+- **Component → Settings**: One-to-One (each component has one settings entity)
+- **User → ForumPost**: One-to-Many (one user can create many forum posts)
+- **ForumPost → Comment**: One-to-Many (one post can have many comments)
+- **DAW → RatingsPage**: One-to-One (each DAW has one ratings page)
+- **RatingsPage → RatingsComment**: One-to-Many (one ratings page has many comments)
+
+**Key Features:**
+
+- **JSONB Storage**: Component parameters are stored as JSONB in PostgreSQL, allowing flexible schema for different component types
+- **Ordered Components**: Components maintain order via `@OrderColumn` annotation for signal chain ordering
+- **Cascade Operations**: Deleting a DAW cascades to configs, components, and settings
+- **UUID for DAWs**: DAW entities use UUID for globally unique identifiers
 
 **ERD:**
 
-[Link to ERD diagram or embed image]
+The following Entity Relationship Diagram shows the database structure:
+
+```mermaid
+erDiagram
+    users ||--o{ daw_entity : "has"
+    users ||--o{ forum_posts : "creates"
+    users ||--o{ comment : "writes"
+    users ||--o{ session_notes : "writes"
+    
+    daw_entity ||--o{ config_entity : "contains"
+    config_entity ||--o{ component_entity : "has"
+    component_entity ||--|| settings_entity : "has"
+    
+    daw_entity ||--|| ratings_page : "has"
+    ratings_page ||--o{ ratings_comment : "contains"
+    
+    forum_posts ||--o{ comment : "has"
+    
+    users {
+        Long id PK
+        String email UK
+        String username UK
+        String password
+        String role
+    }
+    
+    daw_entity {
+        String id PK "UUID"
+        Long user_id FK
+        String name
+        String description
+        LocalDateTime created_at
+        Integer export_count
+    }
+    
+    config_entity {
+        Long id PK
+        String daw_id FK
+        String name
+    }
+    
+    component_entity {
+        Long id PK
+        Long config_id FK
+        Long settings_id FK
+        String instance_id
+        String name
+        String type
+    }
+    
+    settings_entity {
+        Long id PK
+        String technology
+        String export_name
+        JSONB parameters
+    }
+    
+    forum_posts {
+        Long id PK
+        Long user_id FK
+        String title
+        TEXT description
+        String post_type
+        LocalDateTime created_at
+        List tags
+    }
+    
+    comment {
+        Long id PK
+        Long parent_post_id FK
+        Long user_id FK
+        TEXT content
+        LocalDateTime created_at
+    }
+    
+    ratings_page {
+        Long id PK
+        String daw_id "references daw_entity.id"
+        Double rating
+    }
+    
+    ratings_comment {
+        Long id PK
+        Long ratings_page_id FK
+        Long user_id
+        String username
+        Double rating
+        TEXT comment
+        LocalDateTime created_at
+    }
+    
+    session_notes {
+        Long id PK
+        Long user_id FK
+        String daw_id
+        TEXT content
+        LocalDateTime created_at
+    }
+```
+
+**Note:** If the Mermaid diagram doesn't render in your markdown viewer, you can:
+1. Use GitHub/GitLab (they support Mermaid natively)
+2. Use an online Mermaid editor: https://mermaid.live/
+3. Export as PNG/SVG and embed the image instead
+
+**Sample Queries:**
+
+```sql
+-- Get all DAWs for a user
+SELECT * FROM daw_entity WHERE user_id = 1;
+
+-- Get full DAW with configs and components
+SELECT d.*, c.*, comp.*, s.*
+FROM daw_entity d
+LEFT JOIN config_entity c ON c.daw_id = d.id
+LEFT JOIN component_entity comp ON comp.config_id = c.id
+LEFT JOIN settings_entity s ON s.id = comp.settings_id
+WHERE d.id = 'some-uuid';
+
+-- Get forum posts with comment counts
+SELECT fp.*, COUNT(c.id) as comment_count
+FROM forum_posts fp
+LEFT JOIN comment c ON c.parent_post_id = fp.id
+GROUP BY fp.id;
+```
 
 ---
 
