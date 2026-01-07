@@ -525,11 +525,6 @@ erDiagram
     }
 ```
 
-**Note:** If the Mermaid diagram doesn't render in your markdown viewer, you can:
-1. Use GitHub/GitLab (they support Mermaid natively)
-2. Use an online Mermaid editor: https://mermaid.live/
-3. Export as PNG/SVG and embed the image instead
-
 **Sample Queries:**
 
 ```sql
@@ -551,6 +546,65 @@ LEFT JOIN comment c ON c.parent_post_id = fp.id
 GROUP BY fp.id;
 ```
 
+#### Unused/Legacy Files
+
+The following backend files are present in the codebase but are **not currently used** by the application. They were early implementations of our project, later used as reference for the main files:
+
+**Controllers (Not Used):**
+- `PresetController.java` - Legacy preset management system (replaced by DAW system)
+- `CategoryController.java` - Category management (not used)
+- `GearItemController.java` - Gear item management (not used)
+- `PresetCategoryController.java` - Preset-category relationships (not used)
+- `PresetGearController.java` - Preset-gear relationships (not used)
+- `UserController.java` - Alternative user management (user operations handled in `dawController`)
+- `UserAllController.java` - Nested user data retrieval (not used)
+
+**Services (Not Used):**
+- `PresetService.java` - Legacy preset business logic
+- `CategoryService.java` - Category business logic
+- `GearItemService.java` - Gear item business logic
+- `PresetCategoryService.java` - Preset-category business logic
+- `PresetGearService.java` - Preset-gear business logic
+- `UserService.java` - Alternative user service (user operations handled by `useService`)
+
+**DTOs (Not Used):**
+- `controller/dto/Category/CategoryDTO.java`
+- `controller/dto/GearItem/GearItemDTO.java`
+- `controller/dto/Preset/PresetDTO.java`
+- `controller/dto/Preset/PresetWOIDDTO.java`
+- `controller/dto/PresetCategory/PresetCategoryDTO.java`
+- `controller/dto/PresetCategory/PresetCategoryWOIDDTO.java`
+- `controller/dto/PresetGear/PresetGearDTO.java`
+- `controller/dto/PresetGear/PresetGearWOIDDTO.java`
+- `controller/dto/User/UserAllDTO.java`
+- `controller/dto/User/UserDTO.java`
+- `controller/dto/User/UserWOIDDTO.java`
+- `controller/dto/User/Nested/UserNestedCategoryDTO.java`
+- `controller/dto/User/Nested/UserNestedGearItemDTO.java`
+- `controller/dto/User/Nested/UserNestedPresetCategoryDTO.java`
+- `controller/dto/User/Nested/UserNestedPresetDTO.java`
+- `controller/dto/User/Nested/UserNestedPresetGearDTO.java`
+- `controller/dto/User/Nested/UserNestedUserDTO.java`
+
+**Entities (Not Used):**
+- `entity/Preset.java` - Legacy preset entity
+- `entity/PresetAmp.java` - Legacy preset amp entity
+- `entity/PresetCabinet.java` - Legacy preset cabinet entity
+- `entity/PresetPedal.java` - Legacy preset pedal entity
+- `entity/PresetCategory.java` - Legacy preset-category join entity
+- `entity/PresetGear.java` - Legacy preset-gear join entity
+- `entity/Category.java` - Category entity (not used)
+- `entity/GearItem.java` - Gear item entity (not used)
+- `entity/CategoryType.java` - Category type enum (not used)
+- `entity/GearType.java` - Gear type enum (not used)
+
+**Repositories (Not Used):**
+- `PresetRepository.java` - Legacy preset repository
+- `PresetCategoryRepository.java` - Legacy preset-category repository
+- `PresetGearRepository.java` - Legacy preset-gear repository
+- `CategoryRepository.java` - Category repository (not used)
+- `GearItemRepository.java` - Gear item repository (not used)
+
 ---
 
 ## Frontend Documentation
@@ -559,34 +613,151 @@ GROUP BY fp.id;
 
 #### Tailwind CSS
 
-**Purpose:**
+**Purpose:**  
+Tailwind is used as the primary utility‑first styling system for the frontend. It provides low‑level utility classes for layout, spacing, color, typography, and responsive design. Components like `Layout`, `Sidebar`, `Landing`, and `UserPage` rely heavily on Tailwind classes for the dashboard-style UI and dark theme.
 
-**Configuration:**
+**Configuration:**  
+- Integrated via the Vite plugin `@tailwindcss/vite` in `vite.config.js`:
+  - `plugins: [react(), tailwindcss()]`
+- Tailwind directives are imported in `src/index.css`:
+  - `@tailwind base;`
+  - `@tailwind components;`
+  - `@tailwind utilities;`
+- Utility classes are used directly in JSX (e.g. `className="flex h-screen w-full bg-zinc-900"`, `bg-zinc-900`, `text-zinc-400`, `space-y-2`, etc.)
+- No separate `tailwind.config.js` is required because Tailwind v4 uses conventions and the Vite plugin to infer content paths.
 
 #### Blueprint
 
-**Purpose:**
+**Purpose:**  
+Blueprint (`@blueprintjs/core`, `@blueprintjs/icons`, `@blueprintjs/select`) provides higher‑level UI components such as buttons, cards, icons, overlays, menus, and form controls. It is primarily used for:
+- Navigation and layout accents (icons, dividers) in `Sidebar`
+- Forum UI (cards, buttons, overlays, selects) in `Forums` and `ForumPage`
+- Search and ratings UI in `Searchts` and related components
 
-**Usage:**
+**Usage:**  
+- Imported components (examples):
+  - `Button`, `Card`, `Divider`, `Drawer`, `Tag`, `Icon`, `Overlay2`, `Select`
+- Styling is combined with Tailwind:
+  - Blueprint components receive Tailwind utility classes via `className` for spacing, colors, and layout
+- Icons are used throughout navigation:
+  - Example: `<Icon icon="home" />`, `<Icon icon="search" />`, `<Icon icon="chat" />`, `<Icon icon="cog" />`
+- Overlays and drawers are used for:
+  - Creating new forum posts
+  - Viewing forum threads and ratings details
 
 ### React
 
-**Version:**
+**Version:**  
+- React: `^19.2.3`  
+- React DOM: `^19.2.3`  
+- React Router DOM: `^7.0.0`  
+- Bundler/Dev server: Vite (`vite.config.js` with `@vitejs/plugin-react`)
 
-**Key Components:**
+**Key Components / Pages (in `src/components`)**  
+- `App.jsx` – Root component, sets up `BrowserRouter`, routes, and global layout
+- `Layout.tsx` – Main shell with persistent `Sidebar` and `Outlet` for nested pages
+- `Sidebar.tsx` – Left navigation menu (Dashboard, Search, Community, Settings) using Blueprint icons + Tailwind
+- `Landing.tsx` – Public landing page (`/`) describing the app
+- `Loggin.tsx`, `CreateAccount.tsx` – Authentication pages (`/login`, `/create-account`)
+- `UserPage.tsx` – User dashboard showing saved DAWs/presets and entry point into the app
+- `Searchts.tsx` – Search and browse view for DAWs and ratings
+- `Forums.tsx`, `ForumPage.tsx` – Community forums list and individual forum thread view
+- `NativeAmpDemo.tsx` – Native Web Audio API guitar amp demo integrated with DAW state saving
+- `SettingsPage.tsx` – User/settings page
+- `TestComponent.jsx`, `TonejsDemo.jsx`, `TonetsDemo.tsx` – Experimental/demo components (not part of the main user flow)
+
+**Project structure (frontend):**
 
 ```
-src/
-├── components/
-├── pages/
-├── services/
-├── utils/
-└── styles/
+frontend/DragnDrop/src/
+├── App.jsx
+├── main.jsx
+├── index.css          # Tailwind + global styles
+├── components/        # All pages and shared UI components
+├── dtos/              # Frontend TypeScript DTO definitions
+├── dawService/        # Frontend DAW state helper/service
+└── utils/             # API clients and utility functions (dawAPI, userAPI, forumAPI, ratingsAPI, notesApi, dawUtils)
 ```
 
-**Routing:**
+**Routing:**  
+- Implemented with `BrowserRouter`, `Routes`, and `Route` in `App.jsx`
+- Top‑level routes:
+  - `/` → `Landing`
+  - `/login` → `Loggin`
+  - `/create-account` → `CreateAccount`
+- Nested routes under `Layout` (with `Sidebar` + main content):
+  - `/search` → `Searchts` (DAW search and browse)
+  - `/demo` → `TestComponent`
+  - `/native-amp` → `NativeAmpDemo` (Web Audio amp + DAW integration)
+  - `/userpage` → `UserPage` (user dashboard)
+  - `/forums` → `Forums` (forum index)
+  - `/forums/:postId` → `ForumPage` (single forum thread)
+  - `/settings` → `SettingsPage`
 
 **State Management:**
+
+- **Local component state (React hooks):**
+  - State is primarily managed with `useState`, `useEffect`, and `useRef`:
+    - `NativeAmpDemo.tsx`: amp controls (inputGain, distortionAmount, bass/mid/treble, reverbAmount, volumeValue), audio routing flags (directMode, isOn), and live audio metering.
+    - `Searchts.tsx`: search query, “only mine” filter, selected DAW, ratings drawer open/close, current rating and comment text.
+    - `Forums.tsx` / `ForumPage.tsx`: forum post list, selected post, reply form state, overlay/drawer visibility, validation errors.
+    - `UserPage.tsx`: active DAW/config selection for the dashboard cards.
+
+- **DAW configuration state (DTO-based):**
+  - DAW state is modeled via `DawDTO`, `ConfigDTO`, and `ComponentDTO` in `src/dtos/types.ts`.
+  - `dawAPI.ts` is the main gateway for DAW state:
+    - `getDawById(dawId)` – loads a complete DAW with configs/components/settings.
+    - `getAllDaws()` – loads all DAWs for search and discovery.
+    - `saveDaw(daw)` – sends a full `DawDTO` to `/api/save/Daw` to create/update a DAW.
+  - `dawUtils.ts` bridges UI state ↔ DTOs:
+    - `buildDawDTOFromNativeAmpState(...)` and `buildConfigDTOFromNativeAmpState(...)` turn the current `NativeAmpDemo` slider values into a DAW/config/component graph.
+    - `applyNativeAmpStateFromComponentDTOs(...)` takes a loaded `DawDTO` and sets the corresponding React state (inputGain, distortionAmount, EQ, reverbAmount, volumeValue).
+
+- **User session state:**
+  - Managed by `UserApiService` in `userAPI.ts`:
+    - Keeps `_currentUser` (a `userDTO`) in memory and mirrors it to `localStorage` under the key `dawker_session_user`.
+    - Restores the session on construction by reading/parsing `localStorage`.
+    - Exposes methods: `login`, `register`, `updateUser`, `deleteUser`, `getUserById`, `getAllUsers`.
+
+- **Forum, ratings, and notes state:**
+  - `forumAPI.ts`: `getAllForums`, `getForumById`, `getAllForumsByUserId`, `saveForumPost`.
+  - `ratingsAPI.ts`: `getRatingsPageByDawId`, `createOrUpdateRating` (ratings + comments for a DAW).
+  - `notesApi.ts`: `getNotesForUser`, `getNoteById`, `saveOrUpdateNote` for per‑DAW session notes.
+  - React components hold the UI state (open drawers, selected items, form inputs) and use these APIs to persist/fetch data.
+
+- **No global state library:**
+  - The app does **not** use Redux, MobX, Zustand, or React Context for global state.
+  - Instead it relies on:
+    - Local component state and hooks.
+    - DTO‑driven synchronization with the backend via small API clients.
+    - `localStorage` for persisting the logged‑in user session.
+
+### Research / Prototype Frontend Technologies (Not in Final App)
+
+Several frontend technologies and approaches were explored under `Tutorial_scripts/` but were **not** adopted in the final DAWker SPA. They remain as prototypes and references:
+
+- **Tone.js-based guitar rigs**
+  - `Tutorial_scripts/tonejs-demo/` and `Tutorial_scripts/tonejs-demo2/`:
+    - React + Vite apps using `tone` for amp, cabinet, and pedal simulation.
+    - Custom hooks like `useNAMAmp.js`, `useCabinet.js`, and `usePedal.js` managed Tone.js node graphs for distortion, cabinet IRs, and reverb/delay.
+  - `Tutorial_scripts/toneNnam-demo/`:
+    - Prototype integrating **Neural Amp Modeler (NAM)** via `neural-amp-modeler-wasm` and Tone.js, loading `.nam` models to run trained neural amp profiles in the browser.
+
+- **Standalone RNBO web UIs**
+  - `Tutorial_scripts/rnbo-stream-demo/`:
+    - Vite + React app using `@rnbo/js` to host RNBO exports (`rnbo.overdrive.json`, `rnbo.filterdelay.json`) directly in the browser, with UI sliders bound to RNBO parameters.
+  - `Tutorial_scripts/Testing_RNBO/`:
+    - Create React App RNBO test harness for simple `rnbo~` patches and WAV practice material, focused on verifying RNBO audio routing on the web.
+  - `Tutorial_scripts/guitar-amp-rnbo/`:
+    - CRA + Tailwind prototype that loads a single RNBO guitar amp export (`patch.export.json`) and exposes its parameters in a modern UI.
+
+- **Why the final app uses a different approach:**
+  - The production DAWker frontend standardizes on:
+    - **Native Web Audio API** for the live guitar amp (`NativeAmpDemo.tsx`) to keep the audio graph explicit and minimize WASM/worker complexity.
+    - A **DTO-based DAW model** (`DawDTO` / `ConfigDTO` / `ComponentDTO` / `SettingsDTO`) that can represent both native Web Audio components and RNBO-based components (via `SettingsEntity.technology`).
+  - Tone.js/NAM and standalone RNBO UIs were crucial for R&D (testing tone quality, latency, CPU impact), but were not integrated into the main SPA to:
+    - Reduce bundle size and runtime complexity.
+    - Keep one consistent state model and persistence layer across all audio technologies.
 
 ---
 
