@@ -50,20 +50,17 @@ public class PresetCategoryService {
     }
 
     public PresetCategoryDTO createPresetCategory(PresetCategoryWOIDDTO dto) {
-        Long pId = dto.presetId();
-        Long cId = dto.categoryId();
-        Preset preset = pRepo.findById(pId).orElseThrow(() -> new PresetNotFoundException(
-            String.format("Preset ID = %d not found.", pId)));
-        Category category = cRepo.findById(cId).orElseThrow(() -> new CategoryNotFoundException(
-            String.format("Category ID = %d not found.", cId)));
+        Preset preset = pRepo.findById(dto.presetId()).orElseThrow(() -> new PresetNotFoundException("Preset ID = " + dto.presetId() + " not found"));
+
+        Category category = cRepo.findById(dto.categoryId()).orElseThrow(() -> new CategoryNotFoundException("Category ID = " + dto.categoryId() + " not found"));
 
         PresetCategory pc = new PresetCategory();
-
-        preset.addPresetCategory(pc);
-        category.addPresetCategory(pc);
+        pc.setPreset(preset);
+        pc.setCategory(category);
 
         return presetCategoryToDTO(pc);
     }
+
 
     // currently does nothing, but keeping it here if we give PresetCategory update functionality later
     public PresetCategoryDTO updatePresetCategory(Long id, PresetCategoryWOIDDTO dto) {

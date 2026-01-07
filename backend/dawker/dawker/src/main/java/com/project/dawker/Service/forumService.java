@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.project.dawker.kafka.KafkaLogProducer;
 import org.springframework.stereotype.Service;
 
 import com.project.dawker.dto.commentDTO;
@@ -25,16 +26,20 @@ public class forumService {
     private final ForumPostRepository forumRepository;
     private final UserRepository userRepository;
     private final CommentRepository commentRepository;
+    private final KafkaLogProducer logger;
 
     public forumService(ForumPostRepository forumRepository, UserRepository userRepository,
-            CommentRepository commentRepository) {
+            CommentRepository commentRepository, KafkaLogProducer logProducer) {
         this.forumRepository = forumRepository;
         this.userRepository = userRepository;
         this.commentRepository = commentRepository;
+        logger = logProducer;
     }
 
     // ---------------maptoDTO---------------------
     public forumPostDTO mapToDto(ForumPost entity) {
+        logger.info("service-calls", "", "forumService", "mapToDto");
+        logger.debug("service-calls", "Convert the List<Comment> to List<commentDTO>", "forumService", "mapToDto");
         // 1. Convert the List<Comment> to List<commentDTO>
         List<commentDTO> commentDtos = null;
         if (entity.getComments() != null) {
@@ -48,6 +53,7 @@ public class forumService {
                     .collect(Collectors.toList());
         }
 
+        logger.debug("service-calls", "Return the forumPostDTO using your full constructor", "forumService", "mapToDto");
         // 2. Return the forumPostDTO using your full constructor
         return new forumPostDTO(
                 entity.getId(),
@@ -63,8 +69,11 @@ public class forumService {
     // --------------------Map to Entity-------------
 
     public ForumPost mapToEntity(receivedForumDTO dto, User author) {
-        if (dto == null)
+        logger.info("service-calls", "", "forumService", "mapToEntity");
+        if (dto == null) {
+            logger.debug("service-calls", "dto = null", "forumService", "mapToEntity");
             return null;
+        }
 
         ForumPost post = new ForumPost();
         post.setTitle(dto.getTitle());
@@ -101,24 +110,29 @@ public class forumService {
     }
 
     public List<forumPostDTO> getAllForums() {
+        logger.info("service-calls", "", "forumService", "getAllForums");
         return this.forumRepository.findAll().stream()
                 .map(this::mapToDto)
                 .collect(Collectors.toList());
     }
 
     public forumPostDTO getForumById(Long Id) {
+        logger.info("service-calls", "", "forumService", "getForumById");
         return this.forumRepository.findById(Id).map(this::mapToDto)
                 .orElseThrow(() -> new ForumNotFoundException("Forum request could not be found"));
     }
 
     // AJFEOA[FGOIEJAG[POJEAOGJ]]
     public List<forumPostDTO> getAllForumsByUserId(Long Id) {
+        logger.info("service-calls", "", "forumService", "getAllForumsByUserId");
+        logger.error("service-calls", "AJFEOA[FGOIEJAG[POJEAOGJ]]", "forumService", "getAllForumsByUserId", new Exception("anger"));
         return this.forumRepository.findAllByAuthor_Id(Id).stream()
                 .map(this::mapToDto).toList();
     }
 
     // Save methods
     public ForumPost saveForum(receivedForumDTO dto) {
+        logger.info("service-calls", "", "forumService", "saveForum");
 
         User user = this.userRepository.findById(dto.getUserId())
                 .orElseThrow(() -> new UserNotFoundException("Cannot save forum. Current user not found in Database"));
@@ -126,6 +140,7 @@ public class forumService {
     }
 
     public Comment saveComment(receivedCommentDTO dto) {
+        logger.info("service-calls", "", "forumService", "saveComment");
 
         ForumPost post = this.forumRepository.findById(dto.getParentPostId())
                 .orElseThrow(() -> new ForumNotFoundException("Comment could not be created. Forum not found"));

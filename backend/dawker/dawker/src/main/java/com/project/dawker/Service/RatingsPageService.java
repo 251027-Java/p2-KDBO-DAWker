@@ -1,5 +1,6 @@
 package com.project.dawker.service;
 
+import com.project.dawker.kafka.KafkaLogProducer;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.project.dawker.dto.ratingsPageDTO;
@@ -20,10 +21,12 @@ public class RatingsPageService {
 
     private final RatingsCommentRepository commentRepo;
     private final RatingsPageRepository ratingsRepo;
+    private final KafkaLogProducer logger;
 
-    public RatingsPageService(RatingsCommentRepository commentRepo, RatingsPageRepository ratingsRepo) {
+    public RatingsPageService(RatingsCommentRepository commentRepo, RatingsPageRepository ratingsRepo, KafkaLogProducer logProducer) {
         this.commentRepo = commentRepo;
         this.ratingsRepo = ratingsRepo;
+        logger = logProducer;
     }
 
     // Comment object created:
@@ -37,6 +40,7 @@ public class RatingsPageService {
 
     @Transactional
     public ratingsPageDTO createRatingsPage(recievedRatingsCommentDTO dto) {
+        logger.info("service-calls", "", "RatingsPageService", "createRatingsPage");
         // 1. Find or initialize the page (ID is still null if new)
         RatingsPage page = ratingsRepo.findByDawId(dto.getDawId())
                 .orElseGet(() -> {
@@ -76,6 +80,12 @@ public class RatingsPageService {
         System.out.println("The comment itself: ");
         System.out.println(savedComment);
 
+        logger.trace("service-calls", "After changing everything, these are the objects", "RatingsPageService", "createRatingsPage");
+        logger.trace("service-calls", "The page itself:", "RatingsPageService", "createRatingsPage");
+        logger.trace("service-calls", savedPage.toString(), "RatingsPageService", "createRatingsPage");
+        logger.trace("service-calls", "The comment itself:", "RatingsPageService", "createRatingsPage");
+        logger.trace("service-calls", savedComment.toString(), "RatingsPageService", "createRatingsPage");
+
         // 5. THE CRITICAL CHANGE: Save the PAGE only.
         // DELETE 'commentRepo.save(newComment)' from before.
         // Hibernate will see the Page is new (or dirty), save it, get the ID,
@@ -83,6 +93,7 @@ public class RatingsPageService {
         RatingsPage finalSavedPage = ratingsRepo.save(savedPage);
 
         System.out.println("FIXED STATE: " + finalSavedPage);
+        logger.trace("service-calls", "FIXED STATE: " + finalSavedPage, "RatingsPageService", "createRatingsPage");
         return convertToDTO(finalSavedPage);
     }
 
@@ -110,6 +121,7 @@ public class RatingsPageService {
     }
 
     public ratingsPageDTO getRatingsPageByDawId(String dawId) {
+        logger.info("service-calls", "", "RatingsPageService", "getRatingsPageByDawId");
         return convertToDTO(ratingsRepo.findByDawId(dawId)
                 .orElseThrow(() -> new RatingsPageNotFoundException(
                         "Ratings page you are looking for could not be found in database")));

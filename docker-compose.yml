@@ -49,14 +49,10 @@ services:
       dockerfile: Dockerfile
     container_name: dawker-frontend
     ports:
-<<<<<<< HEAD
-      - "3000:80"
-=======
       - "5173:5173"
     volumes:
       - .:/DragnDrop          # So..you have to sync your local code into the container (apparently..would've been good to know)
       - /DragnDrop/node_modules # Prevents local node_modules from overwriting container ones
->>>>>>> main
     environment:
       - REACT_APP_API_URL=http://localhost:8080/
     depends_on:
@@ -76,9 +72,37 @@ services:
     depends_on:
       - zookeeper
     environment:
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+
+      KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+    healthcheck:
+      test: ["CMD", "kafka-topics", "--bootstrap-server", "kafka:29092", "--list"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  
+  # 5. Log Consumer
+  log-consumer:
+    build:
+      context: ./backend/log-consumer/consumer
+      dockerfile: Dockerfile
+    container_name: dawker-log-consumer
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+    depends_on:
+      kafka:
+        condition: service_healthy    
+    volumes:
+      - ./backend/logs:/app/logs
 
 volumes:
   postgres_data:

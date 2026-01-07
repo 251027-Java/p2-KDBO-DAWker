@@ -45,9 +45,10 @@ public interface DawRepository extends JpaRepository<DawEntity, String> {
     // }
     // ]
     // }
-    @Query("SELECT d FROM DawEntity d " +
-            "LEFT JOIN FETCH d.listOfConfigs c " +
-            "LEFT JOIN FETCH c.components comp " +
-            "WHERE d.user.id = :userId")
+    @Query("""
+        SELECT d FROM DawEntity d
+        LEFT JOIN FETCH d.listOfConfigs
+        WHERE d.user.id = :userId
+        """)
     Optional<DawEntity> findFullRigForUser(@Param("userId") Long userId);
 }
