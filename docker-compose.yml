@@ -49,14 +49,10 @@ services:
       dockerfile: Dockerfile
     container_name: dawker-frontend
     ports:
-<<<<<<< HEAD
-      - "3000:80"
-=======
       - "5173:5173"
     volumes:
       - .:/DragnDrop          # So..you have to sync your local code into the container (apparently..would've been good to know)
       - /DragnDrop/node_modules # Prevents local node_modules from overwriting container ones
->>>>>>> main
     environment:
       - REACT_APP_API_URL=http://localhost:8080/
     depends_on:
