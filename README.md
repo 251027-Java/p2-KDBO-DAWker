@@ -757,8 +757,8 @@ Several frontend technologies and approaches were explored under `Tutorial_scrip
 
 ### Wireframes
 
-[See `WIREFRAMES.md` for text-based wireframes of the main pages. You can also replace or supplement these with image-based wireframes as the design evolves.]
+Early Figma Links:
+* https://www.figma.com/design/YxOK7AqgG0KRFxGBsa2PHE/Untitled?node-id=0-1&p=f&t=wrUOiP8gVtMgc6rq-0
+* https://www.figma.com/design/DQeqlct4Ov2y77fnlhzw9W/DAW-Review?node-id=0-1&p=f&t=wYr3XNBbRCoXhnmx-0
 
-### Architecture Diagram
 
-[Link to architecture diagram or embed image]
