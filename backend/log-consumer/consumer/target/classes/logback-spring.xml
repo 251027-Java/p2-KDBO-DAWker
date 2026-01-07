@@ -1,4 +1,5 @@
-<configuration>
+<configuration debug="true">
+    <statusListener class="ch.qos.logback.core.status.OnConsoleStatusListener"/>
     <appender name="FILE-TRACE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>logs/trace/app.log</file>
         <encoder>
@@ -10,7 +11,7 @@
             <onMismatch>DENY</onMismatch>
         </filter>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>logs/trace/app.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <fileNamePattern>/app/logs/trace/app.%d{yyyy-MM-dd}.log</fileNamePattern>
             <maxHistory>3</maxHistory>
             <totalSizeCap>4GB</totalSizeCap>
         </rollingPolicy>
@@ -26,7 +27,7 @@
             <onMismatch>DENY</onMismatch>
         </filter>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>logs/debug/app.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <fileNamePattern>/app/logs/debug/app.%d{yyyy-MM-dd}.log</fileNamePattern>
             <maxHistory>3</maxHistory>
             <totalSizeCap>2GB</totalSizeCap>
         </rollingPolicy>
@@ -42,7 +43,7 @@
             <onMismatch>DENY</onMismatch>
         </filter>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>logs/info/app.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <fileNamePattern>/app/logs/info/app.%d{yyyy-MM-dd}.log</fileNamePattern>
             <maxHistory>3</maxHistory>
             <totalSizeCap>1GB</totalSizeCap>
         </rollingPolicy>
@@ -58,7 +59,7 @@
             <onMismatch>DENY</onMismatch>
         </filter>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>logs/warn/app.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <fileNamePattern>/app/logs/warn/app.%d{yyyy-MM-dd}.log</fileNamePattern>
             <maxHistory>3</maxHistory>
             <totalSizeCap>1GB</totalSizeCap>
         </rollingPolicy>
@@ -74,7 +75,7 @@
             <onMismatch>DENY</onMismatch>
         </filter>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>logs/error/app.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <fileNamePattern>/app/logs/error/app.%d{yyyy-MM-dd}.log</fileNamePattern>
             <maxHistory>3</maxHistory>
             <totalSizeCap>1GB</totalSizeCap>
         </rollingPolicy>

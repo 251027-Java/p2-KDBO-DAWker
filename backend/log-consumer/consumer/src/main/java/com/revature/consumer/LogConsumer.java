@@ -1,20 +1,37 @@
+// thanks to P2-feedback.fm-deployed for helping
+
 package com.revature.consumer;
 
-import jakarta.annotation.PostConstruct;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @Component
 public class LogConsumer {
-    private static final Logger logger = LoggerFactory.getLogger(LogConsumer.class);
+    private static final Path LOG_DIR = Paths.get("logs");
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
+    private static final List<String> logLevels = new ArrayList<>(List.of("TRACE", "DEBUG", "INFO", "WARN", "ERROR"));
 
-    @PostConstruct
-    public void init() {
-        logger.trace("LogConsumer initialized and ready");
+    public LogConsumer() {
+        try {
+            if (Files.exists(LOG_DIR)) {
+                clearDirectory(LOG_DIR);
+            } else {
+                Files.createDirectories(LOG_DIR);
+            }
+        } catch (IOException e) {
+            System.err.println("WARNING: Could not initialize logs folder: " + e.getMessage());
+        }
     }
 
     @KafkaListener(topics = "api-calls")
@@ -29,20 +46,56 @@ public class LogConsumer {
         String method = logMap.getOrDefault("method", "unknown-method");
         String exception = logMap.get("exception"); // optional
 
+        String timestamp = LocalDateTime.now().format(formatter);
+        String formattedLevel = String.format("%-5s", level);
         StringBuilder logBuilder = new StringBuilder();
         logBuilder.append("[").append(service).append(".").append(method).append("] ");
         logBuilder.append(message);
         if (exception != null) logBuilder.append(" (").append(exception).append(")");
 
-        System.out.printf("kafka consume %s %s %s %s%n", service, method, level, message);
+        String logLine = String.format("{%s} %s - %s%n", timestamp, formattedLevel, logBuilder);
 
-        // Write to SLF4J based on level
-        switch (level) {
-            case "ERROR" -> logger.error(logBuilder.toString());
-            case "WARN" -> logger.warn(logBuilder.toString());
-            case "DEBUG" -> logger.debug(logBuilder.toString());
-            case "TRACE" -> logger.trace(logBuilder.toString());
-            default -> logger.info(logBuilder.toString());
+        System.out.printf("kafka consume %s%n", logLine);
+        write(level, logLine);
+    }
+
+    private synchronized void write(String logLevel, String message) {
+        int logIndex = logLevels.indexOf(logLevel);
+        if (logIndex == -1) logIndex = logLevels.indexOf("INFO");
+        int i = 0;
+
+        try {
+            for (i = 0; i <= logIndex; i++) {
+                Path logFile = LOG_DIR.resolve(logLevels.get(i) + ".log");
+                Files.writeString(
+                    logFile,
+                    message,
+                    StandardOpenOption.CREATE,
+                    StandardOpenOption.APPEND
+                );
+            }
+        } catch (IOException e) {
+            System.out.printf("Error while trying to write %s to %s.log.%n", message, logLevels.get(i));
+            e.printStackTrace();
+        }
+    }
+
+    private void clearDirectory(Path dir) throws IOException {
+        if (!Files.isDirectory(dir)) return;
+
+        try (var entries = Files.list(dir)) {
+            for (Path entry : entries.toList()) {
+                try {
+                    if (Files.isDirectory(entry)) {
+                        clearDirectory(entry);
+                        Files.delete(entry);
+                    } else {
+                        Files.delete(entry);
+                    }
+                } catch (IOException ex) {
+                    System.err.println("WARNING: Could not delete " + entry + ": " + ex.getMessage());
+                }
+            }
         }
     }
 }
