@@ -11,6 +11,7 @@ function SettingsPage() {
     if(userAPI.currentUser == null){
       navigate("/login")
     }
+
   }, [])
 
   return (

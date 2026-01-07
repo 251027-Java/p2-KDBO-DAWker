@@ -23,9 +23,11 @@ import com.project.dawker.repository.interfaces.ForumPostSummary;
 public interface ForumPostRepository extends JpaRepository<ForumPost, Long> {
 
     // This handles your "Most Recent" requirement
-    List<ForumPostSummary> findTop3ByOrderByCreatedAtDesc();
+    List<ForumPost> findTop3ByOrderByCreatedAtDesc();
+
+    List<ForumPost> findAllByAuthor_Id(Long authorId);
 
     // This handles searching by "Type" or "Tag"
-    List<ForumPostSummary> findByPostType(String type);
+    List<ForumPost> findByPostType(String type);
 
 }

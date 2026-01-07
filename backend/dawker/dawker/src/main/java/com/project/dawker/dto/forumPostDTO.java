@@ -16,6 +16,7 @@ public class forumPostDTO {
     private String postType;
     private LocalDateTime createdAt;
     private Long userId;
+    private String username;
     private List<commentDTO> comments;
 
     public forumPostDTO(
@@ -25,7 +26,8 @@ public class forumPostDTO {
             String postType,
             LocalDateTime createdAt,
             Long userId,
-            List<commentDTO> comments) {
+            List<commentDTO> comments,
+            String username) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -33,6 +35,7 @@ public class forumPostDTO {
         this.createdAt = createdAt;
         this.userId = userId;
         this.comments = comments;
+        this.username = username;
 
     }
 
@@ -42,13 +45,14 @@ public class forumPostDTO {
             String description,
             String postType,
             LocalDateTime createdAt,
-            Long userId) {
+            Long userId,
+            String username) {
         this.id = id;
         this.title = title;
         this.description = description;
         this.postType = postType;
         this.createdAt = createdAt;
         this.userId = userId;
-
+        this.username = username;
     }
 }

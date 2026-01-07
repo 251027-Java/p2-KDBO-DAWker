@@ -41,6 +41,18 @@ public class CategoryService {
     }
 
     public boolean existsByCategoryType(String categoryType) {
+        CategoryType type;
+
+        try {
+            type = CategoryType.valueOf(categoryType);
+        } catch (IllegalArgumentException | NullPointerException e) {
+            return false; // or throw exception, your choice
+        }
+
+        return repo.existsByCategoryType(type);
+    }
+
+    public boolean existsByCategoryType(CategoryType categoryType) {
         return repo.existsByCategoryType(categoryType);
     }
 
