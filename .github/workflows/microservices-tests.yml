@@ -13,27 +13,40 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1️⃣ Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      # 2️⃣ Run unit tests for each microservice
       - name: Run unit tests
         run: |
           set -e
 
           # Find all Maven services (directories with pom.xml)
           services=$(find . -maxdepth 4 -name pom.xml -exec dirname {} \;)
-          
+
           for service in $services; do
             echo "Running unit tests in $service"
             cd "$service"
 
+            # Prepare Maven wrapper if it exists
             if [ -f mvnw ]; then
               chmod +x mvnw
               sed -i 's/\r$//' mvnw
-              ./mvnw clean test
-            else
-              mvn clean test
             fi
+
+            # Extract Java version from pom.xml (maven-compiler-plugin release)
+            java_ver=$(xmllint --xpath "//*[local-name()='plugin'][*//*[local-name()='artifactId']='maven-compiler-plugin']/*[local-name()='configuration']/*[local-name()='release']/text()" pom.xml 2>/dev/null || echo "20")
+            
+            if [ -z "$java_ver" ]; then
+              java_ver="20"  # default if not found
+            fi
+
+            echo "Detected Java version for $service: $java_ver"
+
+            # Run tests in Docker Maven container
+            docker run --rm -v "$PWD":/app -w /app maven:3.9-eclipse-temurin-$java_ver-alpine \
+              bash -c "./mvnw clean test || mvn clean test"
 
             cd - >/dev/null
           done
