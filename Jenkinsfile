@@ -40,21 +40,27 @@ pipeline {
                             def success = false
 
                             for (ver in fallbackVersions) {
-                                echo "Trying Java ${ver}"
+                                def image = "maven:3.9-eclipse-temurin-${ver}-alpine"
+                                echo "Checking Docker image ${image}"
                                 try {
+                                    // Check if Docker image exists
+                                    sh "docker manifest inspect ${image} >/dev/null 2>&1"
+                                    echo "Using Docker image ${image}"
+
+                                    // Run tests
                                     sh """
-                                        docker run --rm -v \$PWD:/app -w /app maven:3.9-eclipse-temurin-${ver}-alpine \
+                                        docker run --rm -v \$PWD:/app -w /app ${image} \
                                         bash -c "\${fileExists('mvnw') ? './mvnw clean test' : 'mvn clean test'}"
                                     """
                                     success = true
                                     break
                                 } catch (err) {
-                                    echo "Java ${ver} failed: ${err}"
+                                    echo "Docker image ${image} not available or tests failed, skipping."
                                 }
                             }
 
                             if (!success) {
-                                error "Unit tests failed for ${service} on all tried Java versions."
+                                error "Unit tests failed for ${service} on all available Docker images"
                             }
                         }
                     }
@@ -71,7 +77,7 @@ pipeline {
             echo 'Pipeline succeeded!'
         }
         failure {
-            echo 'Pipeline failed.'
+            echo 'Pipeline failed!'
         }
     }
 }

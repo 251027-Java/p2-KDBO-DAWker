@@ -38,20 +38,26 @@ jobs:
             fi
             echo "Detected Java version: $java_ver"
 
-            # List of fallback versions to try
+            # Define fallback versions
             fallback_versions=($java_ver 21 20 17)
 
             success=false
             for ver in "${fallback_versions[@]}"; do
-              echo "Trying Java $ver"
-              if docker run --rm -v "$PWD":/app -w /app maven:3.9-eclipse-temurin-$ver-alpine bash -c "./mvnw clean test || mvn clean test"; then
-                success=true
-                break
+              image="maven:3.9-eclipse-temurin-${ver}-alpine"
+              echo "Checking Docker image $image..."
+              if docker manifest inspect $image >/dev/null 2>&1; then
+                echo "Using Docker image $image"
+                if docker run --rm -v "$PWD":/app -w /app $image bash -c "./mvnw clean test || mvn clean test"; then
+                  success=true
+                  break
+                fi
+              else
+                echo "Docker image $image does not exist, skipping."
               fi
             done
 
             if [ "$success" = false ]; then
-              echo "Unit tests failed for $service on all tried Java versions"
+              echo "Unit tests failed for $service on all available Docker images"
               exit 1
             fi
 
