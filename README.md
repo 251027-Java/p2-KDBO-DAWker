@@ -751,21 +751,13 @@ Several frontend technologies and approaches were explored under `Tutorial_scrip
   - `Tutorial_scripts/guitar-amp-rnbo/`:
     - CRA + Tailwind prototype that loads a single RNBO guitar amp export (`patch.export.json`) and exposes its parameters in a modern UI.
 
-- **Why the final app uses a different approach:**
-  - The production DAWker frontend standardizes on:
-    - **Native Web Audio API** for the live guitar amp (`NativeAmpDemo.tsx`) to keep the audio graph explicit and minimize WASM/worker complexity.
-    - A **DTO-based DAW model** (`DawDTO` / `ConfigDTO` / `ComponentDTO` / `SettingsDTO`) that can represent both native Web Audio components and RNBO-based components (via `SettingsEntity.technology`).
-  - Tone.js/NAM and standalone RNBO UIs were crucial for R&D (testing tone quality, latency, CPU impact), but were not integrated into the main SPA to:
-    - Reduce bundle size and runtime complexity.
-    - Keep one consistent state model and persistence layer across all audio technologies.
-
 ---
 
 ## Additional Resources
 
 ### Wireframes
 
-[Link to wireframes or embed images]
+[See `WIREFRAMES.md` for text-based wireframes of the main pages. You can also replace or supplement these with image-based wireframes as the design evolves.]
 
 ### Architecture Diagram
 
