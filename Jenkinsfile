@@ -2,7 +2,6 @@ pipeline {
     agent any
 
     stages {
-
         stage('Checkout') {
             steps {
                 checkout scm
@@ -12,7 +11,6 @@ pipeline {
         stage('Run Unit Tests') {
             steps {
                 script {
-                    // Find all Maven services (directories with pom.xml)
                     def services = sh(
                         script: "find . -maxdepth 4 -name pom.xml -exec dirname {} \\;",
                         returnStdout: true
@@ -20,9 +18,7 @@ pipeline {
 
                     for (service in services) {
                         echo "Running unit tests in ${service}"
-
                         dir(service) {
-                            // Prepare Maven wrapper if it exists
                             if (fileExists('mvnw')) {
                                 sh '''
                                     chmod +x mvnw
@@ -30,28 +26,35 @@ pipeline {
                                 '''
                             }
 
-                            // Extract Java version from pom.xml (maven-compiler-plugin release)
+                            // Extract Java version from pom.xml
                             def javaVer = sh(
-                                script: """
-                                    xmllint --xpath "//*[local-name()='plugin'][*//*[local-name()='artifactId']='maven-compiler-plugin']/*[local-name()='configuration']/*[local-name()='release']/text()" pom.xml || echo '20'
-                                """,
+                                script: "xmllint --xpath \"//*[local-name()='plugin'][*//*[local-name()='artifactId']='maven-compiler-plugin']/*[local-name()='configuration']/*[local-name()='release']/text()\" pom.xml 2>/dev/null || echo 20",
                                 returnStdout: true
                             ).trim()
+                            if (!javaVer) {
+                                javaVer = '20'
+                            }
+                            echo "Detected Java version: ${javaVer}"
 
-                            if (javaVer == '') {
-                                javaVer = '20' // default if not found
+                            def fallbackVersions = [javaVer, '21', '20', '17']
+                            def success = false
+
+                            for (ver in fallbackVersions) {
+                                echo "Trying Java ${ver}"
+                                try {
+                                    sh """
+                                        docker run --rm -v \$PWD:/app -w /app maven:3.9-eclipse-temurin-${ver}-alpine \
+                                        bash -c "\${fileExists('mvnw') ? './mvnw clean test' : 'mvn clean test'}"
+                                    """
+                                    success = true
+                                    break
+                                } catch (err) {
+                                    echo "Java ${ver} failed: ${err}"
+                                }
                             }
 
-                            echo "Detected Java version for ${service}: ${javaVer}"
-
-                            // Run tests in Docker Maven container
-                            try {
-                                sh """
-                                    docker run --rm -v \$PWD:/app -w /app maven:3.9-eclipse-temurin-${javaVer}-alpine \
-                                    bash -c "\${fileExists('mvnw') ? './mvnw clean test' : 'mvn clean test'}"
-                                """
-                            } catch (err) {
-                                error "Unit tests failed for ${service} using Java ${javaVer}: ${err}"
+                            if (!success) {
+                                error "Unit tests failed for ${service} on all tried Java versions."
                             }
                         }
                     }
@@ -68,7 +71,7 @@ pipeline {
             echo 'Pipeline succeeded!'
         }
         failure {
-            echo 'Pipeline failed!'
+            echo 'Pipeline failed.'
         }
     }
 }

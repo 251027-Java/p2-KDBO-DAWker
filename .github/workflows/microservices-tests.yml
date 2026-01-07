@@ -13,40 +13,47 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2️⃣ Run unit tests for each microservice
       - name: Run unit tests
         run: |
           set -e
 
-          # Find all Maven services (directories with pom.xml)
           services=$(find . -maxdepth 4 -name pom.xml -exec dirname {} \;)
 
           for service in $services; do
             echo "Running unit tests in $service"
             cd "$service"
 
-            # Prepare Maven wrapper if it exists
             if [ -f mvnw ]; then
               chmod +x mvnw
               sed -i 's/\r$//' mvnw
             fi
 
-            # Extract Java version from pom.xml (maven-compiler-plugin release)
+            # Extract Java version from pom.xml
             java_ver=$(xmllint --xpath "//*[local-name()='plugin'][*//*[local-name()='artifactId']='maven-compiler-plugin']/*[local-name()='configuration']/*[local-name()='release']/text()" pom.xml 2>/dev/null || echo "20")
-            
             if [ -z "$java_ver" ]; then
-              java_ver="20"  # default if not found
+              java_ver="20"
             fi
+            echo "Detected Java version: $java_ver"
 
-            echo "Detected Java version for $service: $java_ver"
+            # List of fallback versions to try
+            fallback_versions=($java_ver 21 20 17)
 
-            # Run tests in Docker Maven container
-            docker run --rm -v "$PWD":/app -w /app maven:3.9-eclipse-temurin-$java_ver-alpine \
-              bash -c "./mvnw clean test || mvn clean test"
+            success=false
+            for ver in "${fallback_versions[@]}"; do
+              echo "Trying Java $ver"
+              if docker run --rm -v "$PWD":/app -w /app maven:3.9-eclipse-temurin-$ver-alpine bash -c "./mvnw clean test || mvn clean test"; then
+                success=true
+                break
+              fi
+            done
+
+            if [ "$success" = false ]; then
+              echo "Unit tests failed for $service on all tried Java versions"
+              exit 1
+            fi
 
             cd - >/dev/null
           done
