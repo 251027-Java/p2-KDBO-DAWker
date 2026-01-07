@@ -34,6 +34,11 @@ public class LogConsumer {
         }
     }
 
+    @KafkaListener(topics = "errors")
+    public void consumeError(Map<String, String> logMap) {
+        consume(logMap);
+    }
+
     @KafkaListener(topics = "api-calls")
     public void consumeAPICall(Map<String, String> logMap) {
         consume(logMap);

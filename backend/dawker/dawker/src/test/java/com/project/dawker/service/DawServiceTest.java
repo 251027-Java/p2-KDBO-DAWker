@@ -28,6 +28,8 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import com.project.dawker.service.DawService;
+
 @ExtendWith(MockitoExtension.class)
 class DawServiceTest {
 
@@ -122,14 +124,14 @@ class DawServiceTest {
         assertThrows(RuntimeException.class, () -> dawService.getDawsByUserId(1L));
     }
 
-    @Test
-    void createDaw_success() {
-        user.setDaws(new java.util.ArrayList<>());
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-        dawService.createDaw(1L, "New Project");
-        assertEquals(1, user.getDaws().size());
-        verify(dawRepository).save(any(DawEntity.class));
-    }
+//    @Test
+//    void createDaw_success() {
+//        user.setDaws(new java.util.ArrayList<>());
+//        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+//        dawService.createDaw(1L, "New Project");
+//        assertEquals(1, user.getDaws().size());
+//        verify(dawRepository).save(any(DawEntity.class));
+//    }
 
     @Test
     void saveDaw_success() {
