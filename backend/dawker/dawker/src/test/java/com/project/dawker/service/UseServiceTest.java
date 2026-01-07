@@ -19,6 +19,7 @@ import com.project.dawker.entity.User;
 import com.project.dawker.entity.daw_specific.DawEntity;
 import com.project.dawker.entity.daw_specific.ForumPost;
 import com.project.dawker.exception.UserNotFoundException;
+import com.project.dawker.kafka.KafkaLogProducer;
 import com.project.dawker.repository.UserRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -26,6 +27,9 @@ class UseServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private KafkaLogProducer logger;
 
     @InjectMocks
     private useService userService;
@@ -42,6 +46,7 @@ class UseServiceTest {
         user.setPassword("password123");
         user.setEmail("test@email.com");
         user.setRole("USER");
+        user.setNotes(List.of());
 
         daw = new DawEntity();
         daw.setId("daw-uuid-1");

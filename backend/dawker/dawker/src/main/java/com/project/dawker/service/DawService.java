@@ -226,6 +226,9 @@ public class DawService {
         // 4. Map the Hierarchy (Passing 'entity' down to prevent findById(null))
         logger.debug("service-calls", "Map the Hierarchy (Passing 'entity' down to prevent findById(null))", "dawService", "saveDaw");
         if (dto.getListOfConfigs() != null) {
+            if (entity.getListOfConfigs() == null) {
+                entity.setListOfConfigs(new java.util.ArrayList<>());
+            }
             // 1. Get the reference to the existing persistent list
             List<ConfigEntity> existingConfigs = entity.getListOfConfigs();
 

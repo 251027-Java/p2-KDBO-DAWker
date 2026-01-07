@@ -5,6 +5,7 @@ import com.project.dawker.dto.recievedDto.recievedRatingsCommentDTO;
 import com.project.dawker.entity.daw_specific.RatingsComment;
 import com.project.dawker.entity.daw_specific.RatingsPage;
 import com.project.dawker.exception.RatingsPageNotFoundException;
+import com.project.dawker.kafka.KafkaLogProducer;
 import com.project.dawker.repository.RatingsCommentRepository;
 import com.project.dawker.repository.RatingsPageRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,6 +18,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -27,6 +29,9 @@ class RatingsPageServiceTest {
 
     @Mock
     private RatingsPageRepository ratingsPageRepository;
+
+    @Mock
+    private KafkaLogProducer logger;
 
     @InjectMocks
     private RatingsPageService ratingsPageService;
