@@ -5,6 +5,8 @@ import {
   applyNativeAmpStateFromComponentDTOs 
 } from '../utils/dawUtils';
 import { DawDTO, ConfigDTO } from '../dtos/types';
+import { userAPI } from '../utils/userAPI';
+import { useParams } from 'react-router-dom';
 
 /**
  * Native Web Audio API amp simulator
@@ -19,7 +21,11 @@ declare global {
 
 const SEEDED_DAW_ID = "587990d4-ede8-475a-a0a6-ee10c067f433";
 
+
 const NativeAmpDemo: FC = () => {
+
+  let { dawId } = useParams<{ dawId: string }>();
+
   const [isOn, setIsOn] = useState<boolean>(false);
   const [distortionAmount, setDistortionAmount] = useState<number>(0.5);
   const [directMode, setDirectMode] = useState<boolean>(false); // Start with effects enabled
@@ -40,6 +46,7 @@ const NativeAmpDemo: FC = () => {
   const [showSaveDialog, setShowSaveDialog] = useState<boolean>(false);
   const [dawName, setDawName] = useState<string>('');
   const [configName, setConfigName] = useState<string>('');
+  const [description, setDescription] = useState('');
   const userId = 1; // Default user ID - can be made dynamic later
 
   // Native Web Audio API refs
@@ -62,7 +69,10 @@ const NativeAmpDemo: FC = () => {
     console.log('LOADING DAW STATE on mount');
     console.log('DAW ID:', SEEDED_DAW_ID);
     
-    dawAPI.getDawById(SEEDED_DAW_ID)
+    if(dawId == null){
+      dawId = SEEDED_DAW_ID;
+    }
+    dawAPI.getDawById(dawId)
       .then((daw: DawDTO) => {
         console.log('LOADED DAW STATE - Full object:', daw);
         console.log('LOADED DAW STATE - Structure:', {
@@ -81,6 +91,10 @@ const NativeAmpDemo: FC = () => {
             } : null
           }))
         });
+
+        setDescription(daw.description)
+        setConfigName(daw.configName)
+        setDawName(daw.name)
         
         setDawState(daw);
         
@@ -184,9 +198,21 @@ const NativeAmpDemo: FC = () => {
       });
       
       const dawDTO = buildDawDTOFromNativeAmpState(
+        dawState?.dawId,
         dawName,
-        userId,
+        description,
+        dawState?.exportCount,
+        dawState?.createdAt,
+        userAPI.currentUser?.id,
         configName,
+        dawState?.listOfConfigs?.[0]?.id,
+        dawState?.listOfConfigs?.[0]?.components?.[0]?.id,
+        dawState?.listOfConfigs?.[0]?.components?.[0]?.instanceId,
+        dawState?.listOfConfigs?.[0]?.components?.[0]?.name,
+        dawState?.listOfConfigs?.[0]?.components?.[0]?.type,
+        dawState?.listOfConfigs?.[0]?.components?.[0]?.settings?.id,
+        dawState?.listOfConfigs?.[0]?.components?.[0]?.settings?.Technology,
+        dawState?.listOfConfigs?.[0]?.components?.[0]?.settings?.export_name,
         {
           inputGain,
           directMode,
@@ -205,18 +231,21 @@ const NativeAmpDemo: FC = () => {
         dawId: dawDTO.dawId,
         name: dawDTO.name,
         userId: dawDTO.userId,
-        configCount: dawDTO.listOfConfigs.length,
+        description: dawDTO.description,
+        configCount: dawDTO.listOfConfigs?.length || 0,
         firstConfig: {
-          id: dawDTO.listOfConfigs[0]?.id,
-          name: dawDTO.listOfConfigs[0]?.name,
-          componentsCount: dawDTO.listOfConfigs[0]?.components?.length || 0,
-          firstComponent: dawDTO.listOfConfigs[0]?.components?.[0] ? {
+          id: dawDTO.listOfConfigs?.[0]?.id,
+          name: dawDTO.listOfConfigs?.[0]?.name,
+          componentsCount: dawDTO.listOfConfigs?.[0]?.components?.length || 0,
+          firstComponent: dawDTO.listOfConfigs?.[0]?.components?.[0] ? {
             name: dawDTO.listOfConfigs[0].components[0].name,
             type: dawDTO.listOfConfigs[0].components[0].type,
             parameters: dawDTO.listOfConfigs[0].components[0].settings?.parameters
           } : null
         }
       });
+
+      console.log(dawDTO);
 
       const saved = await dawAPI.saveDaw(dawDTO);
       
@@ -226,7 +255,7 @@ const NativeAmpDemo: FC = () => {
         sent: {
           dawId: dawDTO.dawId,
           name: dawDTO.name,
-          componentsCount: dawDTO.listOfConfigs[0]?.components?.length
+          componentsCount: dawDTO.listOfConfigs?.[0]?.components?.length
         },
         received: {
           dawId: saved.dawId,
@@ -247,15 +276,44 @@ const NativeAmpDemo: FC = () => {
   };
 
   // Update existing DAW state
-  const handleUpdateDaw = async () => {
-    if (!dawState) {
-      alert('No DAW state loaded. Please save a new preset first.');
-      return;
-    }
+// Update existing DAW state
+const handleUpdateDaw = async () => {
+  if (!dawState) {
+    alert('No DAW state loaded. Please save a new preset first.');
+    return;
+  }
 
-    try {
-      console.log('UPDATE - Current DAW State:', dawState);
-      console.log('UPDATE - Current amp state values:', {
+  try {
+    // We must pass all arguments required by buildDawDTOFromNativeAmpState
+    console.log("Does the list config in the frontend hav an id?")
+    console.log(dawState.listOfConfigs?.[0]?.id)
+    const updatedDTO = buildDawDTOFromNativeAmpState(
+
+      // 1. DAW Specific Metadata
+      dawState.dawId,                      // dawId
+      dawState.name,
+      description,                       // dawName
+      dawState.exportCount,                // exportCount
+      dawState.createdAt,                  // createdAt
+      dawState.userId,                     // userId
+
+      // 2. Config Specific
+      configName || 'Default Config', // configName
+      dawState.listOfConfigs?.[0]?.id,    // configId
+
+      // 3. Component Specific
+      dawState.listOfConfigs?.[0]?.components?.[0]?.id,         // componentId
+      dawState.listOfConfigs?.[0]?.components?.[0]?.instanceId, // instanceId
+      dawState.listOfConfigs?.[0]?.components?.[0]?.name,       // componentName
+      dawState.listOfConfigs?.[0]?.components?.[0]?.type,       // componentType
+
+      // 4. Settings Specific
+      dawState.listOfConfigs?.[0]?.components?.[0]?.settings?.id,          // settingsId
+      dawState.listOfConfigs?.[0]?.components?.[0]?.settings?.Technology,  // settingsTechnology
+      dawState.listOfConfigs?.[0]?.components?.[0]?.settings?.export_name, // settingsExportName
+
+      // 5. The actual Amp State (Object)
+      {
         inputGain,
         directMode,
         distortionAmount,
@@ -264,28 +322,16 @@ const NativeAmpDemo: FC = () => {
         trebleValue,
         reverbAmount,
         volumeValue,
-      });
-      
-      const updatedDTO = buildDawDTOFromNativeAmpState(
-        dawState.name,
-        dawState.userId,
-        dawState.listOfConfigs[0]?.name || 'Default Config',
-        {
-          inputGain,
-          directMode,
-          distortionAmount,
-          bassValue,
-          midValue,
-          trebleValue,
-          reverbAmount,
-          volumeValue,
-        }
-      );
+      }
+    );
+
+      console.log("This is within the Main frontend app. Wanting to see how config is saved")
+      console.log(configName)
 
       // Use the existing DAW ID
       updatedDTO.dawId = dawState.dawId;
-      if (updatedDTO.listOfConfigs[0]) {
-        updatedDTO.listOfConfigs[0].id = dawState.listOfConfigs[0]?.id || updatedDTO.listOfConfigs[0].id;
+      if (updatedDTO.listOfConfigs?.[0]) {
+        updatedDTO.listOfConfigs[0].id = dawState.listOfConfigs?.[0]?.id || updatedDTO.listOfConfigs[0].id;
       }
 
       console.log('UPDATE DTO CREATED (before sending)');
@@ -293,17 +339,17 @@ const NativeAmpDemo: FC = () => {
       console.log('Update Summary:', {
         dawId: updatedDTO.dawId,
         name: updatedDTO.name,
-        configId: updatedDTO.listOfConfigs[0]?.id,
-        configName: updatedDTO.listOfConfigs[0]?.name,
-        componentsCount: updatedDTO.listOfConfigs[0]?.components?.length || 0,
-        firstComponentParams: updatedDTO.listOfConfigs[0]?.components?.[0]?.settings?.parameters
+        configId: updatedDTO.listOfConfigs?.[0]?.id,
+        configName: updatedDTO.listOfConfigs?.[0]?.name,
+        componentsCount: updatedDTO.listOfConfigs?.[0]?.components?.length || 0,
+        firstComponentParams: updatedDTO.listOfConfigs?.[0]?.components?.[0]?.settings?.parameters
       });
       console.log('Comparison - Old vs New:', {
         oldParams: dawState.listOfConfigs?.[0]?.components?.[0]?.settings?.parameters,
-        newParams: updatedDTO.listOfConfigs[0]?.components?.[0]?.settings?.parameters
+        newParams: updatedDTO.listOfConfigs?.[0]?.components?.[0]?.settings?.parameters
       });
 
-      const updated = await dawAPI.updateDaw(updatedDTO);
+      const updated = await dawAPI.saveDaw(updatedDTO);
       
       console.log('UPDATE COMPLETE - Final state');
       console.log('Updated DAW object:', updated);
@@ -859,96 +905,70 @@ const NativeAmpDemo: FC = () => {
         </div>
         {dawState && (
           <div style={{ fontSize: '12px', color: '#aaa' }}>
-            Loaded DAW: {dawState.name} (ID: {dawState.dawId.substring(0, 8)}...)
+            Loaded DAW: {dawState.name} (ID: {dawState.dawId?.substring(0, 8)}...)
           </div>
         )}
       </div>
 
       {/* Save Dialog */}
       {showSaveDialog && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0,0,0,0.7)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000
-        }}>
-          <div style={{
-            background: '#2a2a2a',
-            padding: '30px',
-            borderRadius: '10px',
-            minWidth: '300px'
-          }}>
-            <h3 style={{ marginTop: 0 }}>Save Preset</h3>
-            <div style={{ marginBottom: '15px' }}>
-              <label style={{ display: 'block', marginBottom: '5px' }}>DAW Name:</label>
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/70 backdrop-blur-sm">
+          <div className="min-w-[350px] rounded-lg bg-[#2a2a2a] p-8 shadow-xl border border-white/10">
+            <h3 className="mt-0 mb-6 text-xl font-semibold text-white">Save Preset</h3>
+            
+            {/* DAW Name */}
+            <div className="mb-4">
+              <label className="block mb-1.5 text-sm text-gray-300">DAW Name:</label>
               <input
                 type="text"
                 value={dawName}
                 onChange={(e) => setDawName(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '8px',
-                  background: '#1a1a1a',
-                  color: 'white',
-                  border: '1px solid #444',
-                  borderRadius: '5px'
-                }}
+                className="w-full rounded border border-[#444] bg-[#1a1a1a] p-2 text-white placeholder-gray-500 outline-none focus:border-green-500 transition-colors"
                 placeholder="Enter DAW name"
               />
             </div>
-            <div style={{ marginBottom: '15px' }}>
-              <label style={{ display: 'block', marginBottom: '5px' }}>Config Name:</label>
+
+            {/* Config Name */}
+            <div className="mb-4">
+              <label className="block mb-1.5 text-sm text-gray-300">Config Name:</label>
               <input
                 type="text"
                 value={configName}
                 onChange={(e) => setConfigName(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '8px',
-                  background: '#1a1a1a',
-                  color: 'white',
-                  border: '1px solid #444',
-                  borderRadius: '5px'
-                }}
+                className="w-full rounded border border-[#444] bg-[#1a1a1a] p-2 text-white placeholder-gray-500 outline-none focus:border-green-500 transition-colors"
                 placeholder="Enter config name"
               />
             </div>
-            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+
+            {/* Description Field */}
+            <div className="mb-6">
+              <label className="block mb-1.5 text-sm text-gray-300">Description:</label>
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                className="w-full h-24 rounded border border-[#444] bg-[#1a1a1a] p-2 text-white placeholder-gray-500 outline-none focus:border-green-500 transition-colors resize-none"
+                placeholder="Describe your sound (e.g., 'Heavy metal lead with high gain')"
+              />
+            </div>
+
+            {/* Actions */}
+            <div className="flex justify-end gap-3">
               <button
                 onClick={() => {
                   setShowSaveDialog(false);
                   setDawName('');
                   setConfigName('');
+                  setDescription('');
                 }}
-                style={{
-                  padding: '8px 16px',
-                  background: '#555',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '5px',
-                  cursor: 'pointer'
-                }}
+                className="rounded-md bg-[#555] px-4 py-2 text-sm font-medium text-white hover:bg-[#666] transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSavePreset}
-                style={{
-                  padding: '8px 16px',
-                  background: '#4CAF50',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '5px',
-                  cursor: 'pointer'
-                }}
+                className="rounded-md !bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-500 transition-colors shadow-lg shadow-green-900/20"
               >
-                Save
+                Save Preset
               </button>
             </div>
           </div>
