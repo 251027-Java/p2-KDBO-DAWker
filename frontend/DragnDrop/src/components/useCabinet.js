@@ -1,3 +1,10 @@
+/* 
+ * TONE.JS CODE COMMENTED OUT - Using Native Web Audio API only
+ * This file is kept for reference but is not used in the application.
+ * Cabinet functionality is now handled in NativeAmpDemo.tsx using native Web Audio API.
+ */
+
+/*
 import { useEffect, useRef, useCallback } from 'react';
 import * as Tone from 'tone';
 
@@ -145,4 +152,4 @@ export const useCabinet = (enabled, lowCut, highCut, presence) => {
     }
   };
 };
-
+*/

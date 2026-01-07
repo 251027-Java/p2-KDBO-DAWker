@@ -48,6 +48,12 @@ export interface userDTO{
 
 }
 
+export interface RegisterDTO {
+  username: string;
+  email: string;
+  password: string;
+}
+
 // --------------------------Forums types---------------------
 
 export interface commentsDTO{
