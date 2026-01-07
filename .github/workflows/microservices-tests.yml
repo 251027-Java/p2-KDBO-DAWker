@@ -13,18 +13,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Install dependencies for XML parsing and JSON
       - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libxml2-utils jq
+        run: sudo apt-get update && sudo apt-get install -y libxml2-utils jq
 
-      # Determine highest available Maven Alpine Java version
-      - name: Determine highest available Java version
+      - name: Determine highest available Maven Alpine Java version
         id: java_version
         run: |
           set -e
@@ -33,7 +28,7 @@ jobs:
             | jq -r '.results[].name' \
             | grep 'eclipse-temurin-[0-9]\+-alpine' \
             | sed -E 's/^3\.9.*eclipse-temurin-([0-9]+)-alpine$/\1/')
-
+          
           if [ -z "$tags" ]; then
             echo "No Alpine tags found, defaulting to 21"
             echo "max_java=21" >> $GITHUB_OUTPUT
@@ -43,7 +38,6 @@ jobs:
             echo "max_java=$max_java" >> $GITHUB_OUTPUT
           fi
 
-      # Run unit tests for each microservice
       - name: Run unit tests
         run: |
           set -e
@@ -64,7 +58,7 @@ jobs:
               sed -i 's/\r$//' mvnw
             fi
 
-            # Extract Java version from pom.xml (maven-compiler-plugin release)
+            # Extract Java version from pom.xml
             java_ver=$(xmllint --xpath "//*[local-name()='plugin'][*//*[local-name()='artifactId']='maven-compiler-plugin']/*[local-name()='configuration']/*[local-name()='release']/text()" pom.xml 2>/dev/null || echo "20")
             if [ -z "$java_ver" ]; then java_ver="20"; fi
             echo "Detected Java version: $java_ver"
@@ -76,13 +70,13 @@ jobs:
               continue
             fi
 
-            # Pick the smallest Docker image >= required Java
+            # Run tests in Docker using smallest image >= required Java
             success=false
             for ver in $(seq $java_ver $MAX_JAVA_AVAILABLE); do
               image="maven:3.9-eclipse-temurin-${ver}-alpine"
               if docker manifest inspect $image >/dev/null 2>&1; then
                 echo "Using Docker image $image for $service"
-                docker run --rm -v "$PWD":/app -w /app $image bash -c 'if [ -f mvnw ]; then ./mvnw clean test; else mvn clean test; fi'
+                docker run --rm -v "$PWD":/app -w /app $image bash -c './mvnw clean test'
                 tested="$tested $service"
                 success=true
                 break
@@ -90,7 +84,7 @@ jobs:
             done
 
             if [ "$success" = false ]; then
-              echo "Unit tests failed for $service on all available Docker images"
+              echo "Skipping $service: no suitable Docker image found"
               skipped="$skipped $service"
             fi
 
