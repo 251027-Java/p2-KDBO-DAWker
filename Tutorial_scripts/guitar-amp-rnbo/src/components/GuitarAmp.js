@@ -11,16 +11,13 @@ const GuitarAmp = () => {
   const rnboDeviceRef = useRef(null);
   const inputNodeRef = useRef(null);
   const streamRef = useRef(null);
+  const testGainRef = useRef(null);
 
   // initialize audio context
   useEffect(() => {
     audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
     
-    return () => {
-      if (audioContextRef.current) {
-        audioContextRef.current.close();
-      }
-    };
+    // Don't close here - let the cleanup useEffect handle it
   }, []);
 
   // load RNBO patch
@@ -32,23 +29,66 @@ const GuitarAmp = () => {
       // fetch the RNBO patch export
       const response = await fetch('/patch.export.json');
       if (!response.ok) {
-        throw new Error('Failed to load patch.export.json. Make sure it\'s in the public folder.');
+        throw new Error(`Failed to load patch.export.json (HTTP ${response.status}). Make sure it's in the public folder.`);
       }
       
       const patchExport = await response.json();
+      
+      // validate patch export structure
+      if (!patchExport || typeof patchExport !== 'object') {
+        throw new Error('Invalid patch export: file is not a valid JSON object.');
+      }
+      
+      if (!patchExport.desc) {
+        throw new Error('Invalid patch export: missing "desc" property. Make sure this is a valid RNBO export file.');
+      }
+      
+      console.log('Patch export loaded successfully:', {
+        hasDesc: !!patchExport.desc,
+        hasParameters: !!(patchExport.desc && patchExport.desc.parameters),
+        parameterCount: patchExport.desc?.parameters?.length || 0
+      });
       
       // import RNBO.js
       const { createDevice } = await import('@rnbo/js');
       
       const context = audioContextRef.current;
       
+      if (!context || context.state === 'closed') {
+        throw new Error('AudioContext is not available or has been closed.');
+      }
+      
       // create RNBO device
-      const device = await createDevice({ context, patchExport });
+      // Note: RNBO expects the parameter to be called "patcher", not "patchExport"
+      const device = await createDevice({ context, patcher: patchExport });
       
       // connect device to audio output
       device.node.connect(context.destination);
       
       rnboDeviceRef.current = device;
+      
+      // Check for enable/input/bypass parameters that might need to be set
+      const enableParam = device.parametersById.get('enable');
+      const inputParam = device.parametersById.get('input');
+      const bypassParam = device.parametersById.get('bypass');
+      const onParam = device.parametersById.get('on');
+      
+      if (enableParam) {
+        enableParam.value = 1;
+        console.log('✓ Enabled device (enable parameter set to 1)');
+      }
+      if (inputParam) {
+        inputParam.value = 1;
+        console.log('✓ Enabled input (input parameter set to 1)');
+      }
+      if (bypassParam) {
+        bypassParam.value = 0; // 0 = not bypassed
+        console.log('✓ Disabled bypass (bypass parameter set to 0)');
+      }
+      if (onParam) {
+        onParam.value = 1;
+        console.log('✓ Turned device on (on parameter set to 1)');
+      }
       
       // extract all parameters from the device
       const parameters = {};
@@ -63,12 +103,67 @@ const GuitarAmp = () => {
         };
       });
       
+      // Set optimal initial values for overdrive patch
+      const mixParam = device.parametersById.get('mix');
+      const driveParam = device.parametersById.get('drive');
+      const volumeParam = device.parametersById.get('volume');
+      
+      if (mixParam) {
+        // CRITICAL: Mix must be 100% to hear processed signal (0% = dry only)
+        mixParam.value = 100;
+        parameters.mix.value = 100;
+        console.log('✓ Set mix to 100% (fully wet - you will hear processed signal)');
+      }
+      
+      if (driveParam) {
+        // Set drive to a noticeable level (30% for audible distortion)
+        driveParam.value = 30;
+        parameters.drive.value = 30;
+        console.log('✓ Set drive to 30% (for audible distortion effect)');
+      }
+      
+      if (volumeParam) {
+        // Set volume to a reasonable level (0 = unity gain)
+        volumeParam.value = 0;
+        parameters.volume.value = 0;
+        console.log('✓ Set volume to 0 (unity gain)');
+      }
+      
       setParams(parameters);
       setDeviceReady(true);
       setLoading(false);
       
       console.log('RNBO device loaded successfully');
       console.log('Available parameters:', Object.keys(parameters));
+      console.log('All parameter details:', parameters);
+      
+      // Log device info for debugging
+      console.log('RNBO Device Info:', {
+        numInlets: device.numInlets,
+        numOutlets: device.numOutlets,
+        numInputChannels: device.numInputChannels,
+        numOutputChannels: device.numOutputChannels,
+        sampleRate: context.sampleRate
+      });
+      
+      // Check if patch has audio inlets (not MIDI)
+      if (patchExport.desc && patchExport.desc.inlets) {
+        const audioInlets = patchExport.desc.inlets.filter(inlet => inlet.type === 'signal');
+        const midiInlets = patchExport.desc.inlets.filter(inlet => inlet.type === 'midi');
+        
+        console.log('Patch I/O Configuration:', {
+          audioInlets: audioInlets.length,
+          midiInlets: midiInlets.length,
+          totalInlets: patchExport.desc.inlets.length
+        });
+        
+        if (audioInlets.length === 0 && midiInlets.length > 0) {
+          console.warn('⚠️ WARNING: This patch has MIDI inlets, not audio inlets!');
+          console.warn('⚠️ This patch is designed for MIDI input, not audio processing.');
+          console.warn('⚠️ It will not process your guitar input. You need a patch with signal inlets.');
+          setError('This patch expects MIDI input, not audio. It cannot process your guitar. Please use a patch with audio (signal) inlets.');
+        }
+      }
       
     } catch (err) {
       setError(`Failed to load RNBO patch: ${err.message}`);
@@ -110,12 +205,62 @@ const GuitarAmp = () => {
       inputNodeRef.current = inputNode;
       
       // connect input to RNBO device
-      inputNode.connect(rnboDeviceRef.current.node);
+      const device = rnboDeviceRef.current;
+      
+      console.log('Connecting audio:', {
+        deviceInlets: device.numInlets,
+        deviceOutlets: device.numOutlets,
+        inputChannels: inputNode.channelCount,
+        outputChannels: device.numOutputChannels,
+        deviceNodeInputs: device.node.numberOfInputs,
+        deviceNodeOutputs: device.node.numberOfOutputs
+      });
+      
+      // Ensure device is connected to output (in case it was disconnected)
+      try {
+        device.node.disconnect();
+      } catch (e) {
+        // Ignore if not connected
+      }
+      device.node.connect(context.destination);
+      
+      // Create analyser to check if audio is actually flowing
+      const analyser = context.createAnalyser();
+      analyser.fftSize = 2048;
+      const dataArray = new Uint8Array(analyser.frequencyBinCount);
+      
+      // Connect input to analyser for monitoring (parallel, doesn't affect signal)
+      inputNode.connect(analyser);
+      
+      // Monitor audio levels
+      const checkAudio = () => {
+        analyser.getByteTimeDomainData(dataArray);
+        const sum = dataArray.reduce((a, b) => a + Math.abs(b - 128), 0);
+        const average = sum / dataArray.length;
+        if (average > 1) {
+          console.log(`✓ Audio detected! Level: ${average.toFixed(2)}`);
+        }
+      };
+      const audioCheckInterval = setInterval(checkAudio, 500);
+      
+      // Store interval for cleanup
+      testGainRef.current = { audioCheckInterval };
+      
+      console.log('✓ Audio level monitoring started - check console for "Audio detected!" messages');
+      
+      // Connect input to RNBO device (primary signal path)
+      // The overdrive patch has 2 inputs - connect to input 0 (first audio inlet)
+      inputNode.connect(device.node, 0, 0);
+      console.log('✓ Connected: Input -> RNBO Device (inlet 0) -> Output');
+      console.log('💡 IMPORTANT: Make sure "mix" parameter is at 100% to hear processed signal!');
+      console.log('💡 If mix is at 0%, you will only hear dry (unprocessed) signal.');
+      console.log('💡 Adjust "drive" parameter to control distortion amount.');
       
       setIsProcessing(true);
       setError(null);
       
       console.log('Audio processing started');
+      console.log('Audio routing: Input -> [Test Bypass + RNBO Device] -> Output');
       
     } catch (err) {
       setError(`Failed to access audio input: ${err.message}`);
@@ -130,6 +275,14 @@ const GuitarAmp = () => {
       inputNodeRef.current = null;
     }
     
+    if (testGainRef.current) {
+      if (testGainRef.current.audioCheckInterval) {
+        clearInterval(testGainRef.current.audioCheckInterval);
+      }
+      testGainRef.current.disconnect();
+      testGainRef.current = null;
+    }
+    
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop());
       streamRef.current = null;
@@ -141,20 +294,35 @@ const GuitarAmp = () => {
 
   // update a specific RNBO parameter
   const updateParameter = (paramName, value) => {
+    const numValue = parseFloat(value);
+    
     if (rnboDeviceRef.current && params[paramName]) {
       const param = rnboDeviceRef.current.parametersById.get(params[paramName].id);
       if (param) {
-        param.value = parseFloat(value);
+        param.value = numValue;
+        console.log(`Parameter updated: ${paramName} = ${numValue}`);
       }
     }
+    
+    // Update local state to reflect the change in UI
+    setParams(prevParams => ({
+      ...prevParams,
+      [paramName]: {
+        ...prevParams[paramName],
+        value: numValue
+      }
+    }));
   };
 
   // cleanup on unmount
   useEffect(() => {
     return () => {
       stopAudioInput();
-      if (audioContextRef.current) {
-        audioContextRef.current.close();
+      if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+        audioContextRef.current.close().catch(err => {
+          // Ignore errors when closing AudioContext (it might already be closed)
+          console.log('AudioContext cleanup:', err.message);
+        });
       }
     };
   }, []);
@@ -240,7 +408,42 @@ const GuitarAmp = () => {
                 <div className="space-y-6 mt-8">
                   <h2 className="text-2xl font-bold text-center mb-6">Effect Controls</h2>
                   
-                  {/* organize parameters by section */}
+                  {/* Show all available parameters dynamically */}
+                  <div className="bg-gray-700/50 rounded-lg p-6 border border-gray-600">
+                    <h3 className="text-lg font-bold mb-4 text-blue-300">All Parameters</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {Object.keys(params).map(paramName => {
+                        const param = params[paramName];
+                        return (
+                          <div key={paramName} className="space-y-2">
+                            <div className="flex justify-between items-center">
+                              <label className="text-sm font-semibold text-gray-300">
+                                {param.name}
+                              </label>
+                              <span className="text-xs text-gray-400 bg-gray-800 px-2 py-1 rounded">
+                                {param.value.toFixed(2)}
+                              </span>
+                            </div>
+                            <input
+                              type="range"
+                              min={param.min}
+                              max={param.max}
+                              step={(param.max - param.min) / 1000}
+                              value={param.value}
+                              onChange={(e) => updateParameter(paramName, e.target.value)}
+                              className="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                            />
+                            <div className="flex justify-between text-xs text-gray-500">
+                              <span>{param.min.toFixed(2)}</span>
+                              <span>{param.max.toFixed(2)}</span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  
+                  {/* Optional: Show guitar amp parameters if they exist */}
                   <ParameterSection 
                     title="Input" 
                     params={params} 
@@ -348,7 +551,7 @@ const ParameterSection = ({ title, params, paramNames, updateParameter }) => {
                 min={param.min}
                 max={param.max}
                 step={(param.max - param.min) / 100}
-                defaultValue={param.value}
+                value={param.value}
                 onChange={(e) => updateParameter(paramName, e.target.value)}
                 className="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer accent-blue-500"
               />
@@ -365,4 +568,5 @@ const ParameterSection = ({ title, params, paramNames, updateParameter }) => {
 };
 
 export default GuitarAmp;
+
 
