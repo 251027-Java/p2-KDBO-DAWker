@@ -12,9 +12,7 @@ import java.util.Map;
 public class LogConsumerApplication {
 
     public static void main(String[] args) {
-        System.out.println("before spring runs");
         SpringApplication.run(LogConsumerApplication.class, args);
-        System.out.println("after spring runs");
     }
 
     @GetMapping("/health")

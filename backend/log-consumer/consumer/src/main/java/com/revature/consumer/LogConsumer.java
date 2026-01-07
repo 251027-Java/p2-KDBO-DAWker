@@ -1,5 +1,6 @@
 package com.revature.consumer;
 
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -10,6 +11,11 @@ import java.util.Map;
 @Component
 public class LogConsumer {
     private static final Logger logger = LoggerFactory.getLogger(LogConsumer.class);
+
+    @PostConstruct
+    public void init() {
+        logger.trace("LogConsumer initialized and ready");
+    }
 
     @KafkaListener(topics = "api-calls")
     public void consumeAPICall(Map<String, String> logMap) {

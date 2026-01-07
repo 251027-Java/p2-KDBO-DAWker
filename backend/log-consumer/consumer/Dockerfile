@@ -14,7 +14,7 @@ RUN mvn clean package -DskipTests
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 
-RUN mkdir -p /app/logs/trace /app/logs/debug /app/logs/info /app/logs/warn /app/logs/error
+RUN mkdir -p /app/logs/trace /app/logs/debug /app/logs/info /app/logs/warn /app/logs/error && chmod -R 777 /app/logs
 
 # Copy the JAR from the build stage
 # Note: Ensure the 'target' folder name matches your build output
