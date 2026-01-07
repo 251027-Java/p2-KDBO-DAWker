@@ -1,3 +1,10 @@
+/* 
+ * TONE.JS CODE COMMENTED OUT - Using Native Web Audio API only
+ * This file is kept for reference but is not used in the application.
+ * NAM functionality would need to be reimplemented using native Web Audio API if needed.
+ */
+
+/*
 import { useEffect, useRef, useState } from 'react';
 import * as Tone from 'tone';
 
@@ -138,4 +145,4 @@ export const useNAMAmp = (namFilePath, enabled = true) => {
     }
   };
 };
-
+*/

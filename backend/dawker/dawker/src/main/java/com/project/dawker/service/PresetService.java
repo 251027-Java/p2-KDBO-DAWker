@@ -73,9 +73,13 @@ public class PresetService {
         preset.getUser().removePreset(preset);
     }
 
-    private PresetDTO presetToDTO(Preset preset){
+    private PresetDTO presetToDTO(Preset preset) {
         return new PresetDTO(preset.getId(), preset.getUser().getId(), preset.getPresetName(),
-            preset.getPresetGears().stream().map(PresetGear::getId).toList(),
-            preset.getPresetCategories().stream().map(PresetCategory::getId).toList());
+            preset.getPresetGears() == null ?
+            List.of() : preset.getPresetGears().stream().map(PresetGear::getId).toList(),
+            preset.getPresetCategories() == null ?
+            List.of() : preset.getPresetCategories().stream().map(PresetCategory::getId).toList()
+        );
     }
+
 }

@@ -1,31 +1,31 @@
 // 4. The Top-Level DAW State. What is sent out on search
 export interface DawDTO {
-  dawId: string;
-  userId: number;
+  dawId?: string;
+  userId?: number;
   description?: string;
-  name: string;
-  exportCount: number;
-  createdAt: Date;
-  listOfConfigs: ConfigDTO[];
+  name?: string;
+  exportCount?: number;
+  createdAt?: Date;
+  listOfConfigs?: ConfigDTO[];
 }
 
 // 3. The saved list of configurations within a DAW
 export interface ConfigDTO {
   dawId?: string;
-  id: string;
-  name: string;
-  components: ComponentDTO[];
+  id?: number;
+  name?: string;
+  components?: ComponentDTO[];
 }
 
 // 2. The Individual components within the chain. 
 // Order is important here as you decide how the audio signal flows
 export interface ComponentDTO {
   id?: number;
-  configId: number
-  instanceId: string; // You can have many of one component, they should have unique ids within the chain
-  name: string;
-  type: 'filter' | 'reverb' | 'distortion' | 'delay'; // Literal types prevent typos
-  settings: SettingsDTO;
+  configId?: number
+  instanceId?: string; // You can have many of one component, they should have unique ids within the chain
+  name?: string;
+  type?: 'filter' | 'reverb' | 'distortion' | 'delay'; // Literal types prevent typos
+  settings?: SettingsDTO;
 }
 
 // 1. The Dynamic Settings
@@ -35,8 +35,8 @@ export interface ComponentDTO {
 // Basically, individual settings for each component
 export interface SettingsDTO {
     id?: number;
-    Technology: 'RNBO' | 'TONEJS';
-    export_name: string;
+    Technology?: 'RNBO' | 'TONEJS';
+    export_name?: string;
     parameters:{[key: string]: any}; // Flexible key-value pairs for different settings
 }
 

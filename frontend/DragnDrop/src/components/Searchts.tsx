@@ -103,6 +103,10 @@ export default function Search() {
     }
   };
 
+  const handInitializeWorkspace = (dawId: string | undefined) => {
+        navigate(`/native-amp/${dawId}`);
+  }
+
   return (
     <div className="!min-h-screen !bg-zinc-950 !text-white !p-6">
       {/* SEARCH HEADER */}
@@ -379,6 +383,7 @@ export default function Search() {
               text="INITIALIZE WORKSPACE" 
               icon="document-open"
               className="!py-7 !font-black !tracking-[0.2em] !rounded-xl !bg-emerald-600 hover:!bg-emerald-500 !transition-all"
+              onClick={() => handInitializeWorkspace(selectedDaw?.dawId)}
             />
           </div>
         </div>
