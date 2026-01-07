@@ -52,6 +52,7 @@ const ForumPage = () => {
   const handleCommentSubmit = async () => {
     const commentDto: commentsPostDTO = {
       createdAt: new Date(),
+      userName: userAPI.currentUser?.username || "",
       userId: userAPI.currentUser?.id || 0,
       parentPostId: forumPage?.id || 0,
       content: newComment

@@ -90,6 +90,7 @@ export function buildComponentDTOsFromPreset(
 
 // builds configDTO containing pedal/amp/cabinet components
 export function buildConfigDTOFromPreset(
+  configId: number,
   configName: string,
   pedalState: {
     enabled: boolean;
@@ -114,7 +115,7 @@ export function buildConfigDTOFromPreset(
   const components = buildComponentDTOsFromPreset(pedalState, ampState, cabinetState);
 
   return {
-    id: `config-${Date.now()}`,
+    id: configId,
     name: configName,
     components,
   };
@@ -124,6 +125,7 @@ export function buildConfigDTOFromPreset(
 export function buildDawDTOFromPreset(
   dawName: string,
   userId: number,
+  configId: number,
   configName: string,
   pedalState: {
     enabled: boolean;
@@ -145,7 +147,7 @@ export function buildDawDTOFromPreset(
     cabinetPresence: number;
   }
 ): DawDTO {
-  const config = buildConfigDTOFromPreset(configName, pedalState, ampState, cabinetState);
+  const config = buildConfigDTOFromPreset(configId, configName, pedalState, ampState, cabinetState);
 
   return {
     dawId: `daw-${Date.now()}`,
@@ -187,15 +189,15 @@ export function extractPresetFromComponentDTOs(components: ComponentDTO[]): {
   }
 
   const params = (key: string, defaultValue: any) => {
-    return ampComponent.settings.parameters[key] ?? defaultValue;
+    return ampComponent.settings?.parameters[key] ?? defaultValue;
   };
 
   const pedalParams = (key: string, defaultValue: any) => {
-    return pedalComponent?.settings.parameters[key] ?? defaultValue;
+    return pedalComponent?.settings?.parameters[key] ?? defaultValue;
   };
 
   const cabinetParams = (key: string, defaultValue: any) => {
-    return cabinetComponent?.settings.parameters[key] ?? defaultValue;
+    return cabinetComponent?.settings?.parameters[key] ?? defaultValue;
   };
 
   return {
@@ -271,6 +273,17 @@ export function applyPresetFromComponentDTOs(
 
 // builds componentDTOs from native amp state (input gain, distortion, EQ, reverb, volume)
 export function buildComponentDTOsFromNativeAmpState(
+  //component specific
+  componentId: number | undefined,
+  instanceId: string | undefined,
+  componentName: string | undefined,
+  componentType: string | undefined,
+  
+  // Settings
+  settingsId: number | undefined,
+  settingsTechnology: string | undefined,
+  settingsExportName: string | undefined,
+
   ampState: {
     inputGain: number;
     directMode: boolean;
@@ -286,7 +299,7 @@ export function buildComponentDTOsFromNativeAmpState(
 
   // Single amp component containing all native amp settings
   components.push({
-    instanceId: `native-amp-${Date.now()}`,
+    instanceId: instanceId,
     configId: 0, // will be set by parent config
     name: 'NativeAmp',
     type: 'distortion',
@@ -311,7 +324,19 @@ export function buildComponentDTOsFromNativeAmpState(
 
 // builds configDTO containing native amp component
 export function buildConfigDTOFromNativeAmpState(
-  configName: string,
+  configId: number | undefined,
+  configName: string | undefined,
+
+  //component specific
+  componentId: number | undefined,
+  instanceId: string | undefined,
+  componentName: string | undefined,
+  componentType: string | undefined,
+  
+  // Settings
+  settingsId: number | undefined,
+  settingsTechnology: string | undefined,
+  settingsExportName: string | undefined,
   ampState: {
     inputGain: number;
     directMode: boolean;
@@ -323,20 +348,50 @@ export function buildConfigDTOFromNativeAmpState(
     volumeValue: number;
   }
 ): ConfigDTO {
-  const components = buildComponentDTOsFromNativeAmpState(ampState);
+  const components = buildComponentDTOsFromNativeAmpState(
+    componentId = componentId,
+    instanceId = instanceId,
+    componentName = componentName,
+    componentType = componentType,
+    settingsId = settingsId,
+    settingsTechnology = settingsTechnology,
+    settingsExportName = settingsExportName,
+    ampState);
+
 
   return {
-    id: `config-${Date.now()}`,
+    id: configId,
     name: configName,
     components,
   };
+    console.log("This is within the config function. Wanting to see how config is saved")
+    console.log(configName)
 }
 
 // builds complete dawDTO with single config containing native amp preset
 export function buildDawDTOFromNativeAmpState(
-  dawName: string,
-  userId: number,
-  configName: string,
+  //Daw specific
+  dawId: string | undefined,
+  dawName: string | undefined,
+  dawDescription: string | undefined,
+  exportCount: number | undefined,
+  createdAt: Date | undefined,
+  userId: number | undefined,
+
+  //Config specific
+  configName: string | undefined,
+  configId: number | undefined,
+
+  //component specific
+  componentId: number | undefined,
+  instanceId: string | undefined,
+  componentName: string | undefined,
+  componentType: string | undefined,
+  
+  // Settings
+  settingsId: number | undefined,
+  settingsTechnology: string | undefined,
+  settingsExportName: string | undefined,
   ampState: {
     inputGain: number;
     directMode: boolean;
@@ -348,14 +403,31 @@ export function buildDawDTOFromNativeAmpState(
     volumeValue: number;
   }
 ): DawDTO {
-  const config = buildConfigDTOFromNativeAmpState(configName, ampState);
+  const config = buildConfigDTOFromNativeAmpState(
+    configId = configId, 
+    configName = configName,
+    componentId = componentId,
+    instanceId = instanceId,
+    componentName = componentName,
+    componentType = componentType,
+    settingsId = settingsId,
+    settingsTechnology = settingsTechnology,
+    settingsExportName = settingsExportName, 
+    ampState = ampState);
+
+  console.log("This is within the config function. Wanting to see how config is saved")
+  console.log(configName)
 
   return {
-    dawId: `daw-${Date.now()}`,
-    userId,
+    dawId: dawId,
+    userId: userId,
+    description: dawDescription,
     name: dawName,
-    listOfConfigs: [config],
+    exportCount: exportCount,
+    createdAt: createdAt,
+    listOfConfigs: [config]
   };
+
 }
 
 // extracts native amp settings from componentDTO array
@@ -376,7 +448,7 @@ export function extractNativeAmpStateFromComponentDTOs(components: ComponentDTO[
   }
 
   const params = (key: string, defaultValue: any) => {
-    return ampComponent.settings.parameters[key] ?? defaultValue;
+    return ampComponent.settings?.parameters[key] ?? defaultValue;
   };
 
   return {

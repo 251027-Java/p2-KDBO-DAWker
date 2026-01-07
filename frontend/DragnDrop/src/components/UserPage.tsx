@@ -66,6 +66,11 @@ function UserPage() {
     navigate(`/forums/${id}`);
   };
 
+  const handleInitalizeDaw = (id?: string) => {
+
+    navigate(`/native-amp/${id}`);
+  }
+
   useEffect(() => {
     if(userAPI.currentUser == null){
       navigate("/login")
@@ -179,7 +184,9 @@ function UserPage() {
                           <div key={j} className="!w-1 !bg-white/20 !rounded-full !transition-all group-hover:!bg-amber-400 group-hover:!animate-bounce" style={{ height: `${h}%`, animationDelay: `${j * 0.1}s` }} />
                         ))}
                       </div>
-                      <Button rightIcon="arrow-right" intent="primary" minimal className="!font-bold !uppercase !tracking-widest !text-[10px] group-hover:!translate-x-2 !transition-transform !bg-white/5 hover:!bg-amber-500 hover:!text-black">
+                      <Button rightIcon="arrow-right" intent="primary" minimal 
+                      className="!font-bold !uppercase !tracking-widest !text-[10px] group-hover:!translate-x-2 !transition-transform !bg-white/5 hover:!bg-amber-500 hover:!text-black"
+                      onClick={() => handleInitalizeDaw(daw.dawId)}>
                         Launch_Session
                       </Button>
                     </div>
@@ -208,7 +215,7 @@ function UserPage() {
                   intent="warning" 
                   outlined
                   className="!font-mono !text-[10px] !tracking-widest !px-8 hover:!bg-amber-500/10"
-                  onClick={() => console.log("Init New DAW")}
+                  onClick={() => handleInitalizeDaw()}
                 >
                   INITIALIZE_NEW_PROJECT
                 </Button>
