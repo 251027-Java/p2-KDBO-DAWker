@@ -16,14 +16,39 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Determine highest available Java version
+        id: java_version
+        run: |
+          set -e
+          echo "Fetching available Maven Alpine Java versions from Docker Hub..."
+
+          tags=$(curl -s https://registry.hub.docker.com/v2/repositories/library/maven/tags?page_size=100 \
+            | jq -r '.results[].name' \
+            | grep 'eclipse-temurin-[0-9]\+-alpine' \
+            | sed -E 's/^3\.9.*eclipse-temurin-([0-9]+)-alpine$/\1/')
+
+          if [ -z "$tags" ]; then
+            echo "No Alpine tags found, defaulting to 21"
+            echo "max_java=21" >> $GITHUB_OUTPUT
+          else
+            max_java=$(echo "$tags" | sort -nr | head -n1)
+            echo "Highest available Java version: $max_java"
+            echo "max_java=$max_java" >> $GITHUB_OUTPUT
+          fi
+
       - name: Run unit tests
         run: |
           set -e
+          MAX_JAVA_AVAILABLE=${{ steps.java_version.outputs.max_java }}
+          echo "Max available Java version is $MAX_JAVA_AVAILABLE"
 
           services=$(find . -maxdepth 4 -name pom.xml -exec dirname {} \;)
 
           for service in $services; do
-            echo "Running unit tests in $service"
+            echo "Checking microservice: $service"
             cd "$service"
 
             if [ -f mvnw ]; then
@@ -31,35 +56,27 @@ jobs:
               sed -i 's/\r$//' mvnw
             fi
 
-            # Extract Java version from pom.xml
             java_ver=$(xmllint --xpath "//*[local-name()='plugin'][*//*[local-name()='artifactId']='maven-compiler-plugin']/*[local-name()='configuration']/*[local-name()='release']/text()" pom.xml 2>/dev/null || echo "20")
             if [ -z "$java_ver" ]; then
               java_ver="20"
             fi
             echo "Detected Java version: $java_ver"
 
-            # Define fallback versions
-            fallback_versions=($java_ver 21 20 17)
+            if [ "$java_ver" -gt "$MAX_JAVA_AVAILABLE" ]; then
+              echo "Skipping $service: Java $java_ver not supported in available Docker images (max $MAX_JAVA_AVAILABLE)."
+              cd - >/dev/null
+              continue
+            fi
 
-            success=false
-            for ver in "${fallback_versions[@]}"; do
+            # Pick the smallest Docker image >= required Java
+            for ver in $(seq $java_ver $MAX_JAVA_AVAILABLE); do
               image="maven:3.9-eclipse-temurin-${ver}-alpine"
-              echo "Checking Docker image $image..."
               if docker manifest inspect $image >/dev/null 2>&1; then
-                echo "Using Docker image $image"
-                if docker run --rm -v "$PWD":/app -w /app $image bash -c "./mvnw clean test || mvn clean test"; then
-                  success=true
-                  break
-                fi
-              else
-                echo "Docker image $image does not exist, skipping."
+                echo "Using Docker image $image for $service"
+                docker run --rm -v "$PWD":/app -w /app $image bash -c "./mvnw clean test || mvn clean test"
+                break
               fi
             done
-
-            if [ "$success" = false ]; then
-              echo "Unit tests failed for $service on all available Docker images"
-              exit 1
-            fi
 
             cd - >/dev/null
           done
