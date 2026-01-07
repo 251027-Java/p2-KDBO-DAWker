@@ -47,9 +47,8 @@ function App() {
           <Route element={<Layout />} >
             <Route path="/search" element={<Searchts />} />
             <Route path="/demo" element={<TestComponent />} />
-            {/* TONE.JS ROUTE COMMENTED OUT - Using Native Web Audio API only */}
-            {/* <Route path="/test" element={<ToneJsDemo />} /> */}
-            <Route path="/native-amp" element={<NativeAmpDemo />} />
+            <Route path="/test" element={<ToneJsDemo />} />
+            <Route path="/native-amp/:dawId?" element={<NativeAmpDemo />} />
             <Route path="/userpage" element={<UserPage />} />
             <Route path="/forums" element={<Forums/>} />
             <Route path="/forums/:postId" element={<ForumPage/>} />

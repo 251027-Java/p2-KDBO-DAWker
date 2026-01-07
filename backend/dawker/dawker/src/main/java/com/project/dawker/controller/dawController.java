@@ -159,17 +159,16 @@ public class dawController {
 
     // ------------------- Daw specific ----------------------------
     // Creates an empty daw method
-    @PostMapping("/create/daw")
-    public void createDaw(@RequestParam Long userId, @RequestParam String dawName) {
-        System.out.println("Creating DAW for User ID: " + userId + " with name: " + dawName);
-        this.dawService.createDaw(userId, dawName);
-    }
-
     @PostMapping("/save/Daw")
     public ResponseEntity<?> saveDaw(@RequestBody dawDTO payload) {
 
         // System.out.println("Saving DAW with ID: " + payload.getDawId() + " and name:
         // " + payload.getName());
+
+        System.out.println("The payload that got to the backend");
+        System.out.println(payload);
+        System.out.println("and the settings values:");
+        System.out.println(payload.getListOfConfigs().get(0).getComponents().get(0).getSettings());
         dawService.saveDaw(payload);
 
         return ResponseEntity.ok(payload);
