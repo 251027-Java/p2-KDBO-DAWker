@@ -9,6 +9,7 @@ import com.project.dawker.entity.daw_specific.Comment;
 import com.project.dawker.entity.daw_specific.ForumPost;
 import com.project.dawker.exception.ForumNotFoundException;
 import com.project.dawker.exception.UserNotFoundException;
+import com.project.dawker.kafka.KafkaLogProducer;
 import com.project.dawker.repository.CommentRepository;
 import com.project.dawker.repository.ForumPostRepository;
 import com.project.dawker.repository.UserRepository;
@@ -24,6 +25,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -37,6 +39,9 @@ class ForumServiceTest {
 
     @Mock
     private CommentRepository commentRepository;
+
+    @Mock
+    private KafkaLogProducer logger;
 
     @InjectMocks
     private forumService forumService;

@@ -10,6 +10,7 @@ import com.project.dawker.entity.daw_specific.ConfigEntity;
 import com.project.dawker.entity.daw_specific.DawEntity;
 import com.project.dawker.entity.daw_specific.SettingsEntity;
 import com.project.dawker.exceptions.dawNotFoundException;
+import com.project.dawker.kafka.KafkaLogProducer;
 import com.project.dawker.repository.ConfigRepository;
 import com.project.dawker.repository.DawRepository;
 import com.project.dawker.repository.UserRepository;
@@ -21,11 +22,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import com.project.dawker.service.DawService;
@@ -41,6 +44,9 @@ class DawServiceTest {
 
     @Mock
     private ConfigRepository configRepository;
+
+    @Mock
+    private KafkaLogProducer logger;
 
     @InjectMocks
     private DawService dawService;
@@ -80,7 +86,7 @@ class DawServiceTest {
         daw.setCreatedAt(LocalDateTime.now());
         daw.setExportCount(5);
         daw.setUser(user);
-        daw.setListOfConfigs(List.of(config));
+        daw.setListOfConfigs(new ArrayList<>(List.of(config)));
     }
 
     @Test
@@ -166,9 +172,10 @@ class DawServiceTest {
             )
         );
 
-        when(userRepository.getReferenceById(1L)).thenReturn(user);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(dawRepository.findById("daw-123")).thenReturn(Optional.of(daw));
-        when(configRepository.getReferenceById(300L)).thenReturn(new ConfigEntity());
+        when(dawRepository.save(any(DawEntity.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
         dawService.saveDaw(dto);
         verify(dawRepository).save(any(DawEntity.class));
     }
