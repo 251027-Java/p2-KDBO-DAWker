@@ -4,7 +4,9 @@ package com.project.dawker.service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.project.dawker.exception.UserNotFoundException;
 import com.project.dawker.exceptions.dawNotFoundException;
+import com.project.dawker.kafka.KafkaLogProducer;
 import org.springframework.stereotype.Service;
 
 import com.project.dawker.dto.componentDTO;
@@ -28,11 +30,13 @@ public class DawService {
     private final DawRepository dawRepository;
     private final UserRepository userRepository;
     private final ConfigRepository configRepository;
+    private final KafkaLogProducer logger;
 
-    public DawService(DawRepository dawRepository, UserRepository userRepository, ConfigRepository configRepository) {
+    public DawService(DawRepository dawRepository, UserRepository userRepository, ConfigRepository configRepository, KafkaLogProducer logProducer) {
         this.dawRepository = dawRepository;
         this.userRepository = userRepository;
         this.configRepository = configRepository;
+        logger = logProducer;
     }
 
     // Gets:
@@ -65,6 +69,7 @@ public class DawService {
     // }
 
     public List<dawDTO> getAllDaws() {
+        logger.info("service-calls", "Getting all daws", "DawService", "getAllDaws");
         return this.dawRepository.findAll().stream()
                 .map(this::mapToDawDto) // cleaner syntax
                 .collect(Collectors.toList());
@@ -72,6 +77,7 @@ public class DawService {
 
     // Get DAW with full details
     public dawDTO getDawById(String dawId) {
+        logger.info("service-calls", "Getting daw by id", "DawService", "getDawById");
         DawEntity daw = this.dawRepository.findById(dawId)
                 .orElseThrow(() -> new dawNotFoundException("DAW not found with ID: " + dawId));
         return mapToDawDto(daw);
@@ -172,6 +178,7 @@ public class DawService {
 
     // Get DAW without full details (For searching/listing)
     public List<dawDTO> getDawsByUserId(Long userId) {
+        logger.info("service-calls", "", "DawService", "getDawsByUserId");
         return this.dawRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("No DAWs found for user ID: " + userId))
                 .stream()
@@ -189,37 +196,90 @@ public class DawService {
 
     // CRUD
     // Create:
-    // Create a new DAW with configurations, components, settings
-    public void createDaw(Long userId, String projectName) {
-        User user = userRepository.findById(userId).orElseThrow();
+    // Create a new DAW with configurations, components, settingspublic dawDTO
+    // saveDaw(dawDTO dto) {
+    // 1. Resolve the User (Required for both new and existing)
+    public dawDTO saveDaw(dawDTO dto) {
+        logger.info("service-calls", "", "DawService", "saveDaw");
+        // 1. Resolve User
+        logger.debug("service-calls", "resolving user", "DawService", "saveDaw");
+        User user = userRepository.findById(dto.getUserId())
+                .orElseThrow(() -> new UserNotFoundException("User not found with ID: " + dto.getUserId()));
 
-        DawEntity project = new DawEntity();
-        project.setName(projectName);
-        project.setUser(user);
+        DawEntity entity;
 
-        // Maintain both sides of the relationship in memory
-        user.getDaws().add(project);
+        // 2. Resolve or Create DAW
+        logger.debug("service-calls", "resolving/creating user", "DawService", "saveDaw");
+        if (dto.getDawId() != null && !dto.getDawId().isEmpty()) {
+            entity = dawRepository.findById(dto.getDawId())
+                    .orElseThrow(() -> new dawNotFoundException("DAW not found: " + dto.getDawId()));
+        } else {
+            entity = new DawEntity();
+            entity.setUser(user);
+        }
 
-        dawRepository.save(project);
-    }
-
-    public void saveDaw(dawDTO dto) {
-        // 1. Convert ID to a Proxy/Entity
-        User user = userRepository.getReferenceById(dto.getUserId());
-
-        // 2. Create Entity
-        DawEntity entity = new DawEntity();
+        // 3. Map Basic Fields
+        logger.debug("service-calls", "mapping basic fields", "DawService", "saveDaw");
         entity.setName(dto.getName());
-        entity.setId(dto.getDawId());
         entity.setDescription(dto.getDescription());
-        entity.setListOfConfigs(dto.getListOfConfigs().stream()
-                .map(this::mapToConfigEntity)
-                .collect(Collectors.toList()));
-        entity.setUser(user); // Link the object
 
-        // 3. Save
-        dawRepository.save(entity);
+        // 4. Map the Hierarchy (Passing 'entity' down to prevent findById(null))
+        logger.debug("service-calls", "Map the Hierarchy (Passing 'entity' down to prevent findById(null))", "dawService", "saveDaw");
+        if (dto.getListOfConfigs() != null) {
+            // 1. Get the reference to the existing persistent list
+            List<ConfigEntity> existingConfigs = entity.getListOfConfigs();
+
+            // 2. Clear the contents (this triggers orphan removal correctly)
+            existingConfigs.clear();
+
+            // 3. Map the DTOs and add them to the EXISTING list
+            List<ConfigEntity> newConfigs = dto.getListOfConfigs().stream()
+                    .map(configDto -> mapToConfigEntity(configDto, entity))
+                    .collect(Collectors.toList());
+
+            existingConfigs.addAll(newConfigs);
+        }
+
+        // 5. Save everything (CascadeType.ALL will handle child entities)
+        logger.debug("service-calls", "Saving everything (CascadeType.ALL will handle child entities)", "DawService", "saveDaw");
+        DawEntity savedEntity = dawRepository.save(entity);
+        return mapToDawDto(savedEntity);
     }
+
+    private ConfigEntity mapToConfigEntity(configDTO dto, DawEntity parentDaw) {
+        ConfigEntity config = new ConfigEntity();
+        config.setId(dto.getId());
+        config.setName(dto.getName());
+        config.setDaw(parentDaw); // Link back to parent
+
+        config.setComponents(dto.getComponents().stream()
+                .map(compDto -> mapToComponentEntity(compDto, config)) // Pass config down
+                .collect(Collectors.toList()));
+        return config;
+    }
+
+    private ComponentEntity mapToComponentEntity(componentDTO dto, ConfigEntity parentConfig) {
+        ComponentEntity component = new ComponentEntity();
+        component.setId(dto.getId());
+        component.setInstanceId(dto.getInstanceId());
+        component.setName(dto.getName());
+        component.setType(dto.getType());
+        component.setConfig(parentConfig); // Link back to parent
+
+        if (dto.getSettings() != null) {
+            component.setSettings(mapToSettingsEntity(dto.getSettings()));
+        }
+        return component;
+    }
+
+    // private SettingsEntity mapToSettingsEntity(settingsDTO dto) {
+    // SettingsEntity settings = new SettingsEntity();
+    // settings.setId(dto.getId());
+    // settings.setTechnology(dto.getTechnology());
+    // settings.setExportName(dto.getExportName());
+    // settings.setParameters(dto.getParameters());
+    // return settings;
+    // }
 
     // Update:
     // Update DAW information

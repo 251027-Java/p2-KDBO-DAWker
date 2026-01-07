@@ -6,7 +6,8 @@ import Searchts from './components/Searchts'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import './App.css'
 import TestComponent from './components/TestComponent'
-import ToneJsDemo from './components/TonetsDemo'
+// TONE.JS CODE COMMENTED OUT - Using Native Web Audio API only
+// import ToneJsDemo from './components/TonetsDemo'
 import NativeAmpDemo from './components/NativeAmpDemo'
 import Loggin from './components/Loggin'
 import CreateAccount from './components/CreateAccount'
@@ -47,7 +48,7 @@ function App() {
             <Route path="/search" element={<Searchts />} />
             <Route path="/demo" element={<TestComponent />} />
             <Route path="/test" element={<ToneJsDemo />} />
-            <Route path="/native-amp" element={<NativeAmpDemo />} />
+            <Route path="/native-amp/:dawId?" element={<NativeAmpDemo />} />
             <Route path="/userpage" element={<UserPage />} />
             <Route path="/forums" element={<Forums/>} />
             <Route path="/forums/:postId" element={<ForumPage/>} />

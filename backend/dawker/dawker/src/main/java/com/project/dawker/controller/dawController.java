@@ -1,5 +1,6 @@
 package com.project.dawker.controller;
 
+import com.project.dawker.kafka.KafkaLogProducer;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,6 +20,7 @@ import com.project.dawker.dto.recievedDto.receivedCommentDTO;
 import com.project.dawker.dto.recievedDto.receivedForumDTO;
 import com.project.dawker.dto.recievedDto.recievedLoginRequest;
 import com.project.dawker.dto.recievedDto.recievedRatingsCommentDTO;
+import com.project.dawker.dto.recievedDto.recievedSessionNotesDTO;
 import com.project.dawker.entity.daw_specific.RatingsComment;
 import com.project.dawker.entity.daw_specific.RatingsPage;
 import com.project.dawker.repository.RatingsCommentRepository;
@@ -49,20 +51,23 @@ public class dawController {
     private final RatingsPageRepository ratingsRepo;
     private final RatingsCommentRepository ratingsCommentRepo;
     private final sessionNotesService notesService;
+    private final KafkaLogProducer logger;
 
     public dawController(DawService dawService,
-            useService useService,
-            forumService forumService,
-            RatingsPageService ratingsService,
-            RatingsPageRepository ratingsRepo,
-            RatingsCommentRepository ratingsCommentRepo,
-            sessionNotesService notesService) {
+                         useService useService,
+                         forumService forumService,
+                         RatingsPageService ratingsService,
+                         RatingsPageRepository ratingsRepo,
+                         RatingsCommentRepository ratingsCommentRepo,
+                         KafkaLogProducer logProducer,
+                         sessionNotesService notesService) {
         this.dawService = dawService;
         this.useService = useService;
         this.forumService = forumService;
         this.ratingsService = ratingsService;
         this.ratingsRepo = ratingsRepo;
         this.ratingsCommentRepo = ratingsCommentRepo;
+        logger = logProducer;
         this.notesService = notesService;
     }
 
@@ -72,6 +77,8 @@ public class dawController {
     @GetMapping("/search/users")
     public List<dawDTO> getDawsByUserId(@RequestParam Long userId) {
         System.out.println("Fetching DAWs for User ID: " + userId);
+        logger.info("api-calls", "Getting daws by user id", "dawController", "getDawsByUserId");
+        logger.debug("api-calls", "Fetching DAWs for User ID: " + userId, "dawController", "getDawsByUserId");
         return dawService.getDawsByUserId(userId);
     }
 
@@ -79,49 +86,62 @@ public class dawController {
     public dawDTO getDawById(@RequestParam String dawId) {
         System.out.println("Fetching DAW with ID: " + dawId);
         System.out.println("Does the config work" + dawService.getDawById(dawId).getListOfConfigs().toString());
+        logger.info("api-calls", "Getting daw by id", "dawController", "getDawById");
+        logger.debug("api-calls", "Fetching DAW with ID: " + dawId, "dawController", "getDawById");
+        logger.debug("api-calls", "Does the config work" + dawService.getDawById(dawId).getListOfConfigs().toString(), "dawController", "getDawById");
         return dawService.getDawById(dawId);
     }
 
     @GetMapping("/search/allDaws")
     public List<dawDTO> getAllDaws() {
+        logger.info("api-calls", "Getting all daws", "dawController", "getAllDaws");
         return dawService.getAllDaws();
     }
 
     @GetMapping("/search/allUsers")
     public List<userDTO> getAllUsers() {
+        logger.info("api-calls", "Getting all users", "dawController", "getAllUsers");
         return this.useService.getAllUsers();
     }
 
     @GetMapping("/search/User")
     public userDTO getAUserById(@RequestParam Long Id) {
+        logger.info("api-calls", "", "dawController", "getAUserById");
         return this.useService.getUserById(Id);
     }
 
     @GetMapping("/search/allForums")
     public List<forumPostDTO> getAllForums() {
+        logger.info("api-calls", "", "dawController", "getAllForums");
         return this.forumService.getAllForums();
     }
 
     @GetMapping("/search/Forums")
     public forumPostDTO getForumById(@RequestParam Long Id) {
+        logger.info("api-calls", "", "dawController", "getForumById");
         return this.forumService.getForumById(Id);
     }
 
     @GetMapping("/search/Forums/User")
     public List<forumPostDTO> getForumByUserId(@RequestParam Long Id) {
+        logger.info("api-calls", "Getting forums by user id", "dawController", "getForumByUserId");
         return this.forumService.getAllForumsByUserId(Id);
     }
 
     // -------------------- ratings specific --------------
     @GetMapping("/search/ratingsPage")
     public ratingsPageDTO getRatingsPageById(@RequestParam String dawId) {
+        logger.info("api-calls", "", "dawController", "getRatingsPageById");
         return this.ratingsService.getRatingsPageByDawId(dawId);
     }
 
     @GetMapping("/search/allRatingsPagesRepo")
     public List<RatingsPage> getAllRatingsPages() {
         System.out.println("All ratings pages within the database should be outputted here: ");
+        logger.info("api-calls", "", "dawController", "getAllRatingsPages");
+        logger.debug("api-calls", "All ratings pages within the database should be outputted here", "dawController", "getAllRatingsPages");
         this.ratingsRepo.findAll().forEach(System.out::println);
+        this.ratingsRepo.findAll().forEach(x -> logger.trace("api-calls", x.toString(), "dawController", "getAllRatingsPages"));
         return this.ratingsRepo.findAll();
     }
 
@@ -130,6 +150,10 @@ public class dawController {
 
         System.out.println("The comments in the repository should be outputted here: ");
         this.ratingsCommentRepo.findAll().forEach(System.out::println);
+        logger.info("api-calls", "", "dawController", "getAllRatingsComments");
+        logger.debug("api-calls", "The comments in the repository should be outputted here", "dawController", "getAllRatingsComments");
+        this.ratingsCommentRepo.findAll().forEach(x -> logger.trace("api-calls", x.toString(), "dawController", "getAllRatingsComments"));
+
         return this.ratingsCommentRepo.findAll();
     }
 
@@ -139,12 +163,14 @@ public class dawController {
 
     @GetMapping("/search/note")
     public recievedSessionNotesDTO getNoteById(@RequestParam Long Id) {
+        logger.info("api-calls", "", "dawController", "getNoteById");
 
         return this.notesService.getNoteById(Id);
     }
 
     @GetMapping("/search/note/User")
     public List<recievedSessionNotesDTO> getNotesOfUserByUserId(@RequestParam Long Id) {
+        logger.info("api-calls", "", "dawController", "getNotesOfUserByUserId");
         return this.notesService.getAllNoteByUserId(Id);
     }
 
@@ -154,17 +180,23 @@ public class dawController {
 
     // ------------------- Daw specific ----------------------------
     // Creates an empty daw method
-    @PostMapping("/create/daw")
-    public void createDaw(@RequestParam Long userId, @RequestParam String dawName) {
-        System.out.println("Creating DAW for User ID: " + userId + " with name: " + dawName);
-        this.dawService.createDaw(userId, dawName);
-    }
-
     @PostMapping("/save/Daw")
     public ResponseEntity<?> saveDaw(@RequestBody dawDTO payload) {
 
         // System.out.println("Saving DAW with ID: " + payload.getDawId() + " and name:
         // " + payload.getName());
+
+        System.out.println("The payload that got to the backend");
+        System.out.println(payload);
+        System.out.println("and the settings values:");
+        System.out.println(payload.getListOfConfigs().get(0).getComponents().get(0).getSettings());
+
+        logger.info("api-calls", "", "dawController", "saveDaw");
+        logger.trace("api-calls", "The payload that got to the backend", "dawController", "saveDaw");
+        logger.trace("api-calls", payload.toString(), "dawController", "saveDaw");
+        logger.trace("api-calls", "and the settings values:", "dawController", "saveDaw");
+        logger.trace("api-calls", payload.getListOfConfigs().get(0).getComponents().get(0).getSettings().toString(), "dawController", "saveDaw");
+
         dawService.saveDaw(payload);
 
         return ResponseEntity.ok(payload);
@@ -179,6 +211,8 @@ public class dawController {
     public ResponseEntity<?> saveForum(@RequestBody receivedForumDTO payload) {
 
         System.out.println("Saving Forum with userID: " + payload.getUserId());
+        logger.info("api-calls", "", "dawController", "saveForum");
+        logger.debug("api-calls", "Saving Forum with userID: " + payload.getUserId(), "dawController", "saveForum");
         forumService.saveForum(payload);
         return ResponseEntity.ok(payload);
 
@@ -192,6 +226,8 @@ public class dawController {
 
         System.out.println(
                 "Saving comment with userID: " + payload.getUserId() + ", on post: " + payload.getParentPostId());
+        logger.info("api-calls", "", "dawController", "saveComment");
+        logger.debug("api-calls", "Saving comment with userID: " + payload.getUserId() + ", on post: " + payload.getParentPostId(), "dawController", "saveComment");
 
         forumService.saveComment(payload);
 
@@ -205,11 +241,13 @@ public class dawController {
 
     @PostMapping("/User/auth")
     public ResponseEntity<userDTO> login(@RequestBody recievedLoginRequest loginRequest) {
+        logger.info("api-calls", "", "dawController", "login");
         userDTO user = useService.loginUser(loginRequest.getEmail(), loginRequest.getUserPassword());
 
         if (user == null) {
             // This prevents the "Unexpected end of JSON" error in React
             // because React will see the 401 and return null early.
+            logger.warn("api-calls", "user is null", "dawController", "login");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
@@ -217,8 +255,10 @@ public class dawController {
     }
     @PostMapping("/User/register")
     public ResponseEntity<userDTO> register(@RequestBody userDTO user) {
+        logger.info("api-calls", "", "dawController", "register");
         userDTO registeredUser = useService.registerUser(user);
         if (registeredUser == null) {
+            logger.warn("api-calls", "registered user is null", "dawController", "register");
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
         return ResponseEntity.status(HttpStatus.CREATED).body(registeredUser);
@@ -226,8 +266,10 @@ public class dawController {
 
     @PutMapping("/User/update")
     public ResponseEntity<userDTO> updateUser(@RequestBody userDTO user) {
+        logger.info("api-calls", "", "dawController", "updateUser");
         userDTO updatedUser = useService.updateUser(user);
         if (updatedUser == null) {
+            logger.warn("api-calls", "updated user is null", "dawController", "updateUser");
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
         return ResponseEntity.ok(updatedUser);
@@ -235,8 +277,10 @@ public class dawController {
 
     @DeleteMapping("/User/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+        logger.info("api-calls", "", "dawController", "deleteUser");
         boolean deleted = useService.deleteUser(id);
         if (!deleted) {
+            logger.warn("api-calls", "user not found. id = " + id, "dawController", "deleteUser");
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
         return ResponseEntity.noContent().build();
@@ -262,6 +306,13 @@ public class dawController {
         ratingsPageDTO dto = ratingsService.createRatingsPage(comment);
         System.out.println("This is the DTO returned to the controller before going to the user: ");
         System.out.println(dto);
+
+        logger.info("api-calls", "", "dawController", "createRatingsPage");
+        logger.debug("api-calls", "The comment got to the backend right?", "dawController", "createRatingsPage");
+        logger.trace("api-calls", comment.toString(), "dawController", "createRatingsPage");
+        logger.trace("api-calls", "This is the DTO returned to the controller before going to the user: ", "dawController", "createRatingsPage");
+        logger.trace("api-calls", dto.toString(), "dawController", "createRatingsPage");
+
         return dto;
     }
 
@@ -285,6 +336,13 @@ public class dawController {
         recievedSessionNotesDTO dto = notesService.saveOrUpdateNote(note);
         System.out.println("This is the DTO returned to the controller before going to the user: ");
         System.out.println(dto);
+
+        logger.info("api-calls", "", "dawController", "createSessionNotes");
+        logger.debug("api-calls", "The comment got to the backend right?", "dawController", "createSessionNotes");
+        logger.trace("api-calls", note.toString(), "dawController", "createSessionNotes");
+        logger.trace("api-calls", "This is the DTO returned to the controller before going to the user: ", "dawController", "createSessionNotes");
+        logger.trace("api-calls", dto.toString(), "dawController", "createSessionNotes");
+
         return dto;
     }
 }
