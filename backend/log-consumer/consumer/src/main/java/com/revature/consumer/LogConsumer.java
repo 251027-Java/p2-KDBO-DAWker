@@ -65,7 +65,6 @@ public class LogConsumer {
 
         String logLine = String.format("{%s} %s - %s%n", timestamp, formattedLevel, logBuilder);
 
-        System.out.printf("kafka consume %s%n", logLine);
         write(level, logLine);
     }
 
