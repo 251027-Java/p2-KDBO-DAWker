@@ -11,6 +11,7 @@ const Sidebar = () => {
     { label: "Dashboard", path: "/userpage", icon: "home" },
     { label: "Search_Node", path: "/search", icon: "search" },
     { label: "Community", path: "/forums", icon: "chat" },
+    {label: "Create A DAW", path: "/native-amp/undefined", icon: "plus"}
   ];
 
   return (

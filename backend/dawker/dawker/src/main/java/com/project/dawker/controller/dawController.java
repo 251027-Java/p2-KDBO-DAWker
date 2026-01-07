@@ -21,6 +21,7 @@ import com.project.dawker.dto.recievedDto.receivedForumDTO;
 import com.project.dawker.dto.recievedDto.recievedLoginRequest;
 import com.project.dawker.dto.recievedDto.recievedRatingsCommentDTO;
 import com.project.dawker.dto.recievedDto.recievedSessionNotesDTO;
+import com.project.dawker.entity.User;
 import com.project.dawker.entity.daw_specific.RatingsComment;
 import com.project.dawker.entity.daw_specific.RatingsPage;
 import com.project.dawker.repository.RatingsCommentRepository;
@@ -253,6 +254,7 @@ public class dawController {
 
         return ResponseEntity.ok(user);
     }
+
     @PostMapping("/User/register")
     public ResponseEntity<userDTO> register(@RequestBody userDTO user) {
         logger.info("api-calls", "", "dawController", "register");

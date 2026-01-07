@@ -14,6 +14,13 @@ function SettingsPage() {
 
   }, [])
 
+  const handleLogout = () => {
+    console.log("it just works")
+
+    userAPI.currentUser = null;
+    navigate("/");
+  }
+
   return (
     <div className="!min-h-screen !bg-[#09090b] !text-zinc-400 !p-6 !lg:p-12">
       
@@ -37,7 +44,7 @@ function SettingsPage() {
           </div>
         </section>
 
-        {/* 2. EMAIL MODULE */}
+{/* 2. EMAIL MODULE */}
         <section className="!bg-zinc-900/30 !border !border-white/5 !rounded-xl !p-6 !flex !flex-col !md:flex-row !md:items-center !justify-between !gap-6">
           <div className="!space-y-1">
             <h4 className="!text-white !font-bold !text-sm !uppercase !tracking-tight">Email_Endpoint</h4>
@@ -50,7 +57,26 @@ function SettingsPage() {
         </section>
 
         <div className="!py-6">
-           <Divider className="!opacity-5" />
+            <Divider className="!opacity-5" />
+        </div>
+
+        {/* 3. SESSION MODULE (New Logout Section) */}
+        <section className="!bg-zinc-900/30 !border !border-white/5 !rounded-xl !p-6 !flex !flex-col !md:flex-row !md:items-center !justify-between !gap-6">
+          <div className="!space-y-1">
+            <h4 className="!text-white !font-bold !text-sm !uppercase !tracking-tight">Active_Session</h4>
+            <p className="!text-xs !text-zinc-500">Disconnect from the DAWker cloud interface.</p>
+          </div>
+          <Button 
+            onClick={handleLogout} // Ensure you define this function in your component
+            intent="none" 
+            className="!font-bold !border !bg-white/5 !border-white/10 !uppercase !text-[10px] !px-8 !text-zinc-400 hover:!text-white"
+          >
+            Terminate_Session
+          </Button>
+        </section>
+
+        <div className="!py-6">
+            <Divider className="!opacity-5" />
         </div>
 
         {/* 4. DANGER ZONE (Delete Account) */}
