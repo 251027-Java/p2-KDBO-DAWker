@@ -1,6 +1,6 @@
 // comms w daw controller
 // uses struct: DawDTO -> ConfigDTO -> ComponentDTO -> SettingsDTO
-import { commentsPostDTO, userDTO } from '../dtos/types';
+import { commentsPostDTO, userDTO, RegisterDTO } from '../dtos/types';
 
 const API_BASE_URL = 'http://localhost:8080/api';
 
@@ -36,12 +36,6 @@ class UserApiService {
   // create local storage retrievel for a session
   // Return null if the user does not exist.
   login = async(userEmail: string, userPassword: string): Promise<userDTO | null> => {
-
-    const params = new URLSearchParams({
-      email: userEmail,
-      passoword: userPassword
-    })
-
     try{
 
       console.log("Did it get here?")
@@ -84,6 +78,79 @@ class UserApiService {
     } catch(error){
       console.error(`Error loading user: ${error}`)
       throw error
+    }
+  }
+
+  // Register a new user. Returns the created user or null on conflict.
+  register = async (user: RegisterDTO): Promise<userDTO | null> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/User/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(user),
+      });
+
+      if (response.status === 409) return null;
+
+      if (!response.ok) throw new Error(`Failed to register: ${response.statusText}`);
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error registering user:', error);
+      throw error;
+    }
+  }
+
+  // Update an existing user. Returns updated user or null if not found.
+  updateUser = async (user: userDTO): Promise<userDTO | null> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/User/update`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(user),
+      });
+
+      if (response.status === 404) return null;
+
+      if (!response.ok) throw new Error(`Failed to update user: ${response.statusText}`);
+
+      const updated = await response.json();
+      // update cached session if it's the same user
+      if (this._currentUser && updated && this._currentUser.id === updated.id) {
+        this._currentUser = updated;
+        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(updated));
+      }
+      return updated;
+    } catch (error) {
+      console.error('Error updating user:', error);
+      throw error;
+    }
+  }
+
+  // Delete a user by id. Returns true on success, false if not found.
+  deleteUser = async (userId: number): Promise<boolean> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/User/${userId}`, {
+        method: 'DELETE',
+      });
+
+      if (response.status === 404) return false;
+
+      if (response.status === 204) {
+        // if deleted current user, clear session
+        if (this._currentUser && this._currentUser.id === userId) {
+          this._currentUser = null;
+          localStorage.removeItem(this.STORAGE_KEY);
+        }
+        return true;
+      }
+
+      if (!response.ok) throw new Error(`Failed to delete user: ${response.statusText}`);
+
+      return true;
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      throw error;
     }
   }
 

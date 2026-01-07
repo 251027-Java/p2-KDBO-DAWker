@@ -4,6 +4,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -214,7 +217,32 @@ public class dawController {
 
         return ResponseEntity.ok(user);
     }
+    @PostMapping("/User/register")
+    public ResponseEntity<userDTO> register(@RequestBody userDTO user) {
+        userDTO registeredUser = useService.registerUser(user);
+        if (registeredUser == null) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(registeredUser);
+    }
 
+    @PutMapping("/User/update")
+    public ResponseEntity<userDTO> updateUser(@RequestBody userDTO user) {
+        userDTO updatedUser = useService.updateUser(user);
+        if (updatedUser == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        return ResponseEntity.ok(updatedUser);
+    }
+
+    @DeleteMapping("/User/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+        boolean deleted = useService.deleteUser(id);
+        if (!deleted) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        return ResponseEntity.noContent().build();
+    }
     // -------------------------------------------------------------------
 
     // ------------------------------------ ratings page control
