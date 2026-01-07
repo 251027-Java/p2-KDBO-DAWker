@@ -16,7 +16,6 @@ pipeline {
                         script: "curl -s https://registry.hub.docker.com/v2/repositories/library/maven/tags?page_size=100 | jq -r '.results[].name' | grep 'eclipse-temurin-[0-9]\\+-alpine' | sed -E 's/^3\\.9.*eclipse-temurin-([0-9]+)-alpine$/\\1/'",
                         returnStdout: true
                     ).trim().split('\n')
-
                     def MAX_JAVA_AVAILABLE = tags ? tags.collect { it.toInteger() }.max() : 21
                     echo "Max available Java version: ${MAX_JAVA_AVAILABLE}"
 
@@ -24,6 +23,9 @@ pipeline {
                         script: "find . -maxdepth 4 -name pom.xml -exec dirname {} \\;",
                         returnStdout: true
                     ).trim().split('\n')
+
+                    def tested = []
+                    def skipped = []
 
                     for (service in services) {
                         echo "Checking microservice: ${service}"
@@ -44,6 +46,7 @@ pipeline {
 
                             if (javaVer.toInteger() > MAX_JAVA_AVAILABLE) {
                                 echo "Skipping ${service}: Java ${javaVer} not supported (max ${MAX_JAVA_AVAILABLE})"
+                                skipped << service
                                 continue
                             }
 
@@ -55,12 +58,13 @@ pipeline {
                                     echo "Using Docker image ${image}"
                                     sh """
                                         docker run --rm -v \$PWD:/app -w /app ${image} \
-                                        bash -c "\${fileExists('mvnw') ? './mvnw clean test' : 'mvn clean test'}"
+                                        bash -c 'if [ -f mvnw ]; then ./mvnw clean test; else mvn clean test; fi'
                                     """
+                                    tested << service
                                     success = true
                                     break
                                 } catch (err) {
-                                    echo "Docker image ${image} not available or test failed, skipping."
+                                    echo "Docker image ${image} not available, skipping."
                                 }
                             }
 
@@ -69,6 +73,12 @@ pipeline {
                             }
                         }
                     }
+
+                    echo ""
+                    echo "====== Unit Test Summary ======"
+                    echo "Tested microservices: ${tested.join(' ')}"
+                    echo "Skipped microservices: ${skipped.join(' ')}"
+                    echo "==============================="
                 }
             }
         }

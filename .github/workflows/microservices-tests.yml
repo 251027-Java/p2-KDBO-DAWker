@@ -17,19 +17,18 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Install jq
-        run: sudo apt-get update && sudo apt-get install -y jq
+        run: sudo apt-get update && sudo apt-get install -y jq xmllint
 
       - name: Determine highest available Java version
         id: java_version
         run: |
           set -e
           echo "Fetching available Maven Alpine Java versions from Docker Hub..."
-
           tags=$(curl -s https://registry.hub.docker.com/v2/repositories/library/maven/tags?page_size=100 \
             | jq -r '.results[].name' \
             | grep 'eclipse-temurin-[0-9]\+-alpine' \
             | sed -E 's/^3\.9.*eclipse-temurin-([0-9]+)-alpine$/\1/')
-
+          
           if [ -z "$tags" ]; then
             echo "No Alpine tags found, defaulting to 21"
             echo "max_java=21" >> $GITHUB_OUTPUT
@@ -45,8 +44,10 @@ jobs:
           MAX_JAVA_AVAILABLE=${{ steps.java_version.outputs.max_java }}
           echo "Max available Java version is $MAX_JAVA_AVAILABLE"
 
-          services=$(find . -maxdepth 4 -name pom.xml -exec dirname {} \;)
+          tested=""
+          skipped=""
 
+          services=$(find . -maxdepth 4 -name pom.xml -exec dirname {} \;)
           for service in $services; do
             echo "Checking microservice: $service"
             cd "$service"
@@ -57,13 +58,12 @@ jobs:
             fi
 
             java_ver=$(xmllint --xpath "//*[local-name()='plugin'][*//*[local-name()='artifactId']='maven-compiler-plugin']/*[local-name()='configuration']/*[local-name()='release']/text()" pom.xml 2>/dev/null || echo "20")
-            if [ -z "$java_ver" ]; then
-              java_ver="20"
-            fi
+            if [ -z "$java_ver" ]; then java_ver="20"; fi
             echo "Detected Java version: $java_ver"
 
             if [ "$java_ver" -gt "$MAX_JAVA_AVAILABLE" ]; then
-              echo "Skipping $service: Java $java_ver not supported in available Docker images (max $MAX_JAVA_AVAILABLE)."
+              echo "Skipping $service: Java $java_ver not supported (max $MAX_JAVA_AVAILABLE)."
+              skipped="$skipped $service"
               cd - >/dev/null
               continue
             fi
@@ -73,10 +73,17 @@ jobs:
               image="maven:3.9-eclipse-temurin-${ver}-alpine"
               if docker manifest inspect $image >/dev/null 2>&1; then
                 echo "Using Docker image $image for $service"
-                docker run --rm -v "$PWD":/app -w /app $image bash -c "./mvnw clean test || mvn clean test"
+                docker run --rm -v "$PWD":/app -w /app $image bash -c 'if [ -f mvnw ]; then ./mvnw clean test; else mvn clean test; fi'
+                tested="$tested $service"
                 break
               fi
             done
 
             cd - >/dev/null
           done
+
+          echo ""
+          echo "====== Unit Test Summary ======"
+          echo "Tested microservices: $tested"
+          echo "Skipped microservices: $skipped"
+          echo "==============================="
