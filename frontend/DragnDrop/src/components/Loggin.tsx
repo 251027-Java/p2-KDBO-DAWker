@@ -113,8 +113,10 @@ export default function Loggin() {
           </label>
 
           {error && <div className="error">{error}</div>}
-
-          <button className="btn primary gradient" type="submit">LOGIN</button>
+          <div style={{display:'flex',gap:8}}>
+            <button className="btn primary gradient" type="submit">LOGIN</button>
+            <button type="button" className="btn" onClick={() => navigate('/create-account')}>Create account</button>
+          </div>
         
         </form>
       </div>
