@@ -28,6 +28,16 @@ function UserPage() {
     "from-cyan-900/40",
   ];
 
+  const handleLogout = async () => {
+    try {
+      await userAPI.logout();
+    } catch (e) {
+      console.warn('Logout failed', e);
+    } finally {
+      navigate('/login');
+    }
+  }
+
 
   const handleOpenNote = async (noteId: number | null = null, userId: number | null = null, title = "", content = "", isNew = false) => {
       
@@ -124,12 +134,23 @@ function UserPage() {
             </p>
           </div>
           
-          <Button 
-            icon="user" 
-            minimal 
-            large 
-            className="!bg-white/5 !rounded-full hover:!bg-white/10 hover:!scale-110 !transition-all" 
-          />
+          <div className="!flex !items-center !gap-2">
+            <Button 
+              icon="user" 
+              minimal 
+              large 
+              className="!bg-white/5 !rounded-full hover:!bg-white/10 hover:!scale-110 !transition-all" 
+            />
+            <Button
+              icon="log-out"
+              minimal
+              large
+              onClick={handleLogout}
+              className="!bg-white/5 !rounded-full hover:!bg-white/10 hover:!scale-110 !transition-all"
+            >
+              LOGOUT
+            </Button>
+          </div>
         </div>
       </div>
 

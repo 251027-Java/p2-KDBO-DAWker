@@ -1,5 +1,7 @@
+import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Icon, Divider } from "@blueprintjs/core";
+import { userAPI } from "../utils/userAPI";
 
 const Sidebar = () => {
   const navigate = useNavigate();
@@ -11,6 +13,7 @@ const Sidebar = () => {
     { label: "Dashboard", path: "/userpage", icon: "home" },
     { label: "Search_Node", path: "/search", icon: "search" },
     { label: "Community", path: "/forums", icon: "chat" },
+    { label: "Logout", path: "/logout", icon: "log-out" },
   ];
 
   return (
@@ -33,7 +36,26 @@ const Sidebar = () => {
         {navItems.map((item) => (
           <div
             key={item.path}
-            onClick={() => navigate(item.path)}
+            onClick={() => {
+              if (item.path === '/logout') {
+                userAPI.logout();
+                navigate('/login');
+                return;
+              }
+              navigate(item.path);
+            }}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                if (item.path === '/logout') {
+                  userAPI.logout();
+                  navigate('/login');
+                } else {
+                  navigate(item.path);
+                }
+              }
+            }}
             className={`
               !flex !items-center !gap-4 !px-4 !py-3 !rounded-xl !cursor-pointer !transition-all !group
               ${isActive(item.path) 

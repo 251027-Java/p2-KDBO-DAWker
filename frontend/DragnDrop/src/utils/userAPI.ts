@@ -154,6 +154,20 @@ class UserApiService {
     }
   }
 
+  // Logout the current user: clear cached session and localStorage
+  logout = async (): Promise<void> => {
+    try {
+      // Optional: call backend logout endpoint if implemented
+      // await fetch(`${API_BASE_URL}/User/logout`, { method: 'POST', credentials: 'include' });
+    } catch (error) {
+      // ignore backend logout errors; we'll clear local session anyway
+      console.warn('Logout backend call failed:', error);
+    } finally {
+      this._currentUser = null;
+      localStorage.removeItem(this.STORAGE_KEY);
+    }
+  }
+
   getUserById = async (userId: number): Promise<userDTO> => {
     try {
       const response = await fetch(`${API_BASE_URL}/search/User?Id=${userId}`);
