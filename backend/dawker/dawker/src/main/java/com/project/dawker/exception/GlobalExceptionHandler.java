@@ -81,6 +81,16 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(ex, HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(ForumNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleForumNotFound(ForumNotFoundException ex) {
+        return buildErrorResponse(ex, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(RatingsPageNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleRatingsPageNotFound(RatingsPageNotFoundException ex) {
+        return buildErrorResponse(ex, HttpStatus.NOT_FOUND);
+    }
+
     private ResponseEntity<Map<String, Object>> buildErrorResponse(Exception ex, HttpStatus status) {
         logger.error("errors", ex.getMessage(), ex.getStackTrace()[0].getClassName(), ex.getStackTrace()[0].getMethodName(), ex);
 

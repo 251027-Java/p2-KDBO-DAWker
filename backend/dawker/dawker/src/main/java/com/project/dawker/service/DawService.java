@@ -4,7 +4,9 @@ package com.project.dawker.service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.project.dawker.exception.UserNotFoundException;
 import com.project.dawker.exceptions.dawNotFoundException;
+import com.project.dawker.kafka.KafkaLogProducer;
 import org.springframework.stereotype.Service;
 
 import com.project.dawker.dto.componentDTO;
@@ -28,11 +30,13 @@ public class DawService {
     private final DawRepository dawRepository;
     private final UserRepository userRepository;
     private final ConfigRepository configRepository;
+    private final KafkaLogProducer logger;
 
-    public DawService(DawRepository dawRepository, UserRepository userRepository, ConfigRepository configRepository) {
+    public DawService(DawRepository dawRepository, UserRepository userRepository, ConfigRepository configRepository, KafkaLogProducer logProducer) {
         this.dawRepository = dawRepository;
         this.userRepository = userRepository;
         this.configRepository = configRepository;
+        logger = logProducer;
     }
 
     // Gets:
@@ -65,6 +69,7 @@ public class DawService {
     // }
 
     public List<dawDTO> getAllDaws() {
+        logger.info("service-calls", "Getting all daws", "DawService", "getAllDaws");
         return this.dawRepository.findAll().stream()
                 .map(this::mapToDawDto) // cleaner syntax
                 .collect(Collectors.toList());
@@ -72,6 +77,7 @@ public class DawService {
 
     // Get DAW with full details
     public dawDTO getDawById(String dawId) {
+        logger.info("service-calls", "Getting daw by id", "DawService", "getDawById");
         DawEntity daw = this.dawRepository.findById(dawId)
                 .orElseThrow(() -> new dawNotFoundException("DAW not found with ID: " + dawId));
         return mapToDawDto(daw);
@@ -172,6 +178,7 @@ public class DawService {
 
     // Get DAW without full details (For searching/listing)
     public List<dawDTO> getDawsByUserId(Long userId) {
+        logger.info("service-calls", "", "DawService", "getDawsByUserId");
         return this.dawRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("No DAWs found for user ID: " + userId))
                 .stream()
@@ -193,13 +200,16 @@ public class DawService {
     // saveDaw(dawDTO dto) {
     // 1. Resolve the User (Required for both new and existing)
     public dawDTO saveDaw(dawDTO dto) {
+        logger.info("service-calls", "", "DawService", "saveDaw");
         // 1. Resolve User
+        logger.debug("service-calls", "resolving user", "DawService", "saveDaw");
         User user = userRepository.findById(dto.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found with ID: " + dto.getUserId()));
+                .orElseThrow(() -> new UserNotFoundException("User not found with ID: " + dto.getUserId()));
 
         DawEntity entity;
 
         // 2. Resolve or Create DAW
+        logger.debug("service-calls", "resolving/creating user", "DawService", "saveDaw");
         if (dto.getDawId() != null && !dto.getDawId().isEmpty()) {
             entity = dawRepository.findById(dto.getDawId())
                     .orElseThrow(() -> new dawNotFoundException("DAW not found: " + dto.getDawId()));
@@ -209,10 +219,12 @@ public class DawService {
         }
 
         // 3. Map Basic Fields
+        logger.debug("service-calls", "mapping basic fields", "DawService", "saveDaw");
         entity.setName(dto.getName());
         entity.setDescription(dto.getDescription());
 
         // 4. Map the Hierarchy (Passing 'entity' down to prevent findById(null))
+        logger.debug("service-calls", "Map the Hierarchy (Passing 'entity' down to prevent findById(null))", "dawService", "saveDaw");
         if (dto.getListOfConfigs() != null) {
             // 1. Get the reference to the existing persistent list
             List<ConfigEntity> existingConfigs = entity.getListOfConfigs();
@@ -229,6 +241,7 @@ public class DawService {
         }
 
         // 5. Save everything (CascadeType.ALL will handle child entities)
+        logger.debug("service-calls", "Saving everything (CascadeType.ALL will handle child entities)", "DawService", "saveDaw");
         DawEntity savedEntity = dawRepository.save(entity);
         return mapToDawDto(savedEntity);
     }

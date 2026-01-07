@@ -44,6 +44,11 @@ public class LogConsumer {
         consume(logMap);
     }
 
+    @KafkaListener(topics = "service-calls")
+    public void consumeServiceCall(Map<String, String> logMap) {
+        consume(logMap);
+    }
+
     private void consume(Map<String, String> logMap) {
         String service = logMap.getOrDefault("service", "unknown-service");
         String level = logMap.getOrDefault("level", "INFO");

@@ -3,6 +3,8 @@ package com.project.dawker.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.project.dawker.exception.UserNotFoundException;
+import com.project.dawker.kafka.KafkaLogProducer;
 import org.springframework.stereotype.Service;
 
 import com.project.dawker.dto.recievedDto.recievedSessionNotesDTO;
@@ -17,10 +19,12 @@ import jakarta.transaction.Transactional;
 public class sessionNotesService {
     private final UserRepository userRepo;
     private final SessionNotesRepository notesRepo;
+    private final KafkaLogProducer logger;
 
-    public sessionNotesService(UserRepository userRepo, SessionNotesRepository notesRepo) {
+    public sessionNotesService(UserRepository userRepo, SessionNotesRepository notesRepo, KafkaLogProducer logProducer) {
         this.userRepo = userRepo;
         this.notesRepo = notesRepo;
+        logger = logProducer;
     }
 
     // Inside SessionNotesService.java
@@ -50,12 +54,14 @@ public class sessionNotesService {
     }
 
     public recievedSessionNotesDTO getNoteById(Long id) {
+        logger.info("service-calls", "", "sessionNotesService", "getNoteById");
         sessionNotes note = notesRepo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Note_Entry not found with ID: " + id));
         return mapToDTO(note);
     }
 
     public List<recievedSessionNotesDTO> getAllNoteByUserId(Long id) {
+        logger.info("service-calls", "", "sessionNotesService", "getAllNoteByUserId");
         List<recievedSessionNotesDTO> notes = notesRepo.findAllByAuthor_Id(id).stream()
                 .map(this::mapToDTO).toList();
         return notes;
@@ -63,9 +69,10 @@ public class sessionNotesService {
 
     @Transactional
     public recievedSessionNotesDTO saveOrUpdateNote(recievedSessionNotesDTO dto) {
+        logger.info("service-calls", "", "sessionNotesService", "saveOrUpdateNote");
         // 1. Find the user (assuming you have a userRepository injected)
         User user = userRepo.findById(dto.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
 
         sessionNotes noteEntity;
         sessionNotes savedNote;
