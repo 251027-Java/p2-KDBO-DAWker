@@ -71,9 +71,11 @@ function UserPage() {
       navigate("/login")
     }
     const fetchUser = async () => {
-      const userDTO: userDTO = await userAPI.getUserById(1);
-      userAPI.currentUser = userDTO;
-      setUserObject(userDTO);
+      if(userAPI.currentUser?.id != null){
+        const userDTO: userDTO = await userAPI.getUserById(userAPI.currentUser?.id);
+        userAPI.currentUser = userDTO;
+        setUserObject(userDTO);
+      }
     };
 
     const fetchNotes = async () => {
@@ -145,52 +147,74 @@ function UserPage() {
         </div>
 
         <div className="!flex !flex-row !gap-6 !overflow-x-auto !pb-6 !snap-x !snap-mandatory !scrollbar-hide">
-          {userObject?.daws.map((daw, i) => { 
-            const colorClass = DAW_COLORS[i % DAW_COLORS.length];
-            
-            return (
-            <div 
-              key={i} 
-              className={`!snap-center !shrink-0 !w-[85%] !md:w-[600px] !relative !overflow-hidden !bg-zinc-900 !bg-gradient-to-br !border !border-white/10 !rounded-2xl !p-8 !group !transition-all hover:!border-amber-500/40 hover:!shadow-[0_0_30px_rgba(0,0,0,0.5)] hover:!translate-y-1 !cursor-pointer`}
-            >
-              <div className={`!absolute !inset-0 !bg-gradient-to-r ${colorClass} !to-transparent !opacity-30 group-hover:!opacity-50 !transition-opacity !pointer-events-none`} />
+          {userObject?.daws && userObject.daws.length > 0 ? (
+            userObject.daws.map((daw, i) => {
+              const colorClass = DAW_COLORS[i % DAW_COLORS.length];
 
-              <div className="!relative !z-10 !flex !flex-col !h-full !justify-between">
-                <div>
-                  <div className="!flex !justify-between !items-start !mb-4">
-                    <Tag minimal intent="warning" className="!text-[9px] !uppercase !font-bold !tracking-tighter group-hover:!invert !transition-all">PROJECT_00{i+1}</Tag>
-                    <span className="!text-[10px] !font-mono !text-zinc-500">REV_0.4.2</span>
-                  </div>
-                  
-                  <H2 className="!text-4xl !font-black !text-white !italic !tracking-tighter !mb-2 group-hover:!text-amber-400 !transition-colors">
-                    {daw.name}
-                  </H2>
-                  
-                  <div className="!flex !items-center !gap-3 !text-[10px] !font-mono !text-zinc-500">
-                    <span>EST. 2025</span>
-                    <div className="!w-1 !h-1 !rounded-full !bg-zinc-700" />
-                    <span className="group-hover:!text-zinc-300">AUTO_SAVE_ENABLED</span>
+              return (
+                <div
+                  key={i}
+                  className={`!snap-center !shrink-0 !w-[85%] !md:w-[600px] !relative !overflow-hidden !bg-zinc-900 !bg-gradient-to-br !border !border-white/10 !rounded-2xl !p-8 !group !transition-all hover:!border-amber-500/40 hover:!shadow-[0_0_30px_rgba(0,0,0,0.5)] hover:!translate-y-1 !cursor-pointer`}
+                >
+                  {/* ... Your existing DAW Card Content ... */}
+                  <div className={`!absolute !inset-0 !bg-gradient-to-r ${colorClass} !to-transparent !opacity-30 group-hover:!opacity-50 !transition-opacity !pointer-events-none`} />
+                  <div className="!relative !z-10 !flex !flex-col !h-full !justify-between">
+                    <div>
+                      <div className="!flex !justify-between !items-start !mb-4">
+                        <Tag minimal intent="warning" className="!text-[9px] !uppercase !font-bold !tracking-tighter group-hover:!invert !transition-all">PROJECT_00{i + 1}</Tag>
+                        <span className="!text-[10px] !font-mono !text-zinc-500">REV_0.4.2</span>
+                      </div>
+                      <H2 className="!text-4xl !font-black !text-white !italic !tracking-tighter !mb-2 group-hover:!text-amber-400 !transition-colors">
+                        {daw.name}
+                      </H2>
+                      <div className="!flex !items-center !gap-3 !text-[10px] !font-mono !text-zinc-500">
+                        <span>EST. 2025</span>
+                        <div className="!w-1 !h-1 !rounded-full !bg-zinc-700" />
+                        <span className="group-hover:!text-zinc-300">AUTO_SAVE_ENABLED</span>
+                      </div>
+                    </div>
+                    <div className="!mt-12 !flex !items-center !justify-between">
+                      <div className="!flex !gap-1 !h-6 !items-end">
+                        {[20, 50, 80, 40, 90, 30].map((h, j) => (
+                          <div key={j} className="!w-1 !bg-white/20 !rounded-full !transition-all group-hover:!bg-amber-400 group-hover:!animate-bounce" style={{ height: `${h}%`, animationDelay: `${j * 0.1}s` }} />
+                        ))}
+                      </div>
+                      <Button rightIcon="arrow-right" intent="primary" minimal className="!font-bold !uppercase !tracking-widest !text-[10px] group-hover:!translate-x-2 !transition-transform !bg-white/5 hover:!bg-amber-500 hover:!text-black">
+                        Launch_Session
+                      </Button>
+                    </div>
                   </div>
                 </div>
-
-                <div className="!mt-12 !flex !items-center !justify-between">
-                  <div className="!flex !gap-1 !h-6 !items-end">
-                      {[20, 50, 80, 40, 90, 30].map((h, j) => (
-                        <div key={j} className="!w-1 !bg-white/20 !rounded-full !transition-all group-hover:!bg-amber-400 group-hover:!animate-bounce" style={{ height: `${h}%`, animationDelay: `${j * 0.1}s` }} />
-                      ))}
-                  </div>
-                  <Button 
-                    rightIcon="arrow-right" 
-                    intent="primary" 
-                    minimal 
-                    className="!font-bold !uppercase !tracking-widest !text-[10px] group-hover:!translate-x-2 !transition-transform !bg-white/5 hover:!bg-amber-500 hover:!text-black"
-                  >
-                    Launch_Session
-                  </Button>
-                </div>
+              );
+            })
+          ) : (
+            /* --- EMPTY STATE PLACEHOLDER --- */
+            <div className="!w-full !min-h-[280px] !flex !flex-col !items-center !justify-center !border-2 !border-dashed !border-zinc-800 !rounded-2xl !bg-zinc-900/20 !group hover:!border-zinc-600 !transition-colors">
+              {/* <div className="!mb-4 !p-4 !rounded-full !bg-zinc-900 !border !border-zinc-800 !relative">
+                <div className="!h-12 !w-12 !border-2 !border-zinc-700 !rounded-full !border-t-amber-500 !animate-spin" />
+                <span className="!absolute !inset-0 !flex !items-center !justify-center !text-zinc-500 !text-[8px] !font-mono">NULL</span>
+              </div> */}
+              
+              <div className="!text-center">
+                <h3 className="!text-zinc-400 !font-black !text-xs !uppercase !tracking-[0.5em] !mb-2">
+                  No_Active_Signals_Detected
+                </h3>
+                <p className="!text-[10px] !font-mono !text-zinc-600 !uppercase !mb-6">
+                  System registry is currently empty. Initialize a new node to begin.
+                </p>
+                
+                <Button 
+                  icon="plus" 
+                  intent="warning" 
+                  outlined
+                  className="!font-mono !text-[10px] !tracking-widest !px-8 hover:!bg-amber-500/10"
+                  onClick={() => console.log("Init New DAW")}
+                >
+                  INITIALIZE_NEW_PROJECT
+                </Button>
               </div>
             </div>
-          )})}
+          )}
         </div>
       </section>
 

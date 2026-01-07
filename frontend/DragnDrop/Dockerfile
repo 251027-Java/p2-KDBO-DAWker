@@ -1,25 +1,17 @@
-# Stage 1: Build the React app
-FROM node:20-alpine AS build
+FROM node:20-alpine
+
 WORKDIR /app
 
-# Copy package files from the specific app folder to install dependencies
+# Install dependencies first (to leverage Docker caching)
 COPY package*.json ./
 RUN npm install --legacy-peer-deps
 
-# Copy the rest of the specific app's source code
+# Copy the rest of your source code
 COPY . .
 
-# Build the production-ready files
-RUN npm run build
+# Vite dev server default port
+EXPOSE 5173
 
-# Stage 2: Serve the app with Nginx
-FROM nginx:stable-alpine
-# Copy the build output from Stage 1 to Nginx's html folder
-COPY --from=build /app/dist /usr/share/nginx/html
-
-# If you are using React Router, you need this custom Nginx config 
-# to prevent 404s on page refresh
-# COPY nginx.conf /etc/nginx/conf.d/default.conf
-
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+# Run the dev server. 
+# We use --host to ensure it binds to 0.0.0.0 so you can access it from outside the container.
+CMD ["npm", "run", "dev", "--", "--host"]

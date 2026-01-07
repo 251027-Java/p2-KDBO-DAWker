@@ -57,7 +57,7 @@ export default function Loggin() {
     <div className="login-page">
       <div className="dither-wrapper" aria-hidden>
         <Dither
-          waveColor={[0.32,0.15,1]}
+          waveColor={[0.133,0.773,0.369]}
           disableAnimation={false}
           enableMouseInteraction={true}
           mouseRadius={0.25}
@@ -113,8 +113,10 @@ export default function Loggin() {
           </label>
 
           {error && <div className="error">{error}</div>}
-
-          <button className="btn primary gradient" type="submit">LOGIN</button>
+          <div style={{display:'flex',gap:8}}>
+            <button className="btn primary gradient" type="submit">LOGIN</button>
+            <button type="button" className="btn" onClick={() => navigate('/create-account')}>Create account</button>
+          </div>
         
         </form>
       </div>

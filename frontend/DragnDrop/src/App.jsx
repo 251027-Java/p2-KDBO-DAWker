@@ -10,6 +10,7 @@ import TestComponent from './components/TestComponent'
 // import ToneJsDemo from './components/TonetsDemo'
 import NativeAmpDemo from './components/NativeAmpDemo'
 import Loggin from './components/Loggin'
+import CreateAccount from './components/CreateAccount'
 import Landing from './components/Landing'
 import UserPage from './components/UserPage'
 import Layout from './components/Layout'
@@ -40,6 +41,7 @@ function App() {
           {/* Separates the landing page from the other component types */}
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Loggin />} />
+          <Route path="/create-account" element={<CreateAccount />} />
 
           {/* Makes it so that all other components have a sidebar */}
           <Route element={<Layout />} >

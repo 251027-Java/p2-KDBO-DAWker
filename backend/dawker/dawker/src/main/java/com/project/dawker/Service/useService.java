@@ -7,8 +7,8 @@ import org.springframework.stereotype.Service;
 
 import com.project.dawker.dto.dawDTO;
 import com.project.dawker.dto.forumPostDTO;
-import com.project.dawker.dto.userDTO;
 import com.project.dawker.dto.recievedDto.recievedSessionNotesDTO;
+import com.project.dawker.dto.userDTO;
 import com.project.dawker.entity.User;
 import com.project.dawker.entity.daw_specific.DawEntity;
 import com.project.dawker.entity.daw_specific.ForumPost;
@@ -123,6 +123,60 @@ public class useService {
                                 .filter(user -> user.getPassword().equals(password))
                                 .map(this::mapToUserDTO)
                                 .orElse(null);
+        }
+
+        // Register a new user. Returns null on conflict (existing username or email).
+        public userDTO registerUser(userDTO userDto) {
+                if (userDto == null) {
+                        return null;
+                }
+
+                if (userRepository.existsByUsername(userDto.getUsername())) {
+                        return null;
+                }
+
+                if (userDto.getEmail() != null && userRepository.findByEmailContainingIgnoreCase(userDto.getEmail()).isPresent()) {
+                        return null;
+                }
+
+                User user = new User();
+                user.setUsername(userDto.getUsername());
+                user.setEmail(userDto.getEmail());
+                user.setPassword(userDto.getPassword());
+                user.setRole(userDto.getRole() != null ? userDto.getRole() : "USER");
+
+                User saved = userRepository.save(user);
+                return mapToUserDTO(saved);
+        }
+
+        // Update existing user. Returns null if not found.
+        public userDTO updateUser(userDTO userDto) {
+                if (userDto == null || userDto.getId() == null) {
+                        return null;
+                }
+
+                return userRepository.findById(userDto.getId()).map(user -> {
+                        if (userDto.getUsername() != null) {
+                                user.setUsername(userDto.getUsername());
+                        }
+                        if (userDto.getPassword() != null) {
+                                user.setPassword(userDto.getPassword());
+                        }
+                        if (userDto.getEmail() != null) {
+                                user.setEmail(userDto.getEmail());
+                        }
+                        User saved = userRepository.save(user);
+                        return mapToUserDTO(saved);
+                }).orElse(null);
+        }
+
+        // Delete user by id. Returns true if deleted, false if not found.
+        public boolean deleteUser(Long id) {
+                if (id == null || !userRepository.existsById(id)) {
+                        return false;
+                }
+                userRepository.deleteById(id);
+                return true;
         }
 
 }
